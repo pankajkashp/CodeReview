@@ -154,6 +154,19 @@ a {
   position: absolute;
 }
 
+.hero-reference {
+  height: 760px;
+  left: 50%;
+  max-width: none;
+  object-fit: cover;
+  opacity: 0.16;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  width: min(443px, 100vw);
+}
+
 .hero-inner {
   margin: 0 auto;
   max-width: 850px;
