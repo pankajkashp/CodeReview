@@ -1,4 +1,4 @@
-export function Hero() {
+export function Hero({ onLaunch }) {
   return (
     <section className="hero" id="top" aria-labelledby="hero-title">
       <div className="hero-noise" aria-hidden="true" />
@@ -13,10 +13,10 @@ export function Hero() {
           instantly. Precision-engineered for the modern stack.
         </p>
         <div className="hero-actions">
-          <a className="primary-button" href="#features">
+          <button className="primary-button" type="button" onClick={onLaunch}>
             Launch Console
-            <span aria-hidden="true">→</span>
-          </a>
+            <span aria-hidden="true">-&gt;</span>
+          </button>
           <a className="outline-button" href="#docs">
             Documentation
           </a>
