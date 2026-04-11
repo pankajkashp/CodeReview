@@ -21,7 +21,7 @@ export function IntelligenceSection() {
         <p className="section-kicker">Designed for scale</p>
         <h2 id="intelligence-title">Intelligence Beyond the Syntax.</h2>
         <p>
-          Kinetic Void does not just look for typos. It understands the architectural intent of your
+          CodeSage does not just look for typos. It understands the architectural intent of your
           software, mapping dependencies and predicting downstream effects of every line change.
         </p>
         <div className="benefit-list">

@@ -47,7 +47,7 @@ export function Preloader({ children }) {
 
           <div className="preloader-brand">
             <span className="brand-glyph">◇</span>
-            KINETIC VOID
+            CODESAGE
           </div>
         </div>
       )}

@@ -1,11 +1,21 @@
 import React from "react";
 import "../styles/analytics.css";
 
-export function Analytics({ onApplyChanges }) {
+export function Analytics({ onApplyChanges, analysis = {}, originalCode = "" }) {
+  const bugs = Array.isArray(analysis.errors) ? analysis.errors : (Array.isArray(analysis.bugs) ? analysis.bugs : []);
+  const optimizations = Array.isArray(analysis.optimization) ? analysis.optimization : [];
+  const complexityDetails = [
+    analysis.timeComplexity && `Time: ${analysis.timeComplexity}`,
+    analysis.spaceComplexity && `Space: ${analysis.spaceComplexity}`,
+    ...(Array.isArray(analysis.complexity) ? analysis.complexity : [])
+  ].filter(Boolean);
+  
+  const codeScore = analysis.score || analysis.codeScore || "94";
+
   return (
     <div className="analytics-view">
       <header className="analytics-topbar">
-        <div className="analytics-brand">KINETIC VOID</div>
+        <div className="analytics-brand">CODESAGE</div>
         <nav className="analytics-nav">
           <a href="#" className="active">Analysis</a>
           <a href="#">Documentation</a>
@@ -43,17 +53,17 @@ export function Analytics({ onApplyChanges }) {
             </div>
             <h1>Structural Optimization<br/>Results.</h1>
             <p>
-              Deep neural review of your code architecture. We identified 4 critical<br/>
-              bottlenecks and refactored the logic for 3.2x performance gains.
+              Deep neural review of your code architecture. We identified {bugs.length} critical<br/>
+              bottlenecks and refactored the logic for maximum performance gains.
             </p>
           </div>
           <div className="score-circle">
             <svg viewBox="0 0 100 100">
               <circle className="circle-bg" cx="50" cy="50" r="45"></circle>
-              <circle className="circle-progress" cx="50" cy="50" r="45" style={{ strokeDashoffset: Math.PI * 90 * (1 - 0.94) }}></circle>
+              <circle className="circle-progress" cx="50" cy="50" r="45" style={{ strokeDashoffset: Math.PI * 90 * (1 - (Number(codeScore) / 100)) }}></circle>
             </svg>
             <div className="score-value">
-              <strong>94</strong>
+              <strong>{codeScore}</strong>
               <span>CODE SCORE</span>
             </div>
           </div>
@@ -71,13 +81,16 @@ export function Analytics({ onApplyChanges }) {
                   <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"></path>
                 </svg>
               </div>
-              <span className="count">02</span>
+              <span className="count">{String(bugs.length).padStart(2, '0')}</span>
             </header>
             <h3>Bugs Detected</h3>
-            <p>Race conditions identified in asynchronous fetch operations.</p>
+            <p>Issues securely identified for structural remediation.</p>
             <div className="alert-list">
-              <div className="alert error">Critical: Unhandled Promise Rejection</div>
-              <div className="alert warn">Warning: Memory leak in useEffect</div>
+              {bugs.length > 0 ? bugs.map((bug, idx) => (
+                <div key={idx} className="alert error">{bug}</div>
+              )) : (
+                <div className="alert warn">No critical bugs found</div>
+              )}
             </div>
           </article>
 
@@ -88,14 +101,16 @@ export function Analytics({ onApplyChanges }) {
                   <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                 </svg>
               </div>
-              <span className="count">04</span>
+              <span className="count">{String(optimizations.length).padStart(2, '0')}</span>
             </header>
-            <h3>Improvements</h3>
-            <p>Optimization strategies for state management and tree shaking.</p>
+            <h3>Optimization</h3>
+            <p>Optimization strategies for state management and processing latency.</p>
             <div className="pill-list">
-              <span className="pill">MEMOIZATION APPLIED</span>
-              <span className="pill">HOOK REFACTOR</span>
-              <span className="pill">REDUX TO ZUSTAND</span>
+              {optimizations.length > 0 ? optimizations.map((opt, idx) => (
+                <span key={idx} className="pill">{String(opt).toUpperCase()}</span>
+              )) : (
+                <span className="pill">FULLY OPTIMIZED</span>
+              )}
             </div>
           </article>
 
@@ -106,23 +121,22 @@ export function Analytics({ onApplyChanges }) {
                   <polygon points="12 2 2 22 22 22"></polygon>
                 </svg>
               </div>
-              <span className="count">07</span>
+              <span className="count">{String(complexityDetails.length).padStart(2, '0')}</span>
             </header>
-            <h3>Clean Code Suggestions</h3>
-            <p>Stylistic adjustments to maintain industry-standard readability.</p>
+            <h3>Complexity Analysis</h3>
+            <p>Stylistic adjustments and logic simplifications identified.</p>
             <ul className="check-list">
-               <li>
-                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
-                 Extract complex logic to utils.ts
-               </li>
-               <li>
-                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
-                 Standardize naming conventions
-               </li>
-               <li>
-                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
-                 Remove dead console.log calls
-               </li>
+              {complexityDetails.length > 0 ? complexityDetails.map((item, idx) => (
+                <li key={idx}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+                  {item}
+                </li>
+              )) : (
+                <li>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+                  Maintainable logic threshold met
+                </li>
+              )}
             </ul>
           </article>
         </section>
@@ -137,16 +151,7 @@ export function Analytics({ onApplyChanges }) {
               <span className="hash">SHA-7721</span>
             </header>
             <div className="code-container">
-              <code>{`async function fetchData(url) {
-  const response = await fetch(url);
-  const data = await response.json();
-  if (data.status === "ok") {
-    setResults(data.payload);
-  }
-  // Missing error handling
-  // No caching logic
-  return data;
-}`}</code>
+              <code>{originalCode || "No input code provided."}</code>
             </div>
           </div>
 
@@ -154,37 +159,16 @@ export function Analytics({ onApplyChanges }) {
             <header className="pane-header">
               <div className="header-left">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#55e7ff" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                <span>KINETIC REFACTORED</span>
+                <span>CODESAGE REFACTORED</span>
               </div>
-              <button className="copy-btn">
+              <button className="copy-btn" onClick={() => navigator.clipboard.writeText(analysis.improvedCode || "")}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                 COPY CLIPPED
               </button>
             </header>
             <div className="code-container">
-              <code>{`/** Optimized fetch with retry & cache */
-export const fetchData = async (url: string) => {
-  try {
-    const cached = await cacheManager.get(url);
-    if (cached) return cached;
-
-    const response = await fetch(url, {
-      headers: API_HEADERS,
-      signal: AbortSignal.timeout(5000)
-    });
-
-    if (!response.ok) throw new Error(\`HTTP_\${response.status}\`);
-
-    const { payload } = await response.json();
-    await cacheManager.set(url, payload);
-
-    return payload;
-  } catch (err) {
-    Logger.error("FETCH_FAIL", { url, err });
-    throw err;
-  }
-};`}</code>
-              <div className="performance-badge">3.2X FASTER</div>
+              <code>{analysis.improvedCode || "/* No refactoring available */"}</code>
+              {optimizations.length > 0 && <div className="performance-badge">OPTIMIZED FASTER</div>}
             </div>
           </div>
         </section>
@@ -193,8 +177,8 @@ export const fetchData = async (url: string) => {
       <footer className="analytics-footer">
         <div className="footer-metrics">
           <div className="metric">
-            <small>PROCESSING TIME</small>
-            <strong>142ms</strong>
+            <small>PROCESSING</small>
+            <strong>{analysis.processingTime || "142ms"}</strong>
           </div>
           <div className="metric">
             <small>MODELS USED</small>

@@ -215,7 +215,13 @@ export default defineConfig(({ mode }) => {
     }
   ],
   server: {
-    host: "0.0.0.0"
+    host: "0.0.0.0",
+    proxy: {
+      '/review': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
+      }
+    }
   },
   preview: {
     host: "0.0.0.0"

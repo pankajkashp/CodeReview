@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from "../supabaseclient.js";
+import { supabase } from "./supabaseClient.js";
 
 import { Capabilities } from "./components/Capabilities.jsx";
 import { CodeIntegrityEngine } from "./components/CodeIntegrityEngine.jsx";
@@ -8,42 +8,54 @@ import { Hero } from "./components/Hero.jsx";
 import { IntelligenceSection } from "./components/IntelligenceSection.jsx";
 import { ReviewInterface } from "./components/ReviewInterface.jsx";
 import { TopNavigation } from "./components/TopNavigation.jsx";
-
 import { Preloader } from "./components/Preloader.jsx";
 
 export default function App() {
   const [activeView, setActiveView] = useState("landing");
   const [user, setUser] = useState(null);
 
-  // Check session on load
+  // ✅ SUPABASE AUTH LISTENER
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      setUser(data?.user || null);
+      setUser(data.user);
     });
 
-    // Listen for auth changes
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null);
-    });
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user || null);
+      }
+    );
 
-    return () => listener.subscription.unsubscribe();
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
-  // LOGIN via Google OAuth
-  const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin
-      }
-    });
-    if (error) console.error("Error logging in:", error.message);
-  };
+  // 🔥 LOGIN (EMAIL - WORKING VERSION)
+ const handleLogin = async () => {
+  const email = prompt("Enter email:");
+  const password = prompt("Enter password:");
 
-  // LOGOUT
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    alert("User not found. Creating account...");
+
+    await supabase.auth.signUp({
+      email,
+      password
+    });
+  }
+};
+
+  // 🔥 LOGOUT
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setActiveView("landing");
   };
 
   return (
@@ -51,16 +63,27 @@ export default function App() {
       <Preloader>
         <div className="app-root-animate">
           {activeView === "engine" ? (
-            <CodeIntegrityEngine onBack={() => setActiveView("landing")} />
+            <CodeIntegrityEngine
+              user={user}
+              onBack={() => setActiveView("landing")}
+            />
           ) : (
             <div className="site-shell">
-              <TopNavigation user={user} onLogin={handleLogin} onLogout={handleLogout} />
+              <TopNavigation
+                user={user}
+                onLogin={handleLogin}
+                onLogout={handleLogout}
+              />
+
               <main>
                 <Hero onLaunch={() => setActiveView("engine")} />
-                <ReviewInterface />
+
+                <ReviewInterface user={user} />
+
                 <Capabilities />
                 <IntelligenceSection />
               </main>
+
               <Footer />
             </div>
           )}
