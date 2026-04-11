@@ -102,6 +102,7 @@ export function CodeIntegrityEngine({ onBack }) {
   const [activePanel, setActivePanel] = useState("dashboard");
   const [modelName, setModelName] = useState("gpt-4.1-mini");
   const [fileName, setFileName] = useState(defaultLanguage.fileName);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const fileInputRef = useRef(null);
 
   const lineCount = useMemo(() => code.split("\n").length, [code]);
@@ -208,8 +209,15 @@ export function CodeIntegrityEngine({ onBack }) {
 
   return (
     <div className="engine-shell">
-      <aside className="engine-sidebar" aria-label="Workspace navigation">
-        <button className="engine-logo" type="button" onClick={onBack}>
+      {isMobileOpen && <div className="mobile-overlay" onClick={() => setIsMobileOpen(false)} />}
+      <aside className={`engine-sidebar ${isMobileOpen ? 'mobile-open' : ''}`} aria-label="Workspace navigation">
+        <button className="engine-logo" type="button" onClick={() => {
+          if (window.innerWidth <= 768 && !isMobileOpen) {
+            setIsMobileOpen(true);
+          } else {
+            onBack();
+          }
+        }}>
           <span className="logo-text">KINETIC <small>AI REVIEWER</small></span>
         </button>
         <nav>
