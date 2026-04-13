@@ -1,4 +1,4 @@
-.preloader {
+.preloader-overlay {
   position: fixed;
   inset: 0;
   background: #05070a;
@@ -7,73 +7,83 @@
   align-items: center;
   justify-content: center;
   z-index: 9999;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 1;
+}
+
+.preloader-overlay.exit {
+  opacity: 0;
+  transform: scale(1.1);
+  pointer-events: none;
 }
 
 /* CORE CENTER */
-.core {
+.engine-core {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* GLOW RINGS */
-.ring {
+.core-ring {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 2px solid rgba(0, 255, 200, 0.3);
-  animation: pulse 2s infinite;
+  border: 2px solid rgba(255, 77, 77, 0.4);
+  animation: core-pulse 2s infinite;
 }
 
-.ring.delay {
+.core-ring.delay {
   animation-delay: 1s;
 }
 
-/* DIAMOND CENTER */
-.diamond {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 40px;
-  height: 40px;
-  border: 3px solid #00ffd0;
-  transform: translate(-50%, -50%) rotate(45deg);
-  box-shadow: 0 0 20px #00ffd0;
-  animation: rotateDiamond 2s linear infinite;
+/* BRAND SYMBOL */
+.core-symbol {
+  color: #ff4d4d;
+  font-size: 32px;
+  font-weight: 900;
+  font-family: 'Courier New', Courier, monospace;
+  text-shadow: 0 0 25px rgba(255, 77, 77, 0.8);
+  animation: core-blink 1.5s infinite;
 }
 
 /* TEXT */
-.loading-text {
-  margin-top: 30px;
-  color: #a0fdf0;
-  font-size: 14px;
-  letter-spacing: 2px;
-  opacity: 0.8;
-  animation: blink 1.5s infinite;
+.loader-text {
+  margin-top: 40px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  font-weight: 800;
 }
 
 /* ANIMATIONS */
-@keyframes pulse {
+@keyframes core-pulse {
   0% {
     transform: scale(0.6);
-    opacity: 0.5;
+    opacity: 0.8;
   }
   100% {
-    transform: scale(1.4);
+    transform: scale(1.6);
     opacity: 0;
   }
 }
 
-@keyframes rotateDiamond {
-  0% {
-    transform: translate(-50%, -50%) rotate(45deg);
-  }
-  100% {
-    transform: translate(-50%, -50%) rotate(405deg);
-  }
+@keyframes core-blink {
+  0%, 100% { opacity: 0.4; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1.05); }
 }
 
-@keyframes blink {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
+.main-content {
+  opacity: 0;
+  transform: scale(0.98);
+  transition: all 0.8s ease;
+}
+
+.main-content.show {
+  opacity: 1;
+  transform: scale(1);
 }

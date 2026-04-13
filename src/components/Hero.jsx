@@ -57,7 +57,7 @@ export function Hero({ onLaunch }) {
             color: 'transparent'
           }}>CodeSage</span>
         </h1>
-        <p className="pill" style={{ borderColor: '#ff4d4d', color: '#ff4d4d', fontSize: '0.65rem', marginBottom: 'px' }}>
+        <p className="pill" style={{ borderColor: '#ff4d4d', color: '#ff4d4d', fontSize: '0.65rem', marginBottom: '24px' }}>
           THE AI THAT ACTUALLY REVIEWS ARCHITECTURE.
         </p>
 

@@ -2,57 +2,47 @@ import { useEffect, useState } from "react";
 import "../styles/preloader.css";
 
 export function Preloader({ children }) {
-  const [phase, setPhase] = useState("circle");
+  const [loading, setLoading] = useState(true);
+  const [showOverlay, setShowOverlay] = useState(true);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase("rotate"), 200);
-    const t2 = setTimeout(() => setPhase("explode"), 1400);
-    const t3 = setTimeout(() => setPhase("reveal"), 2000); // 👈 pause + reveal
-    const t4 = setTimeout(() => setPhase("end"), 2300);
+    // Stage 1: Stop the loading state to trigger fade out
+    const tStart = setTimeout(() => {
+      setLoading(false);
+    }, 2200);
+
+    // Stage 2: Completely remove from DOM after CSS transition (800ms)
+    const tEnd = setTimeout(() => {
+      setShowOverlay(false);
+    }, 3000);
 
     return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      clearTimeout(t4);
+      clearTimeout(tStart);
+      clearTimeout(tEnd);
     };
   }, []);
 
-  const symbols = ["{}", "()", "=>", ";", "</>", "[]", "&&", "||", "==", "+", "-", "*", "/"];
-
   return (
     <>
-      {/* 🟢 LANDING PAGE */}
-      <div className={`main-content ${phase}`}>
-        {children}
-      </div>
+      {showOverlay && (
+        <div className={`preloader-overlay ${!loading ? "exit" : ""}`}>
+          <div className="engine-core">
+            <div className="core-ring"></div>
+            <div className="core-ring delay"></div>
 
-      {/* 🔵 PRELOADER */}
-      {phase !== "end" && (
-        <div className={`preloader-overlay ${phase}`}>
-          <div className="syntax-container">
-            {symbols.map((sym, i) => (
-              <span
-                key={i}
-                className="syntax"
-                style={{
-                  "--i": i,
-                  "--total": symbols.length
-                }}
-              >
-                {sym}
-              </span>
-            ))}
-          </div>
-
-          <div className="preloader-brand">
-            <div className="tire-loader">
-              <div className="tire-center"></div>
+            <div className="core-symbol">
+              &lt;./&gt;
             </div>
-            <div style={{ marginTop: '20px' }}>CODESAGE</div>
           </div>
+
+          <p className="loader-text">Initializing Engine...</p>
         </div>
       )}
+
+      {/* WEBSITE */}
+      <div className={`main-content ${!loading ? "show" : ""}`}>
+        {children}
+      </div>
     </>
   );
 }

@@ -1,0 +1,18 @@
+.engine-bg {
+  position: absolute;
+  top: 50%;
+  right: 10%;
+  transform: translateY(-50%);
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+/* SMALL VERSION */
+.engine-core.small {
+  width: 80px;
+  height: 80px;
+}
+
+.engine-core.small .core-symbol {
+  font-size: 16px;
+}
