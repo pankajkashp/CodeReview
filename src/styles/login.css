@@ -1,7 +1,7 @@
 .login-shell {
   align-items: center;
   background:
-    radial-gradient(circle at 10% 10%, rgba(65, 220, 255, 0.08), transparent 25%),
+    radial-gradient(circle at 10% 10%, rgba(255, 77, 77, 0.08), transparent 25%),
     radial-gradient(circle at 90% 90%, rgba(136, 75, 255, 0.08), transparent 25%),
     #020305;
   color: #f7fbff;
@@ -24,7 +24,7 @@
 }
 
 .login-card::before {
-  background: linear-gradient(90deg, #55e7ff, #b68cff);
+  background: linear-gradient(90deg, #ff4d4d, #b64c4c);
   content: "";
   height: 2px;
   left: 0;
@@ -79,13 +79,13 @@
 }
 
 .form-group input:focus {
-  border-color: #55e7ff;
-  box-shadow: 0 0 0 4px rgba(85, 231, 255, 0.12);
+  border-color: #ff4d4d;
+  box-shadow: 0 0 0 4px rgba(255, 77, 77, 0.12);
   outline: 0;
 }
 
 .login-submit {
-  background: #55e7ff;
+  background: #ff4d4d;
   border: 0;
   border-radius: 6px;
   color: #020305;
@@ -100,7 +100,7 @@
 }
 
 .login-submit:hover {
-  box-shadow: 0 0 20px rgba(85, 231, 255, 0.4);
+  box-shadow: 0 0 20px rgba(255, 77, 77, 0.4);
   transform: translateY(-2px);
 }
 
@@ -112,7 +112,7 @@
 .login-footer button {
   background: transparent;
   border: 0;
-  color: #55e7ff;
+  color: #ff4d4d;
   cursor: pointer;
   font-size: 0.88rem;
   font-weight: 600;

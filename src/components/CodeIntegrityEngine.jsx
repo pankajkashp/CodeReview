@@ -29,8 +29,24 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
   const [activePanel, setActivePanel] = useState("dashboard");
 
   const lineRailRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const lineCount = useMemo(() => code.split("\n").length, [code]);
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setCode(event.target.result);
+    };
+    reader.readAsText(file);
+  };
 
   // ✅ FETCH HISTORY
   const fetchHistory = async () => {
@@ -176,7 +192,13 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                     </span>
                   </div>
                   <div className="engine-actions">
-                    <button>IMPORT FILE</button>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      style={{ display: 'none' }} 
+                      onChange={handleFileChange}
+                    />
+                    <button onClick={handleImportClick}>IMPORT FILE</button>
                     <button>SETTINGS</button>
                   </div>
                 </section>
@@ -223,8 +245,15 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
 
                     <footer className="editor-footer">
                       <small>{lineCount} lines</small>
-                      <button onClick={analyzeCode} disabled={status === "loading"}>
-                        {status === "loading" ? "Processing..." : "Analyze Code"}
+                      <button 
+                        onClick={analyzeCode} 
+                        disabled={status === "loading"}
+                        style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+                      >
+                        {status === "loading" && (
+                          <div className="tire-loader" style={{ width: '16px', height: '16px', border: '3px solid #1a1a1a', borderTop: '3px solid #ff4d4d' }}></div>
+                        )}
+                        {status === "loading" ? "Analyzing..." : "Analyze Code"}
                       </button>
                     </footer>
                   </article>

@@ -103,9 +103,9 @@ export default function Login() {
               fontSize: '0.85rem',
               textAlign: 'center',
               animation: 'fadeIn 0.3s ease',
-              background: successMsg ? 'rgba(85, 231, 255, 0.1)' : 'rgba(255, 82, 82, 0.1)',
-              border: `1px solid ${successMsg ? 'rgba(85, 231, 255, 0.3)' : 'rgba(255, 82, 82, 0.3)'}`,
-              color: successMsg ? '#55e7ff' : '#ffb7b7'
+              background: successMsg ? 'rgba(255, 77, 77, 0.1)' : 'rgba(255, 82, 82, 0.1)',
+              border: `1px solid ${successMsg ? 'rgba(255, 77, 77, 0.3)' : 'rgba(255, 82, 82, 0.3)'}`,
+              color: successMsg ? '#ff4d4d' : '#ffb7b7'
             }}>
               {error.includes("not a user") ? error : successMsg}
             </div>

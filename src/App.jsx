@@ -25,8 +25,14 @@ export default function App() {
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setUser(session?.user || null);
+        
+        // If user just signed in and was on landing, take them to engine
+        if (session?.user && activeView === "landing") {
+          setActiveView("engine");
+        }
+        
         if (!session?.user && activeView === "engine") {
-            setActiveView("landing");
+          setActiveView("landing");
         }
       }
     );
@@ -63,23 +69,13 @@ export default function App() {
               onLogout={handleLogout}
             />
           ) : (
-            <div className="site-shell">
+            <div className="site-shell" style={{ height: '100vh', overflow: 'hidden' }}>
               <TopNavigation
                 user={user}
                 onLogin={handleLogin}
                 onLogout={handleLogout}
               />
-
-              <main>
-                <Hero onLaunch={handleLaunchEngine} />
-
-                <ReviewInterface user={user} />
-
-                <Capabilities />
-                <IntelligenceSection />
-              </main>
-
-              <Footer />
+              <Hero onLaunch={handleLaunchEngine} />
             </div>
           )}
         </div>

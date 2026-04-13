@@ -21,7 +21,7 @@
   font-weight: 800;
   font-size: 0.95rem;
   letter-spacing: 0.05em;
-  color: #55e7ff;
+  color: #ff4d4d;
 }
 
 .analytics-nav {
@@ -140,9 +140,9 @@
 .pulse-dot {
   width: 6px;
   height: 6px;
-  background: #a78bfc;
+  background: #ff4d4d;
   border-radius: 50%;
-  box-shadow: 0 0 8px #a78bfc;
+  box-shadow: 0 0 8px #ff4d4d;
 }
 
 .badge-secondary {
@@ -174,7 +174,7 @@
   justify-content: center;
   background: rgba(255,255,255,0.02);
   border-radius: 50%;
-  box-shadow: 0 0 50px rgba(52, 211, 153, 0.1);
+  box-shadow: 0 0 50px rgba(255, 77, 77, 0.1);
   margin-right: 40px;
 }
 
@@ -195,7 +195,7 @@
 
 .circle-progress {
   fill: none;
-  stroke: #34d399;
+  stroke: #ff4d4d;
   stroke-width: 5;
   stroke-linecap: round;
   stroke-dasharray: 283;
@@ -379,7 +379,7 @@
 }
 
 .refactored-pane .header-left {
-  color: #55e7ff;
+  color: #ff4d4d;
 }
 
 .hash {
@@ -388,8 +388,8 @@
 }
 
 .copy-btn {
-  background: rgba(85, 231, 255, 0.15);
-  color: #55e7ff;
+  background: rgba(255, 77, 77, 0.15);
+  color: #ff4d4d;
   border: none;
   padding: 6px 12px;
   border-radius: 4px;

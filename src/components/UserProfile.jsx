@@ -1,10 +1,13 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export function UserProfile({ user, onLogout }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const navigate = useNavigate();
 
-  const userInitial = user?.email?.[0].toUpperCase() || "?";
+  const userInitial = user?.user_metadata?.full_name?.[0] || user?.email?.[0].toUpperCase() || "?";
+  const userAvatar = user?.user_metadata?.avatar_url;
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -25,7 +28,7 @@ export function UserProfile({ user, onLogout }) {
         onClick={() => setMenuOpen(!menuOpen)}
         title={user.email}
       >
-        {userInitial}
+        {userAvatar ? <img src={userAvatar} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} /> : userInitial}
       </div>
       
       <div className={`user-profile-menu ${menuOpen ? 'open' : ''}`}>
@@ -33,12 +36,12 @@ export function UserProfile({ user, onLogout }) {
           {user.email}
         </div>
         <div className="menu-divider" />
-        <button onClick={() => { setMenuOpen(false); }}>
+        <button onClick={() => { setMenuOpen(false); navigate("/profile"); }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
              <circle cx="12" cy="7" r="4" />
           </svg>
-          Profile
+          Profile Dashboard
         </button>
         <button 
           onClick={() => { setMenuOpen(false); onLogout(); }}

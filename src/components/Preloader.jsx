@@ -46,8 +46,10 @@ export function Preloader({ children }) {
           </div>
 
           <div className="preloader-brand">
-            <span className="brand-glyph">◇</span>
-            CODESAGE
+            <div className="tire-loader">
+              <div className="tire-center"></div>
+            </div>
+            <div style={{ marginTop: '20px' }}>CODESAGE</div>
           </div>
         </div>
       )}

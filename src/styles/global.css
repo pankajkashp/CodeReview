@@ -21,8 +21,8 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 50% 15%, rgba(36, 160, 169, 0.12), transparent 28rem),
-    linear-gradient(180deg, #020305 0%, #040608 45%, #080909 100%);
+    radial-gradient(circle at 50% 15%, rgba(255, 77, 77, 0.12), transparent 28rem),
+    linear-gradient(180deg, #020305 0%, #040608 45%, #050607 100%);
 }
 
 a {
@@ -75,7 +75,7 @@ button {
 }
 
 .brand {
-  color: #66e9ff;
+  color: #ff4d4d;
   font-size: 0.78rem;
   font-weight: 900;
   gap: 8px;
@@ -85,8 +85,8 @@ button {
 
 .brand-glyph {
   align-items: center;
-  background: rgba(83, 222, 246, 0.12);
-  border: 1px solid rgba(83, 222, 246, 0.34);
+  background: rgba(255, 77, 77, 0.12);
+  border: 1px solid rgba(255, 77, 77, 0.34);
   border-radius: 3px;
   display: inline-flex;
   height: 18px;
@@ -114,11 +114,11 @@ button {
 }
 
 .top-navigation nav a:first-child {
-  color: #6ae8ff;
+  color: #ff4d4d;
 }
 
 .top-navigation nav a:first-child::after {
-  background: #6ae8ff;
+  background: #ff4d4d;
   bottom: -8px;
   content: "";
   height: 2px;
@@ -135,7 +135,7 @@ button {
 
 .profile-circle {
   align-items: center;
-  background: linear-gradient(135deg, #55e7ff, #b68cff);
+  background: linear-gradient(135deg, #ff4d4d, #b64c4c);
   border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   color: #020305;
@@ -150,7 +150,7 @@ button {
 }
 
 .profile-circle:hover {
-  box-shadow: 0 0 15px rgba(85, 231, 255, 0.4);
+  box-shadow: 0 0 15px rgba(255, 77, 77, 0.4);
   transform: scale(1.05);
 }
 
@@ -191,7 +191,7 @@ button {
 
 .user-profile-menu button:hover {
   background: rgba(255, 255, 255, 0.05);
-  color: #55e7ff;
+  color: #ff4d4d;
 }
 
 .user-profile-menu .menu-divider {
@@ -201,7 +201,7 @@ button {
 }
 
 .signin-button {
-  background: #80c9ff;
+  background: #ff4d4d;
   border-radius: 7px;
   color: #041016;
   padding: 9px 22px;
@@ -214,7 +214,7 @@ button {
 }
 
 .hero::before {
-  background: radial-gradient(circle, rgba(0, 224, 255, 0.14), transparent 34rem);
+  background: radial-gradient(circle, rgba(255, 77, 77, 0.14), transparent 34rem);
   content: "";
   filter: blur(20px);
   height: 360px;
@@ -347,7 +347,7 @@ p {
   border-radius: 7px;
   box-shadow:
     0 0 70px rgba(30, 227, 239, 0.16),
-    inset 0 0 60px rgba(64, 236, 255, 0.08);
+    inset 0 0 60px rgba(255, 77, 77, 0.08);
   margin: 0 auto;
   max-width: 1280px;
   padding: clamp(26px, 4vw, 58px);
@@ -355,9 +355,9 @@ p {
 }
 
 .scanner-screen {
-  border: 1px solid rgba(44, 230, 234, 0.28);
-  box-shadow: inset 0 0 42px rgba(31, 226, 221, 0.14);
-  color: #2ee7e5;
+  border: 1px solid rgba(255, 77, 77, 0.28);
+  box-shadow: inset 0 0 42px rgba(255, 77, 77, 0.14);
+  color: #ff4d4d;
   min-height: 520px;
   overflow: hidden;
   padding: 22px;
@@ -365,7 +365,7 @@ p {
 }
 
 .scanner-screen::before {
-  border: 1px solid rgba(44, 230, 234, 0.36);
+  border: 1px solid rgba(255, 77, 77, 0.36);
   clip-path: polygon(0 0, 92% 0, 100% 14%, 100% 100%, 8% 100%, 0 86%);
   content: "";
   inset: 26px;
@@ -383,8 +383,8 @@ p {
 }
 
 .toolbar {
-  background: rgba(46, 231, 229, 0.1);
-  border: 1px solid rgba(46, 231, 229, 0.22);
+  background: rgba(255, 77, 77, 0.1);
+  border: 1px solid rgba(255, 77, 77, 0.22);
   gap: 12px;
   height: 24px;
   margin-bottom: 24px;
@@ -392,13 +392,13 @@ p {
 }
 
 .toolbar span {
-  background: rgba(46, 231, 229, 0.8);
+  background: rgba(255, 77, 77, 0.8);
   height: 6px;
   width: 62px;
 }
 
 .toolbar strong {
-  color: rgba(46, 231, 229, 0.62);
+  color: rgba(255, 77, 77, 0.62);
   font-family: "Courier New", monospace;
   font-size: 0.68rem;
   font-weight: 700;
@@ -414,7 +414,7 @@ p {
 }
 
 .analysis-grid aside {
-  border: 1px solid rgba(46, 231, 229, 0.14);
+  border: 1px solid rgba(255, 77, 77, 0.14);
   padding: 16px;
 }
 
@@ -427,7 +427,7 @@ p {
 }
 
 .analysis-grid aside p {
-  background: linear-gradient(90deg, rgba(46, 231, 229, 0.5), rgba(46, 231, 229, 0.04));
+  background: linear-gradient(90deg, rgba(255, 77, 77, 0.5), rgba(255, 77, 77, 0.04));
   height: 5px;
   margin-bottom: 11px;
 }
@@ -446,7 +446,7 @@ p {
 }
 
 .ring {
-  border: 2px solid rgba(46, 231, 229, 0.22);
+  border: 2px solid rgba(255, 77, 77, 0.22);
   border-radius: 50%;
 }
 
@@ -456,15 +456,15 @@ p {
 }
 
 .ring-two {
-  border-left-color: #2ee7e5;
-  border-right-color: #2ee7e5;
+  border-left-color: #ff4d4d;
+  border-right-color: #ff4d4d;
   height: 230px;
   transform: rotate(36deg);
   width: 230px;
 }
 
 .ring-three {
-  border-bottom-color: #2ee7e5;
+  border-bottom-color: #ff4d4d;
   height: 174px;
   transform: rotate(-28deg);
   width: 174px;
@@ -472,8 +472,8 @@ p {
 
 .matrix {
   background:
-    linear-gradient(rgba(46, 231, 229, 0.2) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(46, 231, 229, 0.2) 1px, transparent 1px),
+    linear-gradient(rgba(255, 77, 77, 0.2) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 77, 77, 0.2) 1px, transparent 1px),
     radial-gradient(circle, rgba(238, 213, 143, 0.5), rgba(238, 213, 143, 0) 58%);
   background-size: 9px 9px, 9px 9px, 100% 100%;
   height: 96px;
@@ -482,10 +482,10 @@ p {
 
 .mini-chart {
   background:
-    linear-gradient(90deg, rgba(46, 231, 229, 0.12) 50%, transparent 50%),
-    linear-gradient(rgba(46, 231, 229, 0.12) 50%, transparent 50%);
+    linear-gradient(90deg, rgba(255, 77, 77, 0.12) 50%, transparent 50%),
+    linear-gradient(rgba(255, 77, 77, 0.12) 50%, transparent 50%);
   background-size: 20px 20px;
-  border: 1px solid rgba(46, 231, 229, 0.18);
+  border: 1px solid rgba(255, 77, 77, 0.18);
   height: 96px;
   margin-bottom: 18px;
 }
@@ -497,7 +497,7 @@ p {
 }
 
 .control-stack span {
-  border: 1px solid rgba(46, 231, 229, 0.18);
+  border: 1px solid rgba(255, 77, 77, 0.18);
   font-family: "Courier New", monospace;
   font-size: 0.7rem;
   padding: 8px;
@@ -549,7 +549,7 @@ mark {
 }
 
 .dials {
-  border: 1px solid rgba(46, 231, 229, 0.14);
+  border: 1px solid rgba(255, 77, 77, 0.14);
   display: flex;
   gap: 42px;
   justify-content: center;
@@ -557,9 +557,9 @@ mark {
 }
 
 .dials span {
-  border: 1px solid rgba(46, 231, 229, 0.35);
+  border: 1px solid rgba(255, 77, 77, 0.35);
   border-radius: 50%;
-  box-shadow: inset 0 0 20px rgba(46, 231, 229, 0.12);
+  box-shadow: inset 0 0 20px rgba(255, 77, 77, 0.12);
   height: 84px;
   width: 84px;
 }
@@ -821,7 +821,7 @@ mark {
   background:
     linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    radial-gradient(circle at 46% 7%, rgba(65, 220, 255, 0.09), transparent 24rem),
+    radial-gradient(circle at 46% 7%, rgba(255, 77, 77, 0.09), transparent 24rem),
     #030405;
   background-size: 28px 28px, 28px 28px, 100% 100%, 100% 100%;
   color: #f5f7fb;
@@ -860,7 +860,7 @@ mark {
 }
 
 .engine-logo {
-  color: #60e7ff;
+  color: #ff4d4d;
   font-weight: 950;
   letter-spacing: 0;
   font-size: 1.28rem;
@@ -909,20 +909,20 @@ mark {
 
 .engine-sidebar nav button {
   background: transparent;
-  border: 1px dashed rgba(85, 231, 255, 0.2);
+  border: 1px dashed rgba(255, 77, 77, 0.2);
   color: rgba(245, 247, 251, 0.62);
   font-weight: 900;
 }
 
 .engine-sidebar nav button:hover {
-  border-color: rgba(85, 231, 255, 0.5);
+  border-color: rgba(255, 77, 77, 0.5);
 }
 
 .engine-sidebar nav button.active {
   background: rgba(13, 23, 29, 0.9);
   border: 0;
-  border-left: 3px solid #55e7ff;
-  color: #55e7ff;
+  border-left: 3px solid #ff4d4d;
+  color: #ff4d4d;
   padding-left: 14px; /* compensate for 3px border */
 }
 
@@ -1089,16 +1089,16 @@ mark {
   letter-spacing: 0;
   line-height: 0.95;
   margin-bottom: 16px;
-  text-shadow: 0 0 34px rgba(85, 231, 255, 0.08);
+  text-shadow: 0 0 34px rgba(255, 77, 77, 0.08);
 }
 
 .engine-hero h1 em {
-  color: #57dfff;
+  color: #ff4d4d;
   font-style: normal;
 }
 
 .engine-hero h1::selection {
-  background: rgba(85, 231, 255, 0.24);
+  background: rgba(255, 77, 77, 0.24);
 }
 
 .engine-hero span {
@@ -1172,9 +1172,9 @@ mark {
 }
 
 .language-tabs button.active {
-  background: rgba(85, 231, 255, 0.12);
-  border-color: rgba(85, 231, 255, 0.32);
-  color: #63e7ff;
+  background: rgba(255, 77, 77, 0.12);
+  border-color: rgba(255, 77, 77, 0.32);
+  color: #ff4d4d;
 }
 
 .editor-toolbar {
@@ -1276,7 +1276,7 @@ mark {
 }
 
 .editor-footer button {
-  border-color: rgba(85, 231, 255, 0.8);
+  border-color: rgba(255, 77, 77, 0.8);
   color: #ffffff;
   font-weight: 950;
   letter-spacing: 0.22em;
@@ -1349,7 +1349,7 @@ mark {
 }
 
 .health-panel meter::-webkit-meter-optimum-value {
-  background: linear-gradient(90deg, #b68cff, #63e7ff);
+  background: linear-gradient(90deg, #b68cff, #ff4d4d);
 }
 
 .live-panel {
@@ -1533,7 +1533,7 @@ mark {
 .history-list span,
 .history-list strong,
 .settings-panel label span {
-  color: #63e7ff;
+  color: #ff4d4d;
   display: block;
   font-size: 0.68rem;
   font-weight: 950;
@@ -1614,7 +1614,7 @@ mark {
 }
 
 .findings-grid strong {
-  color: #63e7ff;
+  color: #ff4d4d;
   display: block;
   font-size: 0.72rem;
   letter-spacing: 0.12em;
@@ -1880,7 +1880,7 @@ mark {
     overflow: hidden;
     background: rgba(4, 7, 8, 0.8);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(85, 231, 255, 0.2);
+    border: 1px solid rgba(255, 77, 77, 0.2);
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -1896,7 +1896,7 @@ mark {
   .engine-sidebar:not(.mobile-open) .engine-logo::before {
     content: "◇";
     font-size: 24px;
-    color: #55e7ff;
+    color: #ff4d4d;
   }
 
   .engine-sidebar.mobile-open .engine-logo {
