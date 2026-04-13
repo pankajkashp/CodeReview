@@ -20,12 +20,12 @@ export function Hero({ onLaunch }) {
       <div className="hero-noise"></div>
       
       <div className="hero-inner" style={{ paddingTop: '0', zIndex: 2, marginBottom: '60px' }}>
-        {/* BIG CENTERED LOGO */}
+        {/* BIG CENTERED SVG LOGO */}
         <div style={{
-          width: '150px',
-          height: '150px',
+          width: '160px',
+          height: '160px',
           background: 'radial-gradient(circle, #ff4d4d 0%, transparent 70%)',
-          margin: '0 auto 20px',
+          margin: '0 auto 30px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -57,7 +57,7 @@ export function Hero({ onLaunch }) {
             color: 'transparent'
           }}>CodeSage</span>
         </h1>
-        <p className="pill" style={{ borderColor: '#ff4d4d', color: '#ff4d4d', fontSize: '0.65rem', marginBottom: '24px' }}>
+        <p className="pill" style={{ borderColor: '#ff4d4d', color: '#ff4d4d', fontSize: '0.65rem', marginBottom: 'px' }}>
           THE AI THAT ACTUALLY REVIEWS ARCHITECTURE.
         </p>
 
@@ -76,7 +76,7 @@ export function Hero({ onLaunch }) {
       {/* TESTIMONIAL STYLE BANNER - POSITIONED LOWER */}
       <div style={{ 
         position: 'absolute', 
-        bottom: '3%', 
+        bottom: '4%', 
         width: '100%',
         zIndex: 1,
         maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)'

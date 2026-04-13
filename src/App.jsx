@@ -1,22 +1,18 @@
 import { useState, useEffect } from "react";
 import { supabase } from "./supabaseclient.js";
-import { useNavigate } from "react-router-dom";
+import AuthModal from "./components/AuthModal";
 
-import { Capabilities } from "./components/Capabilities.jsx";
 import { CodeIntegrityEngine } from "./components/CodeIntegrityEngine.jsx";
-import { Footer } from "./components/Footer.jsx";
 import { Hero } from "./components/Hero.jsx";
-import { IntelligenceSection } from "./components/IntelligenceSection.jsx";
-import { ReviewInterface } from "./components/ReviewInterface.jsx";
 import { TopNavigation } from "./components/TopNavigation.jsx";
 import { Preloader } from "./components/Preloader.jsx";
 
 export default function App() {
   const [activeView, setActiveView] = useState("landing");
   const [user, setUser] = useState(null);
-  const navigate = useNavigate();
+  const [showAuth, setShowAuth] = useState(false);
 
-  // ✅ SUPABASE AUTH LISTENER
+  // ✅ AUTH LISTENER
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
@@ -25,12 +21,11 @@ export default function App() {
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setUser(session?.user || null);
-        
-        // If user just signed in and was on landing, take them to engine
+
         if (session?.user && activeView === "landing") {
           setActiveView("engine");
         }
-        
+
         if (!session?.user && activeView === "engine") {
           setActiveView("landing");
         }
@@ -42,19 +37,24 @@ export default function App() {
     };
   }, [activeView]);
 
-  // 🔥 NAVIGATION HANDLERS
-  const handleLogin = () => navigate("/login");
+  // 🔐 LOGIN → OPEN MODAL
+  const handleLogin = () => {
+    setShowAuth(true);
+  };
+
+  // 🚪 LOGOUT
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
-    navigate("/logout");
+    setActiveView("landing");
   };
 
+  // 🚀 ENGINE ACCESS
   const handleLaunchEngine = () => {
     if (user) {
       setActiveView("engine");
     } else {
-      navigate("/login");
+      setShowAuth(true); // 👈 open modal instead of navigate
     }
   };
 
@@ -62,6 +62,7 @@ export default function App() {
     <>
       <Preloader>
         <div className="app-root-animate">
+
           {activeView === "engine" && user ? (
             <CodeIntegrityEngine
               user={user}
@@ -69,15 +70,25 @@ export default function App() {
               onLogout={handleLogout}
             />
           ) : (
-            <div className="site-shell" style={{ height: '100vh', overflow: 'hidden' }}>
+            <div className="site-shell" style={{ height: "100vh", overflow: "hidden" }}>
               <TopNavigation
                 user={user}
-                onLogin={handleLogin}
+                onLoginClick={handleLogin}   // 👈 IMPORTANT CHANGE
                 onLogout={handleLogout}
               />
+
               <Hero onLaunch={handleLaunchEngine} />
             </div>
           )}
+
+          {/* 🔥 AUTH MODAL */}
+          {showAuth && (
+            <AuthModal
+              supabase={supabase}
+              onClose={() => setShowAuth(false)}
+            />
+          )}
+
         </div>
       </Preloader>
     </>

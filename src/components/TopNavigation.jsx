@@ -2,7 +2,7 @@ import { UserProfile } from "./UserProfile.jsx";
 
 const navItems = ["Features", "How It Works", "Intelligence"];
 
-export function TopNavigation({ user, onLogin, onLogout }) {
+export function TopNavigation({ user, onLoginClick, onLogout }) {
   return (
     <header className="top-navigation">
       <a className="brand" href="#top">
@@ -10,19 +10,11 @@ export function TopNavigation({ user, onLogin, onLogout }) {
         <span style={{ fontSize: "20px" }}>CodeSage</span>
       </a>
 
-      <nav>
-        {navItems.map((item) => (
-          <a href={`#${item.toLowerCase().replaceAll(" ", "-")}`} key={item}>
-            {item}
-          </a>
-        ))}
-      </nav>
-
       <div className="nav-actions">
         {user ? (
           <UserProfile user={user} onLogout={onLogout} />
         ) : (
-          <button className="primary-btn pulse" onClick={onLogin}>
+          <button className="primary-btn pulse" onClick={onLoginClick}>
             Login / Signup
           </button>
         )}

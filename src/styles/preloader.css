@@ -1,153 +1,79 @@
-/* MAIN PAGE (initially hidden) */
-.main-content {
-  opacity: 0;
-  transform: scale(1.1);
-  transition: all 1s ease;
-}
-
-/* 👇 DURING PAUSE (REVEAL PHASE) */
-.main-content.reveal {
-  opacity: 0.6;
-  transform: scale(1.05);
-}
-
-/* 👇 FULLY VISIBLE */
-.main-content.end {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* PRELOADER */
-.preloader-overlay {
+.preloader {
   position: fixed;
   inset: 0;
-  background: black;
-  z-index: 9999;
-  overflow: hidden;
+  background: #05070a;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
+  z-index: 9999;
 }
 
-/* SYMBOL BASE */
-.syntax {
-  position: absolute;
-  color: white;
-  font-size: 18px;
-  transition: all 0.6s ease;
-  text-shadow: 0 0 8px rgba(255, 77, 77, 0.4);
-}
-
-/* 🌀 CIRCLE */
-.preloader-overlay.circle .syntax {
-  top: 50%;
-  left: 50%;
-  transform: 
-    rotate(calc(360deg / var(--total) * var(--i)))
-    translate(240px)
-    rotate(calc(-360deg / var(--total) * var(--i)));
-}
-
-/* 🔄 ROTATE */
-.preloader-overlay.rotate .syntax {
-  animation: spin 1s linear;
-  top: 50%;
-  left: 50%;
-}
-
-@keyframes spin {
-  from {
-    transform: 
-      rotate(calc(360deg / var(--total) * var(--i)))
-      translate(140px)
-      rotate(calc(-360deg / var(--total) * var(--i)));
-  }
-  to {
-    transform: 
-      rotate(calc(360deg / var(--total) * var(--i) + 360deg))
-      translate(240px)
-      rotate(calc(-360deg / var(--total) * var(--i) - 360deg));
-  }
-}
-
-/* 💥 EXPLODE */
-.preloader-overlay.explode .syntax {
-  top: 50%;
-  left: 50%;
-  transform: 
-    rotate(calc(360deg / var(--total) * var(--i)))
-    translate(600px)
-    scale(2.5);
-  opacity: 0;
-}
-
-/* 🧠 PAUSE MOMENT */
-.preloader-overlay.reveal {
-  background: rgba(0,0,0,0.7); /* 👈 shows landing page behind */
-  transition: background 1s ease;
-}
-
-/* FINAL FADE */
-.preloader-overlay.end {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* BRAND */
-.preloader-brand {
-  color: white;
-  font-size: 28px;
-  letter-spacing: 3px;
-  transition: all 0.5s ease;
-  animation: fadeIn 1s ease-out 0.5s both;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* TIRE LOADER */
-.tire-loader {
-  width: 100px;
-  height: 100px;
-  border: 12px solid #1a1a1a;
-  border-top: 12px solid #ff4d4d;
-  border-radius: 50%;
+/* CORE CENTER */
+.core {
   position: relative;
-  animation: tire-spin 1.5s linear infinite;
-  box-shadow: 0 0 20px rgba(255, 77, 77, 0.2);
+  width: 120px;
+  height: 120px;
 }
 
-.tire-loader::before,
-.tire-loader::after {
-  content: "";
+/* GLOW RINGS */
+.ring {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  background: #333;
-  width: 80%;
-  height: 2px;
-  transform: translate(-50%, -50%);
-}
-
-.tire-loader::after {
-  transform: translate(-50%, -50%) rotate(90deg);
-}
-
-.tire-center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 24px;
-  height: 24px;
-  background: #1a1a1a;
-  border: 2px solid #ff4d4d;
+  inset: 0;
   border-radius: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 2;
+  border: 2px solid rgba(0, 255, 200, 0.3);
+  animation: pulse 2s infinite;
 }
 
-@keyframes tire-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.ring.delay {
+  animation-delay: 1s;
+}
+
+/* DIAMOND CENTER */
+.diamond {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  border: 3px solid #00ffd0;
+  transform: translate(-50%, -50%) rotate(45deg);
+  box-shadow: 0 0 20px #00ffd0;
+  animation: rotateDiamond 2s linear infinite;
+}
+
+/* TEXT */
+.loading-text {
+  margin-top: 30px;
+  color: #a0fdf0;
+  font-size: 14px;
+  letter-spacing: 2px;
+  opacity: 0.8;
+  animation: blink 1.5s infinite;
+}
+
+/* ANIMATIONS */
+@keyframes pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+@keyframes rotateDiamond {
+  0% {
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(405deg);
+  }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
 }
