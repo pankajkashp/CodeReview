@@ -1,72 +1,80 @@
-# ◇ CodeSage : AI Code Reviewer
+# ◊ CodeSage | Crimson & Carbon
 
-An ultra-modern, cinematic React web application designed to simulate an advanced AI Code Integrity Engine. This project focuses on delivering a highly premium user experience with complex CSS animations, dark mode aesthetics, and an integrated Firebase authentication flow.
+![Favicon](https://raw.githubusercontent.com/pankajkashp/CodeReview/main/public/favicon.svg)
 
-## 🚀 Key Features
+> **Enterprise-grade code integrity engine for developers who value perfection.**
 
-- **Cinematic Preloader Sequence**: A dynamic 3-part animation where syntax symbols scatter from the edges, rapidly orbit the center in a cluster, and burst outwards to reveal the application.
-- **Firebase Authentication**: Integrated Google OAuth login via Firebase. Protected routes and dynamic navigation updates based on the user's session state.
-- **Code Integrity Engine**: A responsive and interactive dashboard simulating live AI code analysis, featuring a collapsible hovering sidebar and syntax-highlighted code editor.
-- **Analytics Dashboard**: A beautifully designed analytics page tracking "Code Score", bugs detected, and clean code suggestions alongside a visual code diff comparing legacy vs. refactored source.
-- **Modern UI/UX**: Built purely with native CSS using glowing accents (`#55e7ff` signature cyan), dashed borders, glassmorphic elements, and fluid layouts.
+CodeSage is a high-performance, AI-driven architectural review platform designed to scan, refactor, and master your source code in seconds. Built with a high-contrast cinematic aesthetic, it provides deep intelligence on code structure, security, and optimization.
 
-## 🛠️ Technology Stack
+---
 
-- **Framework**: React 19 + Vite
-- **Styling**: Pure CSS (`global.css`, `preloader.css`, `analytics.css`)
-- **Backend**: Node.js Express
-- **Database**: MongoDB (Mongoose)
-- **Auth**: Firebase (Google OAuth)
-- **Intelligence**: OpenAI API
+## 🛠 Features
 
-## 📦 Project Structure
+- **🔴 Red Alert Analytics**: High-impact visual feedback on code metrics and health scores.
+- **⚡ AI Refactoring**: One-click code optimization powered by Google Gemini 1.5 Flash.
+- **📂 Multi-Input Core**: Support for local file imports, manual entry, and real-time history tracking.
+- **📄 Export Suite**: Professional PDF reporting for architectural audits.
+- **🔐 Secure Console**: Modal-based authentication with Supabase for personalized session history.
+
+## 🎨 Aesthetic: Crimson & Carbon
+
+The platform follows a strict **Red and Black** design language:
+- **Primary Color:** `#ff4d4d` (Crimson Red)
+- **Background:** `#05070a` (Carbon Black)
+- **Typography:** Inter & Monospace for a technical, industrial feel.
+- **FX:** Glassmorphism, pulse animations, and dual-row infinite scrolling marquees.
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js (v18+)
+- Supabase Account
+- Google Gemini API Key
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/pankajkashp/CodeReview.git
+   cd CodeReview
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Configure Environment:**
+   Create a `.env` file in the root:
+   ```env
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   GEMINI_API_KEY=your_gemini_api_key
+   ```
+
+4. **Launch Dev Server:**
+   ```bash
+   npm run dev
+   ```
+
+## 🗺 Project Structure
 
 ```text
 src/
 ├── components/
-│   ├── Preloader.jsx           # Animated website entry sequence
-│   ├── TopNavigation.jsx       # Header nav tracking session state
-│   ├── Hero.jsx                # Landing page hero sequence
-│   ├── CodeIntegrityEngine.jsx # Main AI review dashboard workspace
-│   ├── Analytics.jsx           # AI optimization results breakdown
-│   └── ...                     # Additional landing page segments
+│   ├── CodeIntegrityEngine.jsx  # Main workspace
+│   ├── Analytics.jsx            # Result visualization
+│   ├── AuthModal.jsx            # Styled login/signup
+│   └── Hero.jsx                 # Landing experience
 ├── styles/
-│   ├── global.css              # Core typography, themes, and layouts
-│   ├── preloader.css           # Keyframe animations for the preloader
-│   └── analytics.css           # Styling for the analytics dashboard
-├── App.jsx                     # Root application and auth router
-├── firebaseclient.js           # Firebase client configuration
-└── main.jsx                    # Vite entry point
+│   ├── global.css               # Core theme variables
+│   └── analytics.css            # Red-highlighted UI components
+└── supabaseclient.js            # Infrastructure bridge
 ```
 
-## ⚙️ Local Development Setup
+---
 
-**1. Clone the repository**
-```bash
-git clone https://github.com/pankajkashp/CodeReview.git
-cd CodeReview
-```
+## 🛡 Disclaimer
+*CodeSage is an engineering tool. While AI provides high-quality suggestions, always verify mission-critical logic in production environments.*
 
-**2. Install dependencies**
-```bash
-npm install
-```
-
-**3. Configure Environment Variables**
-Create a `.env` file in the root directory and populate it with your credentials:
-```env
-VITE_FIREBASE_API_KEY=...
-VITE_FIREBASE_AUTH_DOMAIN=...
-VITE_FIREBASE_PROJECT_ID=...
-OPENAI_API_KEY=sk-...
-MONGODB_URI=mongodb://localhost:27017/codesage
-```
-
-**4. Start the servers**
-- Frontend: `npm run dev`
-- Backend: `node server.js`
-
-The application will be accessible at `http://localhost:5173`.
-
-## 🎨 Design Philosophy
-The system avoids generic component libraries and tailwind utility classes, opting instead for meticulously crafted native CSS rules to ensure absolute control over every micro-interaction, transition, and glow effect. The result is an interface that feels significantly more responsive, unique, and "alive".
+Built with ❤️ by the **CodeSage Team**.

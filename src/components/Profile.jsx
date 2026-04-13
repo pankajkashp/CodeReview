@@ -21,7 +21,7 @@ export default function Profile() {
     async function getProfile() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        navigate("/login");
+        navigate("/");
         return;
       }
       setUser(user);
@@ -29,13 +29,13 @@ export default function Profile() {
       setAvatarUrl(user.user_metadata?.avatar_url || "");
 
       // Fetch history
-      const { data: reviews } = await supabase
+      const { data: records } = await supabase
         .from("reviews")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       
-      setHistory(reviews || []);
+      setHistory(records || []);
       setLoading(false);
     }
 
@@ -50,12 +50,30 @@ export default function Profile() {
     });
     setSaving(false);
     if (error) alert(error.message);
-    else alert("Profile updated successfully!");
+    else alert("Identity Updated Successfully!");
+  };
+
+  const deleteHistoryRecord = async (e, id) => {
+    e.stopPropagation();
+    if (!confirm("De-authorize and delete this record permanently?")) return;
+    
+    const { error } = await supabase
+      .from("reviews")
+      .delete()
+      .eq("id", id);
+      
+    if (!error) {
+      setHistory(history.filter(h => h.id !== id));
+    }
   };
 
   const userInitial = fullName?.[0] || user?.email?.[0] || "?";
 
-  if (loading) return <div className="profile-shell">Loading Terminal...</div>;
+  if (loading) return (
+    <div className="profile-shell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="loader-text">Initializing Identity Terminal...</div>
+    </div>
+  );
 
   return (
     <div className="profile-shell">
@@ -71,7 +89,7 @@ export default function Profile() {
           <div className="profile-avatar-section">
             <div className="profile-avatar-big">
                {avatarUrl ? <img src={avatarUrl} alt="Avatar" /> : userInitial.toUpperCase()}
-               <div className="avatar-upload-btn">EDIT</div>
+               <div className="avatar-upload-btn" onClick={() => setActiveTab("settings")}>EDIT</div>
             </div>
             <h1 style={{ fontSize: '1.2rem', margin: '10px 0 4px' }}>{fullName || "Developer"}</h1>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>{user.email}</p>
@@ -95,7 +113,7 @@ export default function Profile() {
 
         <main className="profile-main">
           {activeTab === "history" ? (
-            <section className="history-card">
+            <section className="history-card" style={{ background: '#0d1117' }}>
               <header className="card-header">
                 <h2>Security Log</h2>
                 <p>Tracked records of your source code integrity reviews.</p>
@@ -103,13 +121,22 @@ export default function Profile() {
 
               <div className="history-list">
                 {history.length > 0 ? history.map((record) => (
-                  <div key={record.id} className="history-item">
+                  <div key={record.id} className="history-item" style={{ position: 'relative' }}>
                     <div className="history-info">
                       <h3>Analytic Pulse #{record.id.slice(0, 6)}</h3>
                       <span>{new Date(record.created_at).toLocaleString()}</span>
                     </div>
-                    <div className="history-score">
-                      {record.result?.score || 85}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                      <div className="history-score" style={{ background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d', border: '1px solid rgba(255, 77, 77, 0.2)' }}>
+                        {record.result?.score || 85}
+                      </div>
+                      <button 
+                        onClick={(e) => deleteHistoryRecord(e, record.id)}
+                        style={{ background: 'transparent', border: 'none', color: '#666', cursor: 'pointer', fontSize: '1.2rem' }}
+                        title="Delete record"
+                      >
+                        ✕
+                      </button>
                     </div>
                   </div>
                 )) : (
@@ -120,7 +147,7 @@ export default function Profile() {
               </div>
             </section>
           ) : (
-            <section className="settings-card">
+            <section className="settings-card" style={{ background: '#0d1117' }}>
               <header className="card-header">
                 <h2>Account Configuration</h2>
                 <p>Maintain your developer identity and security preferences.</p>
@@ -137,13 +164,14 @@ export default function Profile() {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Avatar Connection (URL)</label>
+                  <label>Avatar Connection (Image URL)</label>
                   <input 
                     type="text" 
                     value={avatarUrl}
                     onChange={(e) => setAvatarUrl(e.target.value)}
                     placeholder="https://..."
                   />
+                  <p style={{ fontSize: '0.7rem', color: '#666', marginTop: '5px' }}>Paste a link to your custom identity portrait.</p>
                 </div>
                 <button 
                   className="login-submit" 
@@ -153,7 +181,7 @@ export default function Profile() {
                 >
                   {saving ? "SAVING..." : "UPDATE IDENTITY"}
                 </button>
-              </form>settings-card
+              </form>
             </section>
           )}
         </main>

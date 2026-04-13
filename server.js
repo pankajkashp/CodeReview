@@ -29,17 +29,17 @@ app.post("/review", async (req, res) => {
             {
               parts: [
                 {
-                  text: `Analyze this code and return JSON:
+                  text: `Analyze this code and return ONLY valid JSON (no markdown, no backticks). Use this exact shape:
 {
-  "errors": [],
-  "optimization": [],
-  "timeComplexity": "",
-  "spaceComplexity": "",
-  "improvedCode": "",
-  "score": number
+  "errors": ["description of each bug or issue"],
+  "optimization": ["each optimization suggestion"],
+  "timeComplexity": "e.g. O(n)",
+  "spaceComplexity": "e.g. O(1)",
+  "improvedCode": "the full improved/refactored version of the code",
+  "score": 85
 }
 
-Code:
+Code to analyze:
 ${code}`
                 }
               ]

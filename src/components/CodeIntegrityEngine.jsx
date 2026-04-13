@@ -53,13 +53,27 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
   // ✅ FETCH HISTORY
   const fetchHistory = async () => {
     if (!user) return;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("reviews")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
-    setHistory(data || []);
+    if (!error) setHistory(data);
+  };
+
+  const deleteHistoryRecord = async (e, id) => {
+    e.stopPropagation(); // prevent opening the record
+    if (!confirm("Are you sure you want to delete this record?")) return;
+    
+    const { error } = await supabase
+      .from("reviews")
+      .delete()
+      .eq("id", id);
+      
+    if (!error) {
+      setHistory(history.filter(h => h.id !== id));
+    }
   };
 
   useEffect(() => {
@@ -84,22 +98,8 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
 
       if (!res.ok) throw new Error(data.error);
 
-      // 🔥 MAP DATA TO UI FORMAT
-      const formatted = {
-        summary: "Analysis Complete",
-        language: "Detected",
-        complexityScore: data.score || 80,
-        findings: Array.isArray(data.errors) ? data.errors?.map((e) => ({
-          title: e,
-          detail: e,
-          severity: "warning"
-        })) : [],
-        optimizations: data.optimization || [],
-        improvedCode: data.improvedCode || "",
-        simulated: data.simulated || false
-      };
-
-      setAnalysis(formatted);
+      // 🔥 Pass Gemini response directly — Analytics reads these fields
+      setAnalysis(data);
       setStatus("complete");
       setActivePanel("analytics");
 
@@ -206,7 +206,14 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                       onChange={handleFileChange}
                     />
                     <button onClick={handleImportClick}>IMPORT FILE</button>
-                    <button>SETTINGS</button>
+                    <button 
+                      className="primary-btn" 
+                      onClick={analyzeCode} 
+                      disabled={status === "loading" || !code.trim()}
+                      style={{ padding: '0 30px', background: '#ff4d4d', color: '#000' }}
+                    >
+                      {status === "loading" ? "INITIALIZING..." : "START ANALYSIS"}
+                    </button>
                   </div>
                 </section>
 
@@ -253,14 +260,29 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                     <footer className="editor-footer">
                       <small>{lineCount} lines</small>
                       <button 
+                        className="pulse"
                         onClick={analyzeCode} 
-                        disabled={status === "loading"}
-                        style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+                        disabled={status === "loading" || !code.trim()}
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '10px',
+                          background: '#ff4d4d',
+                          color: '#000',
+                          fontWeight: '900',
+                          padding: '0 25px',
+                          borderRadius: '4px',
+                          height: '36px'
+                        }}
                       >
-                        {status === "loading" && (
-                          <div className="tire-loader" style={{ width: '16px', height: '16px', border: '3px solid #1a1a1a', borderTop: '3px solid #ff4d4d' }}></div>
+                        {status === "loading" ? (
+                          <div className="tire-loader" style={{ width: '14px', height: '14px', border: '2px solid #000', borderTop: '2px solid #fff', animation: 'tire-spin 1s linear infinite' }}></div>
+                        ) : (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                            <path d="M5 12l5 5L20 7" />
+                          </svg>
                         )}
-                        {status === "loading" ? "Analyzing..." : "Analyze Code"}
+                        {status === "loading" ? "ANALYZING..." : "RUN ANALYSIS"}
                       </button>
                     </footer>
                   </article>
@@ -331,14 +353,30 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                         (h.result?.summary || "").toLowerCase().includes(searchTerm.toLowerCase())
                       )
                       .map((h) => (
-                      <article key={h.id} style={{ cursor: 'pointer' }} onClick={() => {
-                        setAnalysis(h.result);
-                        setCode(h.code);
-                        setActivePanel("analytics");
-                      }}>
-                        <span>{new Date(h.created_at).toLocaleDateString()}</span>
-                        <h3>Review Pulse #{h.id.slice(0, 4)}</h3>
-                        <p>Code integrity score: {h.result?.score || "N/A"}</p>
+                      <article 
+                        key={h.id} 
+                        className="history-card"
+                        style={{ cursor: 'pointer', position: 'relative' }} 
+                        onClick={() => {
+                          setAnalysis(h.result);
+                          setCode(h.code);
+                          setActivePanel("analytics");
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <div>
+                            <span>{new Date(h.created_at).toLocaleDateString()}</span>
+                            <h3>Review Pulse #{h.id.slice(0, 4)}</h3>
+                            <p>Code integrity score: {h.result?.score || "N/A"}</p>
+                          </div>
+                          <button 
+                            onClick={(e) => deleteHistoryRecord(e, h.id)}
+                            className="history-delete-btn"
+                            title="Delete Record"
+                          >
+                            ✕
+                          </button>
+                        </div>
                       </article>
                     ))
                   ) : (

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { EngineEffect } from "./EngineEffect";
 
 const languagesRow1 = [
   { name: "JavaScript", logo: "JS", tag: "@brendan_eich", text: "Any application that can be written in JavaScript, will eventually be written in JavaScript." },
@@ -18,39 +19,58 @@ export function Hero({ onLaunch }) {
   return (
     <section className="hero" style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden' }}>
       <div className="hero-noise"></div>
-      
+
       <div className="hero-inner" style={{ paddingTop: '0', zIndex: 2, marginBottom: '60px' }}>
         {/* BIG CENTERED SVG LOGO */}
         <div style={{
           width: '160px',
           height: '160px',
-          background: 'radial-gradient(circle, #ff4d4d 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(255,77,77,0.25) 0%, transparent 70%)',
           margin: '0 auto 30px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
-          filter: 'drop-shadow(0 0 30px rgba(255, 77, 77, 0.4))'
+          filter: 'drop-shadow(0 0 40px rgba(255, 77, 77, 0.3))',
+          animation: 'breath 4s ease-in-out infinite'
         }}>
-           <div style={{
-             fontSize: '100px',
-             color: '#fff',
-             fontWeight: '900',
-             animation: 'pulse 3s infinite alternate'
-           }}>◇</div>
-           <div style={{
-             position: 'absolute',
-             width: '100%',
-             height: '100%',
-             border: '1px solid rgba(255, 77, 77, 0.2)',
-             borderRadius: '50%',
-             transform: 'rotateX(60deg) rotateY(20deg)',
-             animation: 'spin 10s linear infinite'
-           }}></div>
+
+          {/* SYMBOL */}
+          <div style={{
+            fontSize: '90px',
+            color: '#fff',
+            fontWeight: '900',
+            letterSpacing: '2px',
+            animation: 'symbolPulse 4s ease-in-out infinite'
+          }}>
+            ◇
+          </div>
+
+          {/* ORBIT RING */}
+          <div style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            border: '1px solid rgba(255, 77, 77, 0.15)',
+            borderRadius: '50%',
+            transform: 'rotateX(60deg) rotateY(20deg)',
+            animation: 'spinSlow 20s linear infinite'
+          }}></div>
+
+          {/* EXTRA GLOW RING (NEW 🔥) */}
+          <div style={{
+            position: 'absolute',
+            width: '140%',
+            height: '140%',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(255,77,77,0.15), transparent)',
+            animation: 'glowPulse 5s ease-in-out infinite'
+          }}></div>
+
         </div>
 
         <h1 style={{ fontSize: 'clamp(3.5rem, 8vw, 6.5rem)', marginBottom: '5px' }}>
-          <span style={{ 
+          <span style={{
             background: 'linear-gradient(180deg, #ff4d4d 0%, #a00000 100%)',
             WebkitBackgroundClip: 'text',
             backgroundImage: 'linear-gradient(180deg, #ff4c4c 10%, #d90429 60%, #8d021f 100%)',
@@ -62,7 +82,7 @@ export function Hero({ onLaunch }) {
         </p>
 
         <p className="hero-copy" style={{ marginBottom: '40px', color: 'rgba(255,255,255,0.6)', fontSize: '1.05rem', lineHeight: '1.4' }}>
-          Scan, refactor, and master your source code in seconds.<br/>
+          Scan, refactor, and master your source code in seconds.<br />
           Enterprise-grade intelligence for developers who value perfection.
         </p>
 
@@ -74,9 +94,9 @@ export function Hero({ onLaunch }) {
       </div>
 
       {/* TESTIMONIAL STYLE BANNER - POSITIONED LOWER */}
-      <div style={{ 
-        position: 'absolute', 
-        bottom: '4%', 
+      <div style={{
+        position: 'absolute',
+        bottom: '4%',
         width: '100%',
         zIndex: 1,
         maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)'
@@ -183,6 +203,47 @@ export function Hero({ onLaunch }) {
            padding: 2px 8px;
            border-radius: 4px;
         }
+           @keyframes breath {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 20px rgba(255, 77, 77, 0.2));
+  }
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 60px rgba(255, 77, 77, 0.4));
+  }
+}
+
+@keyframes symbolPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes spinSlow {
+  0% {
+    transform: rotateX(60deg) rotateY(20deg) rotate(0deg);
+  }
+  100% {
+    transform: rotateX(60deg) rotateY(20deg) rotate(360deg);
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
       `}</style>
     </section>
   );

@@ -137,6 +137,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const apiKey = env.OPENAI_API_KEY || process.env.OPENAI_API_KEY;
   const model = env.OPENAI_MODEL || process.env.OPENAI_MODEL || "gpt-4.1-mini";
+  const geminiApiKey = env.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
 
   return {
   plugins: [
@@ -161,16 +162,16 @@ export default defineConfig(({ mode }) => {
               return;
             }
 
-            const apiKey = process.env.GEMINI_API_KEY;
+            const gKey = geminiApiKey;
             const response = await fetch(
-              `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+              `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${gKey}`,
               {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json"
                },
                 body: JSON.stringify({
-                  contents: [{ parts: [{ text: `Analyze this code and return JSON:\n{\n  "errors": [],\n  "optimization": [],\n  "timeComplexity": "",\n  "spaceComplexity": "",\n  "improved_code": "",\n  "score": number\n}\n\nCode:\n${code}` }] }]
+                  contents: [{ parts: [{ text: `Analyze this code and return ONLY valid JSON (no markdown, no backticks). Use this exact shape:\n{\n  "errors": ["description of each bug or issue"],\n  "optimization": ["each optimization suggestion"],\n  "timeComplexity": "e.g. O(n)",\n  "spaceComplexity": "e.g. O(1)",\n  "improvedCode": "the full improved/refactored version of the code",\n  "score": 85\n}\n\nCode to analyze:\n${code}` }] }]
                 })
               }
             );

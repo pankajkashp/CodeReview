@@ -1,71 +1,64 @@
-# CodeSage || Project Architecture & Component Map
+# ◊ CodeSage System Documentation
 
-This document serves as a guide for manual developers to navigate the CodeSage codebase. If you need to change a specific part of the UI or logic, find the element below to see which file to edit.
+This guide maps the platform's architectural components for rapid maintenance and visual scaling.
 
----
+## 🏗 Component Map
 
-## 🎨 Styling System (CSS)
+### 1. The Gateway (`src/App.jsx`)
+- **Role:** Central router and state orchestra.
+- **Key States:** `activeView` (landing vs engine), `user` (auth session), `showAuth` (modal toggle).
+- **Sub-components:** `Preloader`, `TopNavigation`, `Hero`, `CodeIntegrityEngine`, `AuthModal`.
 
-All theme colors (Red & Black) are controlled via CSS.
+### 2. The Landing Zone (`src/components/Hero.jsx`)
+- **Aesthetic:** "Bloody Red" gradients and infinite scrolling marquees.
+- **Elements:**
+  - **Center Logo:** Pulsing Diamond (◇) with concentric rings.
+  - **Banner:** Testimonial-styled language cards featuring famous quotes.
+  - **Actions:** High-impact "LAUNCH SYSTEM" trigger.
 
-| Style Scope | File Path | What's Inside? |
-| :--- | :--- | :--- |
-| **Global Theme** | `src/styles/global.css` | Color variables, `.primary-btn`, Nav bar, Base layout, and Engine Sidebar. |
-| **Landing Page** | `src/components/Hero.jsx` | Inline styles for the Hero section and animated marquee cards. |
-| **Login/Logout** | `src/styles/login.css` | Glassmorphism card styles for auth pages. |
-| **Analytics View** | `src/styles/analytics.css` | Score circles, Diff (Code comparison) colors, and Insight cards. |
-| **User Profile** | `src/styles/profile.css` | Dashboard layout and history log styling. |
-| **Preloader** | `src/styles/preloader.css` | Car-tire spinning animation and syntax symbols. |
+### 3. The Forge (`src/components/CodeIntegrityEngine.jsx`)
+- **Role:** Main developer workspace.
+- **Panels:**
+  - **Terminal (Dashboard):** Real-time code entry and file imports.
+  - **Intelligence (Analytics):** Interactive stats, AI refactoring, and PDF export.
+  - **History:** Searchable audit trail of previous reviews with delete capability.
 
----
+### 4. Identity Terminal (`src/components/Profile.jsx`)
+- **Features:** 
+  - Update Display Name.
+  - Custom Avatar Integration (URL-based portraits).
+  - Security Logs (History view within profile).
 
-## 🧩 Component Map
-
-### 1. Landing & Navigation
-*   **Top Navigation Bar**: `src/components/TopNavigation.jsx`
-    *   Contains: Logo, "Login / Signup" button, User Profile circle (when logged in).
-*   **Hero Section**: `src/components/Hero.jsx`
-    *   Contains: Big "◇" logo, "CodeSage" title (Bloody Red), "Launch System" button, and the dual-row marquee banner.
-
-### 2. The Neural Engine (Core App)
-*   **Main Workspace**: `src/components/CodeIntegrityEngine.jsx`
-    *   Contains: The Sidebar (Dashboard/History), The Code Editor (Textarea), and the "Analyze Code" button.
-    *   *Logic*: The `analyzeCode()` function handles the Gemini AI request.
-*   **Analysis Results**: `src/components/Analytics.jsx`
-    *   Contains: Code Score circle, Bugs list, Optimization list, and the Refactored Code comparison.
-    *   *Action*: "Export PDF" button (triggers `window.print()`).
-
-### 3. Authentication Flow
-*   **Login Screen**: `src/components/Login.jsx`
-    *   Contains: Email/Password inputs, "You are not a user" error handling.
-*   **Logout Confirmation**: `src/components/Logout.jsx`
-    *   Contains: "Session Terminated" message and auto-redirect timer.
-*   **Identity Verification**: `src/components/confirmation.jsx`
-    *   Contains: Post-email-click success screen with the Checkmark icon.
-
-### 4. Identity & Profile
-*   **Profile Dashboard**: `src/components/Profile.jsx`
-    *   Contains: Account settings, Avatar change (URL), and the Persistent Review History list.
-*   **User Dropdown**: `src/components/UserProfile.jsx`
-    *   Contains: The logic for the dropdown menu that appears when clicking the profile circle in the header.
+### 5. Access Console (`src/components/AuthModal.jsx`)
+- **Logic:** Modal-based login/signup with custom error handling ("Password not correct" detection).
+- **Styling:** `src/styles/auth.css` (Glassmorphic Red theme).
 
 ---
 
-## ⚙️ Configuration & Backend
+## 🎨 Theme Tokens (`src/styles/global.css`)
 
-*   **Main Controller**: `src/App.jsx`
-    *   Handles view switching (Landing vs Engine) and the Supabase auth listener.
-*   **Database Config**: `src/supabaseclient.js`
-    *   Credentials for Supabase Auth and Database.
-*   **AI Middleware**: `vite.config.js`
-    *   Redirects the `/review` API calls to the Google Gemini backend.
+| Utility | Token/Value |
+| :--- | :--- |
+| **Primary Brand** | `#ff4d4d` (Crimson) |
+| **Background** | `#05070a` (Carbon) |
+| **Accent Text** | `#ffb7b7` (Light Red) |
+| **Border Glow** | `rgba(255, 77, 77, 0.4)` |
 
 ---
 
-## 🚀 Quick Reference: "I want to change..."
+## 🛠 Database Schema (Supabase)
 
-*   **The color of the main name**: GO TO `src/components/Hero.jsx` -> `linear-gradient` inside the `<h1>`.
-*   **The speed of the marquee**: GO TO `src/components/Hero.jsx` -> `@keyframes marquee`.
-*   **The AI prompt/logic**: GO TO `src/components/CodeIntegrityEngine.jsx` -> `analyzeCode()` function.
-*   **The Global Red variations**: GO TO `src/styles/global.css` -> Search for `#ff4d4d` or `rgba(255, 77, 77, ...)`.
-*   **The Logo**: All logos are stylized "◇" characters (unicode). You can change them in `Hero.jsx`, `TopNavigation.jsx`, and `CodeIntegrityEngine.jsx`.
+- **Table:** `analysis_history`
+  - `id` (UUID, primary key)
+  - `user_id` (FK to auth.users)
+  - `code` (text)
+  - `result` (jsonb - stores scores, summary, refactors)
+  - `created_at` (timestamptz)
+
+---
+
+## ⚡ Maintenance Commands
+
+- **Local Build:** `npm run build`
+- **Linting Check:** `npm run lint` (if configured)
+- **Environment Sync:** Always update `.env` with valid Gemini/Supabase keys.
