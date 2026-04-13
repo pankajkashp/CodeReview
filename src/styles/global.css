@@ -130,6 +130,74 @@ button {
 .nav-actions {
   gap: 20px;
   justify-content: flex-end;
+  position: relative;
+}
+
+.profile-circle {
+  align-items: center;
+  background: linear-gradient(135deg, #55e7ff, #b68cff);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: #020305;
+  cursor: pointer;
+  display: flex;
+  font-size: 0.9rem;
+  font-weight: 800;
+  height: 40px;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 40px;
+}
+
+.profile-circle:hover {
+  box-shadow: 0 0 15px rgba(85, 231, 255, 0.4);
+  transform: scale(1.05);
+}
+
+.user-profile-menu {
+  background: rgba(4, 7, 8, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: none;
+  flex-direction: column;
+  min-width: 180px;
+  overflow: hidden;
+  padding: 8px 0;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 12px);
+  z-index: 100;
+}
+
+.user-profile-menu.open {
+  display: flex;
+}
+
+.user-profile-menu button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: rgba(247, 251, 255, 0.72);
+  display: flex;
+  font-size: 0.85rem;
+  gap: 12px;
+  padding: 12px 20px;
+  text-align: left;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.user-profile-menu button:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #55e7ff;
+}
+
+.user-profile-menu .menu-divider {
+  background: rgba(255, 255, 255, 0.06);
+  height: 1px;
+  margin: 6px 0;
 }
 
 .signin-button {

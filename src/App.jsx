@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { supabase } from "./supabaseClient.js";
+import { supabase } from "./supabaseclient.js";
+import { useNavigate } from "react-router-dom";
 
 import { Capabilities } from "./components/Capabilities.jsx";
 import { CodeIntegrityEngine } from "./components/CodeIntegrityEngine.jsx";
@@ -13,6 +14,7 @@ import { Preloader } from "./components/Preloader.jsx";
 export default function App() {
   const [activeView, setActiveView] = useState("landing");
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   // ✅ SUPABASE AUTH LISTENER
   useEffect(() => {
@@ -23,49 +25,42 @@ export default function App() {
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setUser(session?.user || null);
+        if (!session?.user && activeView === "engine") {
+            setActiveView("landing");
+        }
       }
     );
 
     return () => {
       listener.subscription.unsubscribe();
     };
-  }, []);
+  }, [activeView]);
 
-  // 🔥 LOGIN (EMAIL - WORKING VERSION)
- const handleLogin = async () => {
-  const email = prompt("Enter email:");
-  const password = prompt("Enter password:");
-
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    alert("User not found. Creating account...");
-
-    await supabase.auth.signUp({
-      email,
-      password
-    });
-  }
-};
-
-  // 🔥 LOGOUT
+  // 🔥 NAVIGATION HANDLERS
+  const handleLogin = () => navigate("/login");
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
-    setActiveView("landing");
+    navigate("/logout");
+  };
+
+  const handleLaunchEngine = () => {
+    if (user) {
+      setActiveView("engine");
+    } else {
+      navigate("/login");
+    }
   };
 
   return (
     <>
       <Preloader>
         <div className="app-root-animate">
-          {activeView === "engine" ? (
+          {activeView === "engine" && user ? (
             <CodeIntegrityEngine
               user={user}
               onBack={() => setActiveView("landing")}
+              onLogout={handleLogout}
             />
           ) : (
             <div className="site-shell">
@@ -76,7 +71,7 @@ export default function App() {
               />
 
               <main>
-                <Hero onLaunch={() => setActiveView("engine")} />
+                <Hero onLaunch={handleLaunchEngine} />
 
                 <ReviewInterface user={user} />
 

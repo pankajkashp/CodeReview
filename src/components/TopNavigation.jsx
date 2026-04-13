@@ -1,3 +1,5 @@
+import { UserProfile } from "./UserProfile.jsx";
+
 const navItems = ["Features", "How It Works", "Intelligence"];
 
 export function TopNavigation({ user, onLogin, onLogout }) {
@@ -18,14 +20,7 @@ export function TopNavigation({ user, onLogin, onLogout }) {
 
       <div className="nav-actions">
         {user ? (
-          <>
-            <span style={{ fontSize: "14px", color: "#aaa" }}>
-              {user.email}
-            </span>
-            <button className="outline-btn" onClick={onLogout}>
-              Sign Out
-            </button>
-          </>
+          <UserProfile user={user} onLogout={onLogout} />
         ) : (
           <button className="primary-btn pulse" onClick={onLogin}>
             Login / Signup
