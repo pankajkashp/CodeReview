@@ -205,6 +205,12 @@ button {
   border-radius: 7px;
   color: #041016;
   padding: 9px 22px;
+  transition: all 0.2s ease;
+}
+
+.signin-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(255, 77, 77, 0.4);
 }
 
 .hero {
@@ -995,7 +1001,7 @@ mark {
 }
 
 .engine-brand strong {
-  color: #6ee8ff;
+  color: #ff4d4d;
   font-size: 1.14rem;
   font-weight: 950;
   letter-spacing: 0;

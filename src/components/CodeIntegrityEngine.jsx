@@ -28,6 +28,8 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
   const [history, setHistory] = useState([]);
   const [activePanel, setActivePanel] = useState("dashboard");
 
+  const [searchTerm, setSearchTerm] = useState("");
+
   const lineRailRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -164,7 +166,12 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
           </div>
           <div className="engine-search">
             <span>/</span>
-            <input type="text" placeholder="Search commands or files..." />
+            <input 
+              type="text" 
+              placeholder="Search history or analysis..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
           <div className="engine-icons">
             <span style={{ marginRight: '15px' }}>?</span>
@@ -308,19 +315,34 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
             )}
 
             {activePanel === "history" && (
-              <section className="history-panel">
-                <h2>Analysis History</h2>
+              <section className="history-panel" style={{ animation: 'fadeIn 0.4s ease' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+                  <h2 style={{ margin: 0 }}>Review History</h2>
+                  {searchTerm && <span style={{ color: '#ff4d4d', fontSize: '0.8rem' }}>FILTERING BY: "{searchTerm}"</span>}
+                </div>
                 <div className="history-list">
-                  {history.length > 0 ? (
-                    history.map((h) => (
-                      <article key={h.id}>
+                  {history.filter(h => 
+                    h.code.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                    (h.result?.summary || "").toLowerCase().includes(searchTerm.toLowerCase())
+                  ).length > 0 ? (
+                    history
+                      .filter(h => 
+                        h.code.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                        (h.result?.summary || "").toLowerCase().includes(searchTerm.toLowerCase())
+                      )
+                      .map((h) => (
+                      <article key={h.id} style={{ cursor: 'pointer' }} onClick={() => {
+                        setAnalysis(h.result);
+                        setCode(h.code);
+                        setActivePanel("analytics");
+                      }}>
                         <span>{new Date(h.created_at).toLocaleDateString()}</span>
                         <h3>Review Pulse #{h.id.slice(0, 4)}</h3>
                         <p>Code integrity score: {h.result?.score || "N/A"}</p>
                       </article>
                     ))
                   ) : (
-                    <p>No history found for this user.</p>
+                    <p className="history-empty">No matching records found.</p>
                   )}
                 </div>
               </section>

@@ -38,7 +38,7 @@ export default function Login() {
         
         if (signInError) {
           if (signInError.message.includes("Invalid login credentials")) {
-            throw new Error("You are not a user, create an account first.");
+            throw new Error("Password is not correct or account not found.");
           }
           throw signInError;
         }
@@ -59,11 +59,6 @@ export default function Login() {
           <h1>{isSignUp ? "Initialize Account" : "Access Console"}</h1>
           <p>{isSignUp ? "Create your developer credentials" : "Enter your security clearance"}</p>
         </header>
-
-        {/* Keeping top error for critical system failures, but moving specific ones below */}
-        {error && !error.includes("not a user") && (
-          <div className="login-error">{error}</div>
-        )}
 
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
@@ -94,8 +89,8 @@ export default function Login() {
             {loading ? "AUTHENTICATING..." : (isSignUp ? "CREATE ACCOUNT" : "SIGN IN")}
           </button>
 
-          {/* New Feedback Area below the button */}
-          {(error.includes("not a user") || successMsg) && (
+          {/* Dynamic Feedback Area (Errors or Success) */}
+          {(error || successMsg) && (
             <div style={{ 
               marginTop: '18px', 
               padding: '12px', 
@@ -103,11 +98,11 @@ export default function Login() {
               fontSize: '0.85rem',
               textAlign: 'center',
               animation: 'fadeIn 0.3s ease',
-              background: successMsg ? 'rgba(255, 77, 77, 0.1)' : 'rgba(255, 82, 82, 0.1)',
+              background: successMsg ? 'rgba(255, 77, 77, 0.1)' : 'rgba(255, 82, 82, 0.14)',
               border: `1px solid ${successMsg ? 'rgba(255, 77, 77, 0.3)' : 'rgba(255, 82, 82, 0.3)'}`,
               color: successMsg ? '#ff4d4d' : '#ffb7b7'
             }}>
-              {error.includes("not a user") ? error : successMsg}
+              {error || successMsg}
             </div>
           )}
         </form>

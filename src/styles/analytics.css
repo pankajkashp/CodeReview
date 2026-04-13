@@ -253,9 +253,9 @@
   justify-content: center;
 }
 
-.focus-red .icon { background: rgba(248, 113, 113, 0.1); color: #f87171; }
-.focus-blue .icon { background: rgba(96, 165, 250, 0.1); color: #60a5fa; }
-.focus-green .icon { background: rgba(52, 211, 153, 0.1); color: #34d399; }
+.focus-red .icon { background: rgba(255, 77, 77, 0.1); color: #ff4d4d; }
+.focus-blue .icon { background: rgba(255, 120, 77, 0.1); color: #ff784d; }
+.focus-green .icon { background: rgba(255, 180, 77, 0.1); color: #ffb44d; }
 
 .insight-card .count {
   font-size: 1.5rem;
@@ -263,9 +263,9 @@
   opacity: 0.5;
 }
 
-.focus-red .count { color: #f87171; }
-.focus-blue .count { color: #60a5fa; }
-.focus-green .count { color: #34d399; }
+.focus-red .count { color: #ff4d4d; }
+.focus-blue .count { color: #ff784d; }
+.focus-green .count { color: #ffb44d; }
 
 .insight-card h3 {
   font-size: 1.15rem;
@@ -319,8 +319,8 @@
   letter-spacing: 0.05em;
   padding: 6px 12px;
   border-radius: 20px;
-  border: 1px solid rgba(96, 165, 250, 0.3);
-  color: #93c5fd;
+  border: 1px solid rgba(255, 77, 77, 0.3);
+  color: #ffb7b7;
 }
 
 .check-list {
@@ -340,7 +340,7 @@
 .check-list li svg {
   width: 14px;
   height: 14px;
-  color: #34d399;
+  color: #ff4d4d;
 }
 
 .diff-view {
@@ -403,7 +403,7 @@
 }
 
 .copy-btn:hover {
-  background: rgba(85, 231, 255, 0.25);
+  background: rgba(255, 77, 77, 0.25);
 }
 
 .code-container {
@@ -432,8 +432,8 @@
   position: absolute;
   bottom: 24px;
   right: 24px;
-  background: #34d399;
-  color: #064e3b;
+  background: #ff4d4d;
+  color: #0d1117;
   font-size: 0.7rem;
   font-weight: 800;
   padding: 6px 12px;
@@ -474,7 +474,7 @@
 }
 
 .metric .verified {
-  color: #34d399;
+  color: #ff4d4d;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -503,7 +503,7 @@
 }
 
 .primary-btn {
-  background: #55e7ff;
+  background: #ff4d4d;
   color: #031016;
   border: none;
   padding: 0 24px;
@@ -516,10 +516,10 @@
 }
 
 .primary-btn.pulse {
-  box-shadow: 0 0 20px rgba(85, 231, 255, 0.4);
+  box-shadow: 0 0 20px rgba(255, 77, 77, 0.4);
 }
 
 .primary-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 24px rgba(85, 231, 255, 0.6);
+  box-shadow: 0 4px 24px rgba(255, 77, 77, 0.6);
 }
