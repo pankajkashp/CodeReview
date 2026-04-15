@@ -1,15 +1,86 @@
+/* ================= ROOT SHELL ================= */
+
 .login-shell {
-  align-items: center;
-  background:
-    radial-gradient(circle at 10% 10%, rgba(255, 77, 77, 0.08), transparent 25%),
-    radial-gradient(circle at 90% 90%, rgba(136, 75, 255, 0.08), transparent 25%),
-    #020305;
-  color: #f7fbff;
+  position: relative;
+  overflow: hidden;
+
   display: flex;
-  height: 100vh;
+  align-items: center;
   justify-content: center;
-  padding: 20px;
+  height: 100vh;
+
+  background: #020305;
 }
+
+/* ================= 🌌 STARS BACKGROUND ================= */
+
+.stars {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.stars::before {
+  content: "";
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background-image: radial-gradient(#ffffff 1.5px, transparent 1.5px);
+  background-size: 30px 30px;
+  opacity: 0.18;
+  animation: moveStars 40s linear infinite;
+}
+
+.stars::after {
+  content: "";
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background-image: radial-gradient(#ffffff 2.2px, transparent 2.2px);
+  background-size: 80px 80px;
+  opacity: 0.12;
+  animation: moveStars 25s linear infinite;
+}
+
+/* ================= ☄️ SHOOTING STARS ================= */
+
+.shooting-stars {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.shooting-stars span {
+  position: absolute;
+  width: 2px;
+  height: 80px;
+  background: linear-gradient(-45deg, #ff4d4d, transparent);
+  opacity: 0;
+  transform: rotate(45deg);
+  animation: shoot 5s linear infinite;
+}
+
+.shooting-stars span:nth-child(1) {
+  top: 10%;
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.shooting-stars span:nth-child(2) {
+  top: 40%;
+  left: 70%;
+  animation-delay: 2s;
+}
+
+.shooting-stars span:nth-child(3) {
+  top: 70%;
+  left: 40%;
+  animation-delay: 4s;
+}
+
+/* ================= CARD ================= */
 
 .login-card {
   background: rgba(255, 255, 255, 0.03);
@@ -21,8 +92,23 @@
   padding: 48px 40px;
   position: relative;
   width: 100%;
+  z-index: 2;
+}
+.login-card {
+  position: relative;
+  z-index: 2;
+}
+.login-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
 }
 
+.login-card {
+  position: relative;
+  z-index: 2;
+}
 .login-card::before {
   background: linear-gradient(90deg, #ff4d4d, #b64c4c);
   content: "";
@@ -32,6 +118,8 @@
   right: 0;
   top: 0;
 }
+
+/* ================= HEADER ================= */
 
 .login-header {
   margin-bottom: 34px;
@@ -49,6 +137,8 @@
   color: rgba(247, 251, 255, 0.62);
   font-size: 0.9rem;
 }
+
+/* ================= FORM ================= */
 
 .login-form {
   display: grid;
@@ -84,6 +174,8 @@
   outline: 0;
 }
 
+/* ================= BUTTON ================= */
+
 .login-submit {
   background: #ff4d4d;
   border: 0;
@@ -104,6 +196,8 @@
   transform: translateY(-2px);
 }
 
+/* ================= FOOTER ================= */
+
 .login-footer {
   margin-top: 24px;
   text-align: center;
@@ -118,16 +212,21 @@
   font-weight: 600;
 }
 
-.login-error {
-  background: rgba(255, 82, 82, 0.12);
-  border: 1px solid rgba(255, 82, 82, 0.28);
-  border-radius: 6px;
-  color: #ffb7b7;
-  font-size: 0.84rem;
-  margin-bottom: 24px;
+/* ================= FEEDBACK ================= */
+
+.login-feedback {
+  margin-top: 18px;
   padding: 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
   text-align: center;
+  animation: fadeIn 0.3s ease;
+  background: rgba(255, 77, 77, 0.1);
+  border: 1px solid rgba(255, 77, 77, 0.3);
+  color: #ff4d4d;
 }
+
+/* ================= BACK BUTTON ================= */
 
 .back-to-site {
   color: rgba(247, 251, 255, 0.5);
@@ -144,8 +243,30 @@
   color: #ffffff;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+/* ================= ANIMATIONS ================= */
+
+@keyframes moveStars {
+  from { transform: translateY(0); }
+  to { transform: translateY(-400px); }
 }
 
+
+@keyframes shoot {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(45deg) scale(0);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(100px, -100px) rotate(45deg) scale(1.2);
+  }
+  100% {
+    transform: translate(600px, -600px) rotate(45deg) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

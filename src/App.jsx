@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "./supabaseclient.js";
-import AuthModal from "./components/AuthModal";
 
 import { CodeIntegrityEngine } from "./components/CodeIntegrityEngine.jsx";
 import { Hero } from "./components/Hero.jsx";
@@ -8,9 +8,10 @@ import { TopNavigation } from "./components/TopNavigation.jsx";
 import { Preloader } from "./components/Preloader.jsx";
 
 export default function App() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [activeView, setActiveView] = useState("landing");
   const [user, setUser] = useState(null);
-  const [showAuth, setShowAuth] = useState(false);
 
   // ✅ AUTH LISTENER
   useEffect(() => {
@@ -22,12 +23,12 @@ export default function App() {
       (_event, session) => {
         setUser(session?.user || null);
 
-        if (session?.user && activeView === "landing") {
-          setActiveView("engine");
+        if (session?.user && location.pathname === "/") {
+          navigate("/dashboard");
         }
 
-        if (!session?.user && activeView === "engine") {
-          setActiveView("landing");
+        if (!session?.user && location.pathname === "/dashboard") {
+          navigate("/");
         }
       }
     );
@@ -35,11 +36,11 @@ export default function App() {
     return () => {
       listener.subscription.unsubscribe();
     };
-  }, [activeView]);
+  }, [location.pathname]);
 
-  // 🔐 LOGIN → OPEN MODAL
+  // 🔐 LOGIN → REDIRECT
   const handleLogin = () => {
-    setShowAuth(true);
+    navigate("/login");
   };
 
   // 🚪 LOGOUT
@@ -52,9 +53,9 @@ export default function App() {
   // 🚀 ENGINE ACCESS
   const handleLaunchEngine = () => {
     if (user) {
-      setActiveView("engine");
+      navigate("/dashboard");
     } else {
-      setShowAuth(true); // 👈 open modal instead of navigate
+      navigate("/login");
     }
   };
 
@@ -63,30 +64,30 @@ export default function App() {
       <Preloader>
         <div className="app-root-animate">
 
-          {activeView === "engine" && user ? (
+          {location.pathname === "/dashboard" && user ? (
             <CodeIntegrityEngine
               user={user}
-              onBack={() => setActiveView("landing")}
-              onLogout={handleLogout}
+              onBack={() => navigate("/")}
+              onLogout={() => navigate("/logout")}
             />
           ) : (
-            <div className="site-shell" style={{ height: "100vh", overflow: "hidden" }}>
+            <div className="site-shell" style={{ height: "100vh", overflow: "hidden", position: 'relative' }}>
+              {/* 🌌 BACKGROUND STARS FOR LANDING */}
+              <div className="stars"></div>
+              <div className="shooting-stars">
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+              </div>
+
+
               <TopNavigation
                 user={user}
-                onLoginClick={handleLogin}   // 👈 IMPORTANT CHANGE
-                onLogout={handleLogout}
+                onLoginClick={handleLogin}
+                onLogout={() => navigate("/logout")}
               />
 
               <Hero onLaunch={handleLaunchEngine} />
             </div>
-          )}
-
-          {/* 🔥 AUTH MODAL */}
-          {showAuth && (
-            <AuthModal
-              supabase={supabase}
-              onClose={() => setShowAuth(false)}
-            />
           )}
 
         </div>

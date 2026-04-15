@@ -103,3 +103,90 @@
 .close:hover {
   color: #ff4d4d;
 }
+
+/* ================= 🌌 STARS & SHOOTING STARS ================= */
+
+.stars {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.stars::before {
+  content: "";
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background-image: radial-gradient(#ffffff 1.5px, transparent 1.5px);
+  background-size: 30px 30px;
+  opacity: 0.18;
+  animation: moveStars 40s linear infinite;
+}
+
+.stars::after {
+  content: "";
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background-image: radial-gradient(#ffffff 2.2px, transparent 2.2px);
+  background-size: 80px 80px;
+  opacity: 0.12;
+  animation: moveStars 25s linear infinite;
+}
+
+
+.shooting-stars {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.shooting-stars span {
+  position: absolute;
+  width: 2px;
+  height: 80px;
+  background: linear-gradient(-45deg, #ff4d4d, transparent);
+  opacity: 0;
+  transform: rotate(45deg);
+  animation: shoot 5s linear infinite;
+}
+
+.shooting-stars span:nth-child(1) {
+  top: 10%;
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.shooting-stars span:nth-child(2) {
+  top: 40%;
+  left: 70%;
+  animation-delay: 2s;
+}
+
+.shooting-stars span:nth-child(3) {
+  top: 70%;
+  left: 40%;
+  animation-delay: 4s;
+}
+
+@keyframes moveStars {
+  from { transform: translateY(0); }
+  to { transform: translateY(-400px); }
+}
+
+@keyframes shoot {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(45deg) scale(0);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(100px, -100px) rotate(45deg) scale(1.2);
+  }
+  100% {
+    transform: translate(600px, -600px) rotate(45deg) scale(0.5);
+    opacity: 0;
+  }
+}

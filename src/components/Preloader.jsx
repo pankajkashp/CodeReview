@@ -26,7 +26,16 @@ export function Preloader({ children }) {
     <>
       {showOverlay && (
         <div className={`preloader-overlay ${!loading ? "exit" : ""}`}>
+          {/* 🌌 BACKGROUND */}
+          <div className="stars"></div>
+          <div className="shooting-stars">
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+          </div>
+
+
           <div className="engine-core">
+
             <div className="core-ring"></div>
             <div className="core-ring delay"></div>
 

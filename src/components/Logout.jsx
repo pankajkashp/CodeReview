@@ -1,11 +1,18 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../supabaseclient.js";
 import "../styles/login.css";
 
 export default function Logout() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const performLogout = async () => {
+      await supabase.auth.signOut();
+    };
+
+    performLogout();
+
     const timer = setTimeout(() => {
       navigate("/");
     }, 3000);
@@ -13,9 +20,18 @@ export default function Logout() {
     return () => clearTimeout(timer);
   }, [navigate]);
 
+
   return (
-    <div className="login-shell">
+    <div className="login-shell" style={{ position: 'relative' }}>
+      {/* 🌌 BACKGROUND */}
+      <div className="stars"></div>
+      <div className="shooting-stars">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+
       <div className="login-card">
+
         <header className="login-header">
           <div style={{ 
             background: 'rgba(255, 77, 77, 0.1)', 
