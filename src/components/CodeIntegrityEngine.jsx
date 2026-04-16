@@ -15,12 +15,43 @@ const languageOptions = [
   }
   return total;
 }`
+  },
+  {
+    id: "python",
+    label: "Python",
+    fileName: "main.py",
+    template: `def calculate_total(items):
+    total = 0
+    for item in items:
+        total += item['price'] * item['quantity']
+    return total`
+  },
+  {
+    id: "rust",
+    label: "Rust",
+    fileName: "main.rs",
+    template: `fn calculate_total(items: &[Item]) -> f64 {
+    items.iter().map(|i| i.price * i.quantity).sum()
+}`
+  },
+  {
+    id: "go",
+    label: "Go",
+    fileName: "main.go",
+    template: `func CalculateTotal(items []Item) float64 {
+    var total float64
+    for _, item := range items {
+        total += item.Price * float64(item.Quantity)
+    }
+    return total
+}`
   }
 ];
 
 const defaultLanguage = languageOptions[0];
 
 export function CodeIntegrityEngine({ onBack, user, onLogout }) {
+  const [selectedLanguage, setSelectedLanguage] = useState(defaultLanguage);
   const [code, setCode] = useState(defaultLanguage.template);
   const [analysis, setAnalysis] = useState(null);
   const [status, setStatus] = useState("idle");
@@ -79,6 +110,40 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
   useEffect(() => {
     fetchHistory();
   }, [user]);
+
+  // 🛡️ LANGUAGE VALIDATION
+  const validateCode = (input, langId) => {
+    if (!input.trim()) return true;
+    
+    // Basic heuristic checks
+    if (langId === "javascript" && input.includes("def ") && !input.includes("function")) return false;
+    if (langId === "python" && (input.includes("function ") || input.includes("{") && input.includes("}"))) {
+      // Python doesn't use braces for blocks generally
+      if (!input.includes("def ")) return false;
+    }
+    if (langId === "rust" && !input.includes("fn ") && (input.includes("function") || input.includes("def "))) return false;
+    if (langId === "go" && !input.includes("func ") && (input.includes("def "))) return false;
+    
+    return true;
+  };
+
+  const handleLanguageUpdate = (lang) => {
+    setSelectedLanguage(lang);
+    setCode(lang.template);
+    setError("");
+    setStatus("idle");
+  };
+
+  const handleCodeChange = (e) => {
+    const newCode = e.target.value;
+    setCode(newCode);
+    
+    if (!validateCode(newCode, selectedLanguage.id)) {
+      setError(`Language Mismatch: The code looks like it's not ${selectedLanguage.label}. Please switch language or check your code.`);
+    } else {
+      setError("");
+    }
+  };
 
   // 🚀 ANALYZE FUNCTION
   async function analyzeCode() {
@@ -164,19 +229,10 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
             <strong>CODE INTEGRITY</strong>
             <span>CORE ENGINE v4.2</span>
           </div>
-          <div className="engine-search">
-            <span>/</span>
-            <input 
-              type="text" 
-              placeholder="Search history or analysis..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <div className="engine-icons">
-            <span style={{ marginRight: '15px' }}>?</span>
+          <div className="engine-icons" style={{ marginLeft: 'auto' }}>
             <UserProfile user={user} onLogout={onLogout} />
           </div>
+
         </header>
 
         {activePanel === "analytics" && analysis ? (
@@ -220,11 +276,17 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                 <section className="engine-grid">
                   <article className="code-editor">
                     <div className="language-tabs">
-                      <button className="active">JAVASCRIPT</button>
-                      <button>PYTHON</button>
-                      <button>RUST</button>
-                      <button>GO</button>
+                      {languageOptions.map(lang => (
+                        <button 
+                          key={lang.id}
+                          className={selectedLanguage.id === lang.id ? "active" : ""}
+                          onClick={() => handleLanguageUpdate(lang)}
+                        >
+                          {lang.label.toUpperCase()}
+                        </button>
+                      ))}
                     </div>
+
 
                     <div className="editor-toolbar">
                       <div>
@@ -232,8 +294,9 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                         <span></span>
                         <span></span>
                       </div>
-                      <strong>analysis.js</strong>
-                      <em>Read Only</em>
+                      <strong>{selectedLanguage.fileName}</strong>
+                      <em>{selectedLanguage.label}</em>
+
                     </div>
 
                     <div className="code-input-frame">
@@ -247,8 +310,9 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
 
                       <textarea
                         value={code}
-                        onChange={(e) => setCode(e.target.value)}
-                        placeholder="Paste your code here..."
+                        onChange={handleCodeChange}
+                        placeholder={`Paste your ${selectedLanguage.label} code here...`}
+
                         onScroll={(e) => {
                           if (lineRailRef.current) {
                             lineRailRef.current.style.transform = `translateY(-${e.target.scrollTop}px)`;
@@ -299,8 +363,9 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                       </div>
 
                       {error && (
-                        <div className="analysis-error">
-                          <strong>Connection Error</strong>
+                        <div className="analysis-error" style={{ borderLeft: '3px solid #ff4d4d' }}>
+                          <strong>System Alert</strong>
+
                           <p>{error}</p>
                         </div>
                       )}

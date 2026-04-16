@@ -115,13 +115,13 @@ button {
 }
 
 .site-shell {
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size: 28px 28px;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
   min-height: 100vh;
   overflow: hidden;
+  position: relative;
 }
+
 
 .top-navigation {
   align-items: center;
@@ -899,12 +899,12 @@ mark {
 }
 
 .engine-shell {
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+  background-image: 
     radial-gradient(circle at 46% 7%, rgba(255, 77, 77, 0.09), transparent 24rem),
-    #030405;
-  background-size: 28px 28px, 28px 28px, 100% 100%, 100% 100%;
+    radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-color: #030405;
+  background-size: 100% 100%, 32px 32px;
+
   color: #f5f7fb;
   display: grid;
   grid-template-columns: 125px minmax(0, 1fr);
