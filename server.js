@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { OpenAI } from "openai";
 
 dotenv.config();
 
@@ -9,9 +9,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Initialize Google Generative AI
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // gemini-1.5-flash is stable
+// Initialize OpenAI
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 /* ------------------ ANALYZE ROUTE ------------------ */
 app.post("/review", async (req, res) => {
@@ -35,47 +36,35 @@ app.post("/review", async (req, res) => {
 Code to analyze:
 ${code}`;
 
-    const resultAI = await model.generateContent(prompt);
-    const response = await resultAI.response;
-    const text = response.text();
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "You are a senior software architect. Respond only with valid JSON." },
+        { role: "user", content: prompt }
+      ],
+      response_format: { type: "json_object" }
+    });
 
-    let result;
-    try {
-      // Clean up the response to ensure it's valid JSON (sometimes AI adds backticks)
-      const cleanedText = text.replace(/```json|```/g, "").trim();
-      const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
-      result = JSON.parse(jsonMatch ? jsonMatch[0] : cleanedText);
-    } catch (parseError) {
-      console.error("Failed to parse JSON:", text);
-      result = {
-        errors: ["Structural analysis inconclusive"],
-        optimization: ["Improve code readability"],
-        timeComplexity: "O(n)",
-        spaceComplexity: "O(n)",
-        improvedCode: text,
-        score: 70
-      };
-    }
-
+    const result = JSON.parse(completion.choices[0].message.content);
     res.json(result);
 
   } catch (err) {
-    console.error("⚠️ AI ERROR:", err);
+    console.error("⚠️ OPENAI ERROR:", err);
     
-    // Check for common errors (like invalid API key) to provide simulations
-    if (err.message?.includes("API key not valid") || err.message?.includes("not found")) {
+    // Fallback if key is missing or API fails
+    if (err.status === 401 || !process.env.OPENAI_API_KEY) {
       return res.json({
-        errors: ["[Simulated] No critical architectural flaws found"],
-        optimization: ["[Simulated] Leverage functional patterns"],
+        errors: ["[Fallback] Please configure your OPENAI_API_KEY in .env"],
+        optimization: ["[Simulated] Use efficient array methods"],
         timeComplexity: "O(n)",
         spaceComplexity: "O(1)",
-        improvedCode: "// Review failed. Please check your API key.",
+        improvedCode: "// Switch from Gemini to OpenAI successful. Please add your key.",
         score: 85,
         simulated: true
       });
     }
 
-    res.status(500).json({ error: "Gemini analysis failed" });
+    res.status(500).json({ error: "OpenAI analysis failed" });
   }
 });
 
