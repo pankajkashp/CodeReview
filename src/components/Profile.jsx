@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabaseclient.js";
 import { useNavigate } from "react-router-dom";
 import "../styles/profile.css";
@@ -14,6 +14,10 @@ export default function Profile() {
   const [fullName, setFullName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const fileInputRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -43,14 +47,80 @@ export default function Profile() {
   }, [navigate]);
 
   const handleUpdateProfile = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setSaving(true);
-    const { error } = await supabase.auth.updateUser({
+    setError("");
+    setSuccess("");
+    
+    const { error: updateError } = await supabase.auth.updateUser({
       data: { full_name: fullName, avatar_url: avatarUrl }
     });
+    
     setSaving(false);
-    if (error) alert(error.message);
-    else alert("Identity Updated Successfully!");
+    if (updateError) setError(updateError.message);
+    else setSuccess("Identity Updated Successfully!");
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setError("");
+    setSuccess("");
+
+    // Validate type
+    if (!file.type.startsWith('image/')) {
+      setError('Please upload an image file.');
+      return;
+    }
+
+    // Validate size (e.g., 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      setError('File size must be less than 2MB.');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      
+      // Upload to 'codereview' bucket
+      const { error: uploadError } = await supabase.storage
+        .from('codereview')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) {
+        if (uploadError.message.includes('bucket not found')) {
+          throw new Error('Storage bucket "codereview" not found. Please create it in your Supabase dashboard.');
+        }
+        throw uploadError;
+      }
+
+      // Get Public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('codereview')
+        .getPublicUrl(fileName);
+
+      setAvatarUrl(publicUrl);
+      
+      // Update profile immediately
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: { avatar_url: publicUrl }
+      });
+
+      if (updateError) throw updateError;
+      
+      setSuccess("Identity Portrait Uploaded!");
+    } catch (err) {
+      console.error("Upload Error:", err);
+      setError(err.message || "Failed to upload image. Ensure bucket policies allow uploads.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const deleteHistoryRecord = async (e, id) => {
@@ -89,8 +159,20 @@ export default function Profile() {
           <div className="profile-avatar-section">
             <div className="profile-avatar-big">
                {avatarUrl ? <img src={avatarUrl} alt="Avatar" /> : userInitial.toUpperCase()}
-               <div className="avatar-upload-btn" onClick={() => setActiveTab("settings")}>EDIT</div>
+               <div 
+                className="avatar-upload-btn" 
+                onClick={() => fileInputRef.current?.click()}
+               >
+                 {uploading ? "..." : "UPLOAD"}
+               </div>
             </div>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleFileUpload} 
+              style={{ display: 'none' }} 
+              accept="image/*"
+            />
             <h1 style={{ fontSize: '1.2rem', margin: '10px 0 4px' }}>{fullName || "Developer"}</h1>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>{user.email}</p>
           </div>
@@ -163,24 +245,56 @@ export default function Profile() {
                     placeholder="Enter full name"
                   />
                 </div>
+                
                 <div className="form-group">
-                  <label>Avatar Connection (Image URL)</label>
-                  <input 
-                    type="text" 
-                    value={avatarUrl}
-                    onChange={(e) => setAvatarUrl(e.target.value)}
-                    placeholder="https://..."
-                  />
-                  <p style={{ fontSize: '0.7rem', color: '#666', marginTop: '5px' }}>Paste a link to your custom identity portrait.</p>
+                  <label>Identity Portrait</label>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <input 
+                      type="text" 
+                      value={avatarUrl}
+                      onChange={(e) => setAvatarUrl(e.target.value)}
+                      placeholder="https://..."
+                      style={{ flex: 1 }}
+                    />
+                    <button 
+                      type="button"
+                      className="login-submit"
+                      style={{ padding: '0 20px', width: 'auto', margin: 0, fontSize: '0.8rem' }}
+                      onClick={() => {
+                        setError("");
+                        setSuccess("");
+                        fileInputRef.current?.click();
+                      }}
+                      disabled={uploading}
+                    >
+                      {uploading ? "..." : "UPLOAD FILE"}
+                    </button>
+                  </div>
+                  <p style={{ fontSize: '0.7rem', color: '#666', marginTop: '5px' }}>
+                    Paste a link or upload a file from your desktop.
+                  </p>
                 </div>
+
                 <button 
                   className="login-submit" 
                   type="submit" 
-                  disabled={saving}
+                  disabled={saving || uploading}
                   style={{ marginTop: '20px' }}
                 >
                   {saving ? "SAVING..." : "UPDATE IDENTITY"}
                 </button>
+
+                {error && (
+                  <div className="error-message" style={{ color: '#ff4d4d', fontSize: '0.85rem', marginTop: '15px', textAlign: 'center', padding: '10px', background: 'rgba(255, 77, 77, 0.1)', borderRadius: '4px' }}>
+                    {error}
+                  </div>
+                )}
+                
+                {success && (
+                  <div className="success-message" style={{ color: '#34d399', fontSize: '0.85rem', marginTop: '15px', textAlign: 'center', padding: '10px', background: 'rgba(52, 211, 153, 0.1)', borderRadius: '4px' }}>
+                    {success}
+                  </div>
+                )}
               </form>
             </section>
           )}

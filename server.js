@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { OpenAI } from "openai";
 
 dotenv.config();
 
@@ -9,6 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "2mb" }));
 
+HEAD
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
 if (!GEMINI_KEY) {
@@ -36,6 +37,12 @@ function parseGeminiJson(text) {
   return JSON.parse(match ? match[0] : cleaned);
 }
 
+// Initialize OpenAI
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+ 3db12486b5fc272057871d41b9ba08d2db6728ec
+
 app.post("/review", async (req, res) => {
   try {
     const { code } = req.body;
@@ -61,6 +68,7 @@ Analyze the code below and return ONLY valid JSON (no markdown, no backticks, no
 Code to analyze:
 ${code}`;
 
+ HEAD
     const aiResult = await model.generateContent(prompt);
     const text = aiResult.response.text();
 
@@ -79,8 +87,20 @@ ${code}`;
       };
     }
 
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "You are a senior software architect. Respond only with valid JSON." },
+        { role: "user", content: prompt }
+      ],
+      response_format: { type: "json_object" }
+    });
+3db12486b5fc272057871d41b9ba08d2db6728ec
+
+    const result = JSON.parse(completion.choices[0].message.content);
     res.json(result);
   } catch (err) {
+HEAD
     console.error("⚠️ GEMINI ERROR:", err?.message || err);
 
     const msg = String(err?.message || "");
@@ -92,6 +112,24 @@ ${code}`;
     }
 
     res.status(500).json({ error: "Gemini analysis failed: " + msg });
+
+    console.error("⚠️ OPENAI ERROR:", err);
+    
+    // Fallback if key is missing or API fails
+    if (err.status === 401 || !process.env.OPENAI_API_KEY) {
+      return res.json({
+        errors: ["[Fallback] Please configure your OPENAI_API_KEY in .env"],
+        optimization: ["[Simulated] Use efficient array methods"],
+        timeComplexity: "O(n)",
+        spaceComplexity: "O(1)",
+        improvedCode: "// Switch from Gemini to OpenAI successful. Please add your key.",
+        score: 85,
+        simulated: true
+      });
+    }
+
+    res.status(500).json({ error: "OpenAI analysis failed" });
+ 3db12486b5fc272057871d41b9ba08d2db6728ec
   }
 });
 
