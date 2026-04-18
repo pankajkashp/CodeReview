@@ -7,80 +7,95 @@ dotenv.config();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "2mb" }));
 
-// Initialize Google Generative AI
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // gemini-1.5-flash is stable
+const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
-/* ------------------ ANALYZE ROUTE ------------------ */
+if (!GEMINI_KEY) {
+  console.warn("⚠️  GEMINI_API_KEY is missing from .env — /review will return a simulated response.");
+}
+
+const genAI = GEMINI_KEY ? new GoogleGenerativeAI(GEMINI_KEY) : null;
+const model = genAI ? genAI.getGenerativeModel({ model: "gemini-2.5-flash" }) : null;
+
+function simulated(reason) {
+  return {
+    errors: [`[Simulated] ${reason}`],
+    optimization: ["[Simulated] Add GEMINI_API_KEY to .env and restart the server."],
+    timeComplexity: "O(n)",
+    spaceComplexity: "O(1)",
+    improvedCode: "// Simulation response — configure GEMINI_API_KEY to get a real review.",
+    score: 75,
+    simulated: true
+  };
+}
+
+function parseGeminiJson(text) {
+  const cleaned = text.replace(/```json|```/g, "").trim();
+  const match = cleaned.match(/\{[\s\S]*\}/);
+  return JSON.parse(match ? match[0] : cleaned);
+}
+
 app.post("/review", async (req, res) => {
   try {
     const { code } = req.body;
-
-    if (!code) {
+    if (!code || !code.trim()) {
       return res.status(400).json({ error: "No code provided" });
     }
 
-    const prompt = `Analyze this code and return ONLY valid JSON (no markdown, no backticks). Use this exact shape:
+    if (!model) {
+      return res.json(simulated("GEMINI_API_KEY not configured."));
+    }
+
+    const prompt = `You are a senior software engineer reviewing DSA code.
+Analyze the code below and return ONLY valid JSON (no markdown, no backticks, no commentary) matching this exact shape:
 {
-  "errors": ["description of each bug or issue"],
-  "optimization": ["each optimization suggestion"],
-  "timeComplexity": "e.g. O(n)",
-  "spaceComplexity": "e.g. O(1)",
-  "improvedCode": "the full improved/refactored version of the code",
-  "score": 85
+  "errors": ["each bug, logic issue, or edge-case the code misses"],
+  "optimization": ["each concrete optimization or better approach"],
+  "timeComplexity": "Big-O time complexity, e.g. O(n log n)",
+  "spaceComplexity": "Big-O space complexity, e.g. O(1)",
+  "improvedCode": "a fully optimized/refactored version of the code as a string (keep newlines)",
+  "score": 0-100 integer rating the original code quality
 }
 
 Code to analyze:
 ${code}`;
 
-    const resultAI = await model.generateContent(prompt);
-    const response = await resultAI.response;
-    const text = response.text();
+    const aiResult = await model.generateContent(prompt);
+    const text = aiResult.response.text();
 
     let result;
     try {
-      // Clean up the response to ensure it's valid JSON (sometimes AI adds backticks)
-      const cleanedText = text.replace(/```json|```/g, "").trim();
-      const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
-      result = JSON.parse(jsonMatch ? jsonMatch[0] : cleanedText);
-    } catch (parseError) {
-      console.error("Failed to parse JSON:", text);
+      result = parseGeminiJson(text);
+    } catch (parseErr) {
+      console.error("Failed to parse Gemini JSON:", text);
       result = {
-        errors: ["Structural analysis inconclusive"],
-        optimization: ["Improve code readability"],
-        timeComplexity: "O(n)",
-        spaceComplexity: "O(n)",
+        errors: ["Structural analysis inconclusive — model returned unparseable output."],
+        optimization: ["Try re-running the analysis."],
+        timeComplexity: "Unknown",
+        spaceComplexity: "Unknown",
         improvedCode: text,
         score: 70
       };
     }
 
     res.json(result);
-
   } catch (err) {
-    console.error("⚠️ AI ERROR:", err);
-    
-    // Check for common errors (like invalid API key) to provide simulations
-    if (err.message?.includes("API key not valid") || err.message?.includes("not found")) {
-      return res.json({
-        errors: ["[Simulated] No critical architectural flaws found"],
-        optimization: ["[Simulated] Leverage functional patterns"],
-        timeComplexity: "O(n)",
-        spaceComplexity: "O(1)",
-        improvedCode: "// Review failed. Please check your API key.",
-        score: 85,
-        simulated: true
-      });
+    console.error("⚠️ GEMINI ERROR:", err?.message || err);
+
+    const msg = String(err?.message || "");
+    if (msg.includes("API key not valid") || msg.includes("API_KEY_INVALID")) {
+      return res.json(simulated("Invalid GEMINI_API_KEY."));
+    }
+    if (msg.includes("not found") || msg.includes("404")) {
+      return res.json(simulated("Gemini model not reachable from this key."));
     }
 
-    res.status(500).json({ error: "Gemini analysis failed" });
+    res.status(500).json({ error: "Gemini analysis failed: " + msg });
   }
 });
 
-/* ------------------ START SERVER ------------------ */
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Gemini review server running on http://localhost:${PORT}`);
 });

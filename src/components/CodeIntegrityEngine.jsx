@@ -159,9 +159,19 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
         body: JSON.stringify({ code })
       });
 
-      const data = await res.json();
+      const raw = await res.text();
+      let data;
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        throw new Error(
+          `Server did not return JSON (status ${res.status}). ` +
+          `Make sure the Express server is running on :3001 and restart \`npm run dev\` so Vite picks up the proxy. ` +
+          `First 120 chars of response: ${raw.slice(0, 120)}`
+        );
+      }
 
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.error || `Request failed with status ${res.status}`);
 
       // 🔥 Pass Gemini response directly — Analytics reads these fields
       setAnalysis(data);
