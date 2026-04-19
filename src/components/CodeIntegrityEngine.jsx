@@ -152,7 +152,7 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
     setError("");
 
     try {
-      const res = await fetch("/review", {
+      const res = await fetch("/api/review", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

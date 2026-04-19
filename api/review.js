@@ -17,7 +17,7 @@ const openai = new OpenAI({
 function simulated(reason) {
   return {
     errors: [`[Simulated] ${reason}`],
-    optimization: ["[Simulated] Add OPENAI_API_KEY to .env and restart the server."],
+    optimization: ["[Simulated] Add OPENAI_API_KEY to Vercel environment variables."],
     timeComplexity: "O(n)",
     spaceComplexity: "O(1)",
     improvedCode: "// Simulation response — configure OPENAI_API_KEY to get a real review.",
@@ -65,10 +65,9 @@ ${code}`;
   } catch (err) {
     console.error("⚠️ OPENAI ERROR:", err);
     
-    // Fallback if key is missing or API fails
     if (err.status === 401 || !process.env.OPENAI_API_KEY) {
       return res.json({
-        errors: ["[Fallback] Please configure your OPENAI_API_KEY in .env"],
+        errors: ["[Fallback] Please configure your OPENAI_API_KEY in Vercel settings"],
         optimization: ["[Simulated] Use efficient array methods"],
         timeComplexity: "O(n)",
         spaceComplexity: "O(1)",
@@ -82,7 +81,5 @@ ${code}`;
   }
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`🚀 Review server (OpenAI) running on http://localhost:${PORT}`);
-});
+// For Vercel, we export the app instance
+export default app;
