@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../supabaseclient.js";
 import { Analytics } from "./Analytics";
 import { UserProfile } from "./UserProfile.jsx";
+import { AnalysisLoader } from "./AnalysisLoader.jsx";
 
 const languageOptions = [
   {
@@ -199,6 +200,7 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
 
   return (
     <div className="engine-shell">
+      {status === "loading" && <AnalysisLoader />}
       <aside className="engine-sidebar">
         <button className="engine-logo" onClick={() => setActivePanel("dashboard")}>
           SAGE <small>v4.2</small>
