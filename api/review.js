@@ -26,7 +26,7 @@ function simulated(reason) {
   };
 }
 
-app.post("/api/review", async (req, res) => {
+app.post(["/api/review", "/"], async (req, res) => {
   try {
     const { code } = req.body;
     if (!code || !code.trim()) {
