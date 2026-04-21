@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../supabaseClient.js";
+import supabase from "../supabaseClient.js";
 import "../styles/login.css";
 
 export default function Logout() {

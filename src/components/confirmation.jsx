@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { supabase } from "../supabaseclient";
+import supabase from "../supabaseClient.js";
 import { useNavigate } from "react-router-dom";
 
 export default function Confirm() {
@@ -12,7 +12,7 @@ export default function Confirm() {
       // Increased delay to 3.5 seconds so user can read the success message
       setTimeout(() => {
         if (data.session) {
-          navigate("/"); 
+          navigate("/");
         } else {
           navigate("/login");
         }
@@ -23,12 +23,12 @@ export default function Confirm() {
   }, [navigate]);
 
   return (
-    <div style={{ 
+    <div style={{
       background: '#020305',
       height: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'center', 
+      alignItems: 'center',
       justifyContent: 'center',
       color: 'white',
       textAlign: 'center'
@@ -51,7 +51,7 @@ export default function Confirm() {
       </div>
       <h1 style={{ fontSize: '2.4rem', fontWeight: '900', marginBottom: '8px' }}>Identity Verified</h1>
       <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1.1rem' }}>Your account is now fully secured. Redirecting to terminal...</p>
-      
+
       <div style={{ marginTop: '40px' }} className="tire-loader"></div>
     </div>
   );

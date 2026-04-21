@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { supabase } from "../supabaseClient.js";
+import supabase from "../supabaseClient.js";
 import { Analytics } from "./Analytics";
 import { UserProfile } from "./UserProfile.jsx";
 import { AnalysisLoader } from "./AnalysisLoader.jsx";
