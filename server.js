@@ -11,6 +11,9 @@ app.use(cors());
 app.use(express.json({ limit: "2mb" }));
 
 console.log("GEMINI KEY:", process.env.GEMINI_API_KEY ? "Loaded ✅" : "Missing ❌");
+app.get("/", (req, res) => {
+  res.send("🚀 Code Review API is running");
+});
 
 app.post("/api/review", async (req, res) => {
   try {
