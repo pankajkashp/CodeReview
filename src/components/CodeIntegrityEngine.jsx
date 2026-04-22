@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import supabase from "../supabaseClient.js";
 import { Analytics } from "./Analytics";
 import { UserProfile } from "./UserProfile.jsx";
@@ -60,7 +60,7 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
   const [history, setHistory] = useState([]);
   const [activePanel, setActivePanel] = useState("dashboard");
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchTerm = "";
 
   const lineRailRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -83,7 +83,7 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
   };
 
   // ✅ FETCH HISTORY
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     if (!user) return;
     const { data, error } = await supabase
       .from("reviews")
@@ -92,7 +92,7 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
       .order("created_at", { ascending: false });
 
     if (!error) setHistory(data);
-  };
+  }, [user]);
 
   const deleteHistoryRecord = async (e, id) => {
     e.stopPropagation(); // prevent opening the record
@@ -110,7 +110,7 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
 
   useEffect(() => {
     fetchHistory();
-  }, [user]);
+  }, [fetchHistory]);
 
   // 🛡️ LANGUAGE VALIDATION
   const validateCode = (input, langId) => {
@@ -167,14 +167,14 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
       } catch {
         throw new Error(
           `Server did not return JSON (status ${res.status}). ` +
-          `Make sure the Express server is running on :3001 and restart \`npm run dev\` so Vite picks up the proxy. ` +
+          `Make sure the Express server is running on :3001 with \`npm run server\`, then restart \`npm run dev\` if you changed the proxy. ` +
           `First 120 chars of response: ${raw.slice(0, 120)}`
         );
       }
 
       if (!res.ok) throw new Error(data.error || `Request failed with status ${res.status}`);
 
-      // 🔥 Pass Gemini response directly — Analytics reads these fields
+      // Pass the Gemini response directly — Analytics reads these fields.
       setAnalysis(data);
       setStatus("complete");
       setActivePanel("analytics");

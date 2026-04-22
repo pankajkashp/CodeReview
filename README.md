@@ -52,7 +52,12 @@ The platform follows a strict **Red and Black** design language:
    GEMINI_API_KEY=your_gemini_api_key
    ```
 
-4. **Launch Dev Server:**
+4. **Launch the API server:**
+   ```bash
+   npm run server
+   ```
+
+5. **Launch Dev Server:**
    ```bash
    npm run dev
    ```

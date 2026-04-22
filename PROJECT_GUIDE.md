@@ -22,6 +22,7 @@ This guide maps the platform's architectural components for rapid maintenance an
   - **Terminal (Dashboard):** Real-time code entry and file imports.
   - **Intelligence (Analytics):** Interactive stats, AI refactoring, and PDF export.
   - **History:** Searchable audit trail of previous reviews with delete capability.
+- **API:** Posts code to `/api/review`, which is backed by Gemini through `GEMINI_API_KEY`.
 
 ### 4. Identity Terminal (`src/components/Profile.jsx`)
 - **Features:** 
@@ -60,5 +61,7 @@ This guide maps the platform's architectural components for rapid maintenance an
 ## ⚡ Maintenance Commands
 
 - **Local Build:** `npm run build`
+- **API Server:** `npm run server`
+- **Dev UI:** `npm run dev`
 - **Linting Check:** `npm run lint` (if configured)
 - **Environment Sync:** Always update `.env` with valid Gemini/Supabase keys.

@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { OpenAI } from "openai";
+import process from "node:process";
+import { analyzeCodeWithGemini, simulatedReview } from "./reviewService.js";
 
 dotenv.config();
 
@@ -9,80 +10,33 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "2mb" }));
 
-// Initialize OpenAI
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-function simulated(reason) {
-  return {
-    errors: [`[Simulated] ${reason}`],
-    optimization: ["[Simulated] Add OPENAI_API_KEY to .env and restart the server."],
-    timeComplexity: "O(n)",
-    spaceComplexity: "O(1)",
-    improvedCode: "// Simulation response — configure OPENAI_API_KEY to get a real review.",
-    score: 75,
-    simulated: true
-  };
-}
+console.log("GEMINI KEY:", process.env.GEMINI_API_KEY ? "Loaded ✅" : "Missing ❌");
 
 app.post("/api/review", async (req, res) => {
   try {
     const { code } = req.body;
+
     if (!code || !code.trim()) {
       return res.status(400).json({ error: "No code provided" });
     }
 
-    if (!process.env.OPENAI_API_KEY) {
-      return res.json(simulated("OPENAI_API_KEY not configured."));
+    if (!process.env.GEMINI_API_KEY) {
+      return res.json(simulatedReview("GEMINI_API_KEY missing"));
     }
 
-    const prompt = `You are a senior software engineer reviewing DSA code.
-Analyze the code below and return ONLY valid JSON (no markdown, no backticks, no commentary) matching this exact shape:
-{
-  "errors": ["each bug, logic issue, or edge-case the code misses"],
-  "optimization": ["each concrete optimization or better approach"],
-  "timeComplexity": "Big-O time complexity, e.g. O(n log n)",
-  "spaceComplexity": "Big-O space complexity, e.g. O(1)",
-  "improvedCode": "a fully optimized/refactored version of the code as a string (keep newlines)",
-  "score": 0-100 integer rating the original code quality
-}
+    const result = await analyzeCodeWithGemini(code);
+    return res.json(result);
 
-Code to analyze:
-${code}`;
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: "You are a senior software architect. Respond only with valid JSON." },
-        { role: "user", content: prompt }
-      ],
-      response_format: { type: "json_object" }
-    });
-
-    const result = JSON.parse(completion.choices[0].message.content);
-    res.json(result);
   } catch (err) {
-    console.error("⚠️ OPENAI ERROR:", err);
-    
-    // Fallback if key is missing or API fails
-    if (err.status === 401 || !process.env.OPENAI_API_KEY) {
-      return res.json({
-        errors: ["[Fallback] Please configure your OPENAI_API_KEY in .env"],
-        optimization: ["[Simulated] Use efficient array methods"],
-        timeComplexity: "O(n)",
-        spaceComplexity: "O(1)",
-        improvedCode: "// OpenAI integration error. Please check your key.",
-        score: 85,
-        simulated: true
-      });
-    }
+    console.error("❌ GEMINI ERROR:", err);
 
-    res.status(500).json({ error: "OpenAI analysis failed" });
+    return res.status(500).json({
+      error: err.message || "Gemini analysis failed"
+    });
   }
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = 3001;
 app.listen(PORT, () => {
-  console.log(`🚀 Review server (OpenAI) running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
