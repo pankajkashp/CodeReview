@@ -273,3 +273,15 @@
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: 34px 24px;
+    margin: 20px;
+    width: calc(100% - 40px);
+  }
+
+  .login-header h1 {
+    font-size: 1.5rem;
+  }
+}

@@ -873,30 +873,6 @@ mark {
   padding-top: 28px;
 }
 
-@media (max-width: 920px) {
-  .top-navigation {
-    grid-template-columns: 1fr auto;
-  }
-
-  .top-navigation nav {
-    display: none;
-  }
-
-  .analysis-grid,
-  .lower-console,
-  .intelligence,
-  .site-footer {
-    grid-template-columns: 1fr;
-  }
-
-  .capability-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .footer-columns {
-    justify-content: flex-start;
-  }
-}
 
 .engine-shell {
   background-image: 
@@ -2016,5 +1992,137 @@ mark {
     backdrop-filter: blur(4px);
     z-index: 99;
     animation: fadeIn 0.2s ease forwards;
+  }
+}
+
+/* ================= FINAL RESPONSIVE OVERRIDES ================= */
+
+@media (max-width: 920px) {
+  .engine-shell {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  .engine-sidebar {
+    position: sticky !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 70px !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    padding: 0 20px !important;
+    background: #040708 !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    z-index: 1000 !important;
+  }
+
+  .engine-sidebar:hover {
+    width: 100% !important;
+  }
+
+  .engine-sidebar nav {
+    flex-direction: row !important;
+    gap: 15px !important;
+    align-items: center !important;
+    width: auto !important;
+    display: flex !important;
+  }
+
+  .engine-sidebar nav button {
+    width: 44px !important;
+    height: 44px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    border: 1px solid rgba(255, 77, 77, 0.2) !important;
+  }
+
+  .nav-label, .engine-logo small {
+    display: none !important;
+  }
+
+  .engine-workspace {
+    width: 100% !important;
+    display: block !important;
+    padding: 0 !important;
+  }
+
+  .engine-topbar {
+    grid-template-columns: 1fr auto !important;
+    padding: 0 20px !important;
+    height: auto !important;
+    min-height: 60px !important;
+  }
+
+  .engine-brand strong {
+    font-size: 1rem !important;
+  }
+
+  .engine-main {
+    padding: 24px 15px !important;
+    width: 100% !important;
+  }
+
+  .engine-hero {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 30px !important;
+  }
+
+  .engine-hero h1 {
+    font-size: 2.5rem !important;
+    max-width: 100% !important;
+  }
+
+  .engine-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 12px !important;
+  }
+
+  .engine-actions button {
+    width: 100% !important;
+  }
+  
+  .engine-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+
+  .code-editor {
+    min-height: auto !important;
+  }
+
+  .editor-footer {
+    flex-direction: column !important;
+    padding: 20px !important;
+    gap: 15px !important;
+  }
+
+  .editor-footer button {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .metric-row {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .language-tabs {
+    grid-template-columns: repeat(2, 1fr) !important;
+    padding: 10px 10px 0 !important;
+  }
+
+  .language-tabs button {
+    height: 40px !important;
+    font-size: 0.65rem !important;
   }
 }

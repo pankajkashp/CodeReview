@@ -137,3 +137,17 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+@media (max-width: 480px) {
+  .orbit-1 {
+    width: 150px;
+    height: 150px;
+  }
+  .orbit-2 {
+    width: 200px;
+    height: 200px;
+  }
+  .hexagon-wrapper {
+    width: 80px;
+    height: 80px;
+  }
+}

@@ -94,7 +94,7 @@ export async function analyzeCodeWithGemini(code) {
         responseSchema: REVIEW_SCHEMA,
         temperature: 0.1
       },
-      systemInstruction: "You are a senior software architect. Analyze the code for bugs, optimization, and complexity. Respond ONLY with valid JSON."
+      systemInstruction: "You are a senior software architect. Analyze the code for bugs, optimization, and complexity. For the improvedCode field, provide well-formatted, indented code with appropriate newlines. Respond ONLY with valid JSON."
     });
 
     const prompt = `Analyze the following code for DSA integrity and optimization:\n\n${code}`;

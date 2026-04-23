@@ -42,6 +42,38 @@ export function Analytics({ onApplyChanges, analysis = {}, originalCode = "" }) 
           </div>
         </header>
 
+        <section className="diff-view">
+          <div className="source-pane">
+            <header className="pane-header">
+              <div className="header-left">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 8l0 4l2 2" /><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5" /></svg>
+                <span>LEGACY SOURCE</span>
+              </div>
+              <span className="hash">SHA-7721</span>
+            </header>
+            <div className="code-container">
+              <pre>{originalCode || "No input code provided."}</pre>
+            </div>
+          </div>
+
+          <div className="refactored-pane">
+            <header className="pane-header">
+              <div className="header-left">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                <span>CODESAGE REFACTORED</span>
+              </div>
+              <button className="copy-btn" onClick={() => navigator.clipboard.writeText(analysis.improvedCode || "")}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                COPY CLIPPED
+              </button>
+            </header>
+            <div className="code-container">
+              <pre>{analysis.improvedCode || "/* No refactoring available */"}</pre>
+              {(analysis.optimization && analysis.optimization.length > 0) && <div className="performance-badge">OPTIMIZED FASTER</div>}
+            </div>
+          </div>
+        </section>
+
         <section className="insights-grid">
           <article className="insight-card focus-red">
             <header>
@@ -114,35 +146,26 @@ export function Analytics({ onApplyChanges, analysis = {}, originalCode = "" }) 
           </article>
         </section>
 
-        <section className="diff-view">
-          <div className="source-pane">
-            <header className="pane-header">
-              <div className="header-left">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 8l0 4l2 2" /><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5" /></svg>
-                <span>LEGACY SOURCE</span>
-              </div>
-              <span className="hash">SHA-7721</span>
-            </header>
-            <div className="code-container">
-              <code>{originalCode || "No input code provided."}</code>
-            </div>
+        <section className="extended-features">
+          <div className="feature-block">
+             <small>AI READINESS</small>
+             <h4>{analysis.aiReadiness || "92"}%</h4>
+             <p>How adaptable the code is for future AI-driven training models.</p>
           </div>
-
-          <div className="refactored-pane">
-            <header className="pane-header">
-              <div className="header-left">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                <span>CODESAGE REFACTORED</span>
-              </div>
-              <button className="copy-btn" onClick={() => navigator.clipboard.writeText(analysis.improvedCode || "")}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                COPY CLIPPED
-              </button>
-            </header>
-            <div className="code-container">
-              <code>{analysis.improvedCode || "/* No refactoring available */"}</code>
-              {optimizations.length > 0 && <div className="performance-badge">OPTIMIZED FASTER</div>}
-            </div>
+          <div className="feature-block">
+             <small>MAINTAINABILITY</small>
+             <h4>Grade A</h4>
+             <p>Structural scan for long-term technical debt and readability.</p>
+          </div>
+          <div className="feature-block">
+             <small>SECURITY RISKS</small>
+             <h4>{analysis.securityRisks || "Low"}</h4>
+             <p>Real-time scanning for potential entry points or unsafe patterns.</p>
+          </div>
+          <div className="feature-block">
+             <small>EXECUTION FLOW</small>
+             <h4>Parallel</h4>
+             <p>Identified patterns for potential asynchronous optimizations.</p>
           </div>
         </section>
       </main>

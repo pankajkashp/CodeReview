@@ -181,8 +181,40 @@
 }
 
 @media (max-width: 850px) {
+  .profile-shell {
+    padding: 80px 20px 40px;
+  }
+
   .profile-container {
     grid-template-columns: 1fr;
     gap: 40px;
+  }
+
+  .profile-sidebar {
+    align-items: center;
+  }
+
+  .profile-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .back-link {
+    top: 20px;
+    left: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-card, .history-card {
+    padding: 24px;
+  }
+
+  .history-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
 }
