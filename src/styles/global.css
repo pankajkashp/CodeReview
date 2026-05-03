@@ -26,9 +26,9 @@
   position: absolute;
   width: 200%;
   height: 200%;
-  background-image: radial-gradient(#ffffff 1.5px, transparent 1.5px);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.45) 1.2px, transparent 1.2px);
   background-size: 30px 30px;
-  opacity: 0.18;
+  opacity: 0.22;
   animation: moveStars 40s linear infinite;
 }
 
@@ -37,9 +37,9 @@
   position: absolute;
   width: 200%;
   height: 200%;
-  background-image: radial-gradient(#ffffff 2.2px, transparent 2.2px);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.3) 1.8px, transparent 1.8px);
   background-size: 80px 80px;
-  opacity: 0.12;
+  opacity: 0.18;
   animation: moveStars 25s linear infinite;
 }
 
@@ -115,7 +115,7 @@ button {
 }
 
 .site-shell {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(255, 77, 77, 0.1) 1px, transparent 1px);
   background-size: 32px 32px;
   min-height: 100vh;
   overflow: hidden;
@@ -877,7 +877,7 @@ mark {
 .engine-shell {
   background-image: 
     radial-gradient(circle at 46% 7%, rgba(255, 77, 77, 0.09), transparent 24rem),
-    radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    radial-gradient(rgba(255, 77, 77, 0.1) 1px, transparent 1px);
   background-color: #030405;
   background-size: 100% 100%, 32px 32px;
 
@@ -1282,7 +1282,7 @@ mark {
 
 .code-input-frame {
   background:
-    radial-gradient(circle, rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
     linear-gradient(180deg, rgba(65, 220, 255, 0.03), rgba(0, 0, 0, 0));
   background-size: 16px 16px, 100% 100%;
   display: grid;
