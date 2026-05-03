@@ -1,6 +1,11 @@
 .preloader-overlay {
   position: fixed;
-  inset: 0;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 74%;
+  max-width: 1440px;
   background-color: #05070a;
   background-image: radial-gradient(rgba(255, 77, 77, 0.1) 1px, transparent 1px);
   background-size: 32px 32px;
@@ -11,6 +16,15 @@
   z-index: 9999;
   transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   opacity: 1;
+  mask-image: linear-gradient(to right, transparent, black 60px, black calc(100% - 60px), transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 60px, black calc(100% - 60px), transparent);
+}
+
+@media (max-width: 1100px) {
+  .preloader-overlay {
+    width: 100%;
+    max-width: none;
+  }
 }
 
 .preloader-overlay.exit {

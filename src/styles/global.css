@@ -81,14 +81,28 @@
   100% { transform: translate(600px, -600px) rotate(45deg) scale(0.5); opacity: 0; }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.app-root-animate {
+  width: 74%;
+  max-width: 1440px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+  background: #020305;
+  box-shadow: 0 0 150px rgba(0, 0, 0, 1), 0 0 60px rgba(255, 77, 77, 0.02);
+  mask-image: linear-gradient(to right, transparent, black 60px, black calc(100% - 60px), transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 60px, black calc(100% - 60px), transparent);
 }
 
+@media (max-width: 1100px) {
+  .app-root-animate {
+    width: 100%;
+    max-width: none;
+  }
+}
 
 html {
   scroll-behavior: smooth;
+  background: #000;
 }
 
 body {
@@ -127,12 +141,21 @@ button {
   align-items: center;
   display: flex;
   justify-content: space-between;
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 74%;
+  max-width: 1440px;
   padding: 14px clamp(18px, 4vw, 48px);
   position: fixed;
-  right: 0;
   top: 0;
   z-index: 20;
+}
+
+@media (max-width: 1100px) {
+  .top-navigation {
+    width: 100%;
+    max-width: none;
+  }
 }
 
 .brand,
@@ -880,11 +903,14 @@ mark {
     radial-gradient(rgba(255, 77, 77, 0.1) 1px, transparent 1px);
   background-color: #030405;
   background-size: 100% 100%, 32px 32px;
-
   color: #f5f7fb;
-  display: grid;
-  grid-template-columns: 125px minmax(0, 1fr);
+  display: block;
   min-height: 100vh;
+}
+
+.engine-shell.no-sidebar .engine-workspace {
+  grid-column: 1 / -1;
+  width: 100%;
 }
 
 .engine-sidebar {
@@ -1021,12 +1047,19 @@ mark {
 }
 
 .engine-back {
-  background: transparent;
-  color: rgba(245, 247, 251, 0.78);
+  background: rgba(255, 77, 77, 0.05);
+  border: 1px solid rgba(255, 77, 77, 0.2);
+  color: #ff4d4d;
   font-size: 0.72rem;
   margin-top: auto;
-  border: 1px dashed rgba(255, 255, 255, 0.1);
   padding-left: 17px;
+  transition: all 0.3s ease;
+}
+
+.engine-back:hover {
+  background: rgba(255, 77, 77, 0.15);
+  border-color: #ff4d4d;
+  color: #ffffff;
 }
 
 .engine-workspace {
@@ -1693,6 +1726,11 @@ mark {
   font-family: "Courier New", monospace;
   font-size: 0.9rem;
   line-height: 1.65;
+}
+
+.active-menu {
+  color: #ff4d4d !important;
+  background: rgba(255, 77, 77, 0.1) !important;
 }
 
 @media (max-width: 1050px) {

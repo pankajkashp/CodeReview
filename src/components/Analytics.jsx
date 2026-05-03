@@ -1,7 +1,7 @@
 import React from "react";
 import "../styles/analytics.css";
 
-export function Analytics({ onApplyChanges, analysis = {}, originalCode = "" }) {
+export function Analytics({ onApplyChanges, analysis = {}, originalCode = "", onExit }) {
   const bugs = Array.isArray(analysis.errors) ? analysis.errors : (Array.isArray(analysis.bugs) ? analysis.bugs : []);
   const optimizations = Array.isArray(analysis.optimization) ? analysis.optimization : [];
   const complexityDetails = [

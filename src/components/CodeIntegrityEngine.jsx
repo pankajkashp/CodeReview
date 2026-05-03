@@ -199,41 +199,8 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
   }
 
   return (
-    <div className="engine-shell">
+    <div className="engine-shell no-sidebar">
       {status === "loading" && <AnalysisLoader />}
-      <aside className="engine-sidebar">
-        <button className="engine-logo" onClick={() => setActivePanel("dashboard")}>
-          SAGE <small>v4.2</small>
-        </button>
-
-        <nav>
-          <button
-            className={activePanel === "dashboard" ? "active" : ""}
-            onClick={() => setActivePanel("dashboard")}
-          >
-            <div className="dashboard-icon">
-              <span></span><span></span><span></span><span></span>
-            </div>
-            <span className="nav-label">Dashboard</span>
-          </button>
-          <button
-            className={activePanel === "history" ? "active" : ""}
-            onClick={() => setActivePanel("history")}
-          >
-            <svg className="svg-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="nav-label">History</span>
-          </button>
-        </nav>
-
-        <button className="engine-back" onClick={onBack}>
-          <svg className="svg-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M19 12H5m7 7l-7-7 7-7" />
-          </svg>
-          <span className="nav-label">Exit Engine</span>
-        </button>
-      </aside>
 
       <section className="engine-workspace">
         <header className="engine-topbar">
@@ -242,7 +209,13 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
             <span>CORE ENGINE v4.2</span>
           </div>
           <div className="engine-icons" style={{ marginLeft: 'auto' }}>
-            <UserProfile user={user} onLogout={onLogout} />
+            <UserProfile 
+              user={user} 
+              onLogout={onLogout} 
+              onBack={onBack}
+              setActivePanel={setActivePanel}
+              activePanel={activePanel}
+            />
           </div>
 
         </header>
@@ -252,6 +225,7 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
             analysis={analysis}
             originalCode={code}
             onApplyChanges={() => setActivePanel("dashboard")}
+            onExit={onBack}
           />
         ) : (
           <main className="engine-main">
