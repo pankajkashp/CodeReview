@@ -156,3 +156,5 @@ export function UserProfile({ user, onLogout, onBack, setActivePanel, activePane
     </div>
   );
 }
+
+

@@ -147,7 +147,8 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
   };
 
   // 🚀 ANALYZE FUNCTION
-  async function analyzeCode() {
+  async function analyzeCode(codeToAnalyze = null) {
+    const targetCode = codeToAnalyze || code;
     setStatus("loading");
     setError("");
 
@@ -157,7 +158,7 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ code })
+        body: JSON.stringify({ code: targetCode })
       });
 
       const raw = await res.text();
@@ -226,6 +227,11 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
             originalCode={code}
             onApplyChanges={() => setActivePanel("dashboard")}
             onExit={onBack}
+            onAnalyze={(newCode) => {
+              setCode(newCode);
+              analyzeCode(newCode);
+            }}
+            onBackToDashboard={() => setActivePanel("dashboard")}
           />
         ) : (
           <main className="engine-main">

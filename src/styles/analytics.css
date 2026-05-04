@@ -579,6 +579,130 @@
   margin: 0;
 }
 
+.complexity-comparison-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.complexity-item {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.comp-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #ff4d4d;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+}
+
+.comp-values {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.val-old, .val-new {
+  display: flex;
+  flex-direction: column;
+}
+
+.val-old small, .val-new small {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #4b5563;
+  margin-bottom: 2px;
+}
+
+.val-old span {
+  font-size: 0.95rem;
+  color: #8c9096;
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.val-new span {
+  font-size: 0.95rem;
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(255, 77, 77, 0.3);
+}
+
+.arrow {
+  color: #ff4d4d;
+  font-size: 1.2rem;
+  font-weight: 300;
+  opacity: 0.5;
+}
+
+.alert-placeholder {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-style: italic;
+  padding: 20px;
+  text-align: center;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.legacy-editor {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  background: transparent;
+  border: none;
+  color: #8c9096;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+  padding: 0;
+}
+
+.legacy-editor::placeholder {
+  color: #4b5563;
+  font-style: italic;
+}
+
+.reanalyze-btn {
+  background: rgba(255, 77, 77, 0.1);
+  color: #ff4d4d;
+  border: 1px solid rgba(255, 77, 77, 0.2);
+  padding: 6px 14px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.reanalyze-btn:hover {
+  background: #ff4d4d;
+  color: #000;
+  box-shadow: 0 0 15px rgba(255, 77, 77, 0.4);
+}
+
+.reanalyze-btn svg {
+  transition: transform 0.5s ease;
+}
+
+.reanalyze-btn:hover svg {
+  transform: rotate(180deg);
+}
+
 @media (max-width: 1024px) {
   .analytics-topbar {
     padding: 0 20px;

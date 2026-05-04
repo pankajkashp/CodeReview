@@ -1,15 +1,16 @@
 import React from "react";
 import "../styles/analytics.css";
 
-export function Analytics({ onApplyChanges, analysis = {}, originalCode = "", onExit }) {
+export function Analytics({ onApplyChanges, analysis = {}, originalCode = "", onExit, onAnalyze, onBackToDashboard }) {
+  const [editableCode, setEditableCode] = React.useState(originalCode);
+  
   const bugs = Array.isArray(analysis.errors) ? analysis.errors : (Array.isArray(analysis.bugs) ? analysis.bugs : []);
   const optimizations = Array.isArray(analysis.optimization) ? analysis.optimization : [];
-  const complexityDetails = [
-    analysis.timeComplexity && `Time: ${analysis.timeComplexity}`,
-    analysis.spaceComplexity && `Space: ${analysis.spaceComplexity}`,
-    ...(Array.isArray(analysis.complexity) ? analysis.complexity : [])
-  ].filter(Boolean);
-  
+  const complexities = [
+    { label: "Time", old: analysis.oldTimeComplexity, new: analysis.newTimeComplexity, icon: "M12 8l0 4l2 2" },
+    { label: "Space", old: analysis.oldSpaceComplexity, new: analysis.newSpaceComplexity, icon: "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" }
+  ].filter(c => c.old || c.new);
+
   const codeScore = analysis.score || analysis.codeScore || "94";
 
   return (
@@ -47,12 +48,20 @@ export function Analytics({ onApplyChanges, analysis = {}, originalCode = "", on
             <header className="pane-header">
               <div className="header-left">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 8l0 4l2 2" /><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5" /></svg>
-                <span>LEGACY SOURCE</span>
+                <span>LEGACY SOURCE (EDITABLE)</span>
               </div>
-              <span className="hash">SHA-7721</span>
+              <button className="reanalyze-btn" onClick={() => onAnalyze(editableCode)}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 12c0-4.4 3.6-8 8-8 3.3 0 6.1 2 7.3 4.9M22 12c0 4.4-3.6 8-8 8-3.3 0-6.1-2-7.3-4.9"/></svg>
+                RE-ANALYZE
+              </button>
             </header>
             <div className="code-container">
-              <pre>{originalCode || "No input code provided."}</pre>
+              <textarea 
+                className="legacy-editor"
+                value={editableCode}
+                onChange={(e) => setEditableCode(e.target.value)}
+                placeholder="Paste new code here to re-analyze..."
+              />
             </div>
           </div>
 
@@ -126,23 +135,33 @@ export function Analytics({ onApplyChanges, analysis = {}, originalCode = "", on
                   <polygon points="12 2 2 22 22 22"></polygon>
                 </svg>
               </div>
-              <span className="count">{String(complexityDetails.length).padStart(2, '0')}</span>
+              <span className="count">{String(complexities.length).padStart(2, '0')}</span>
             </header>
             <h3>Complexity Analysis</h3>
-            <p>Stylistic adjustments and logic simplifications identified.</p>
-            <ul className="check-list">
-              {complexityDetails.length > 0 ? complexityDetails.map((item, idx) => (
-                <li key={idx}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
-                  {item}
-                </li>
+            <p>Efficiency gains identified through algorithmic refactoring.</p>
+            <div className="complexity-comparison-list">
+              {complexities.length > 0 ? complexities.map((c, idx) => (
+                <div key={idx} className="complexity-item">
+                  <div className="comp-header">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d={c.icon} /></svg>
+                    <span>{c.label}</span>
+                  </div>
+                  <div className="comp-values">
+                    <div className="val-old">
+                      <small>OLDER</small>
+                      <span>{c.old}</span>
+                    </div>
+                    <div className="arrow">→</div>
+                    <div className="val-new">
+                      <small>NEWER</small>
+                      <span>{c.new}</span>
+                    </div>
+                  </div>
+                </div>
               )) : (
-                <li>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
-                  Maintainable logic threshold met
-                </li>
+                <div className="alert-placeholder">Maintainable logic threshold met</div>
               )}
-            </ul>
+            </div>
           </article>
         </section>
 
@@ -189,7 +208,7 @@ export function Analytics({ onApplyChanges, analysis = {}, originalCode = "", on
           </div>
         </div>
         <div className="footer-actions">
-          <button className="outline-btn" onClick={() => window.print()}>EXPORT PDF</button>
+          <button className="outline-btn" onClick={onBackToDashboard}>BACK TO DASHBOARD</button>
           <button className="primary-btn pulse" onClick={onApplyChanges}>APPLY ALL CHANGES</button>
         </div>
       </footer>

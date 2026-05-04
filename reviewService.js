@@ -12,16 +12,20 @@ const REVIEW_SCHEMA = {
       type: SchemaType.ARRAY,
       items: { type: SchemaType.STRING }
     },
-    timeComplexity: { type: SchemaType.STRING },
-    spaceComplexity: { type: SchemaType.STRING },
+    oldTimeComplexity: { type: SchemaType.STRING },
+    newTimeComplexity: { type: SchemaType.STRING },
+    oldSpaceComplexity: { type: SchemaType.STRING },
+    newSpaceComplexity: { type: SchemaType.STRING },
     improvedCode: { type: SchemaType.STRING },
     score: { type: SchemaType.INTEGER }
   },
   required: [
     "errors",
     "optimization",
-    "timeComplexity",
-    "spaceComplexity",
+    "oldTimeComplexity",
+    "newTimeComplexity",
+    "oldSpaceComplexity",
+    "newSpaceComplexity",
     "improvedCode",
     "score"
   ]
@@ -31,8 +35,10 @@ function normalizeReviewResult(result) {
   return {
     errors: Array.isArray(result.errors) ? result.errors.map(String) : [],
     optimization: Array.isArray(result.optimization) ? result.optimization.map(String) : [],
-    timeComplexity: typeof result.timeComplexity === "string" ? result.timeComplexity : "Unknown",
-    spaceComplexity: typeof result.spaceComplexity === "string" ? result.spaceComplexity : "Unknown",
+    oldTimeComplexity: typeof result.oldTimeComplexity === "string" ? result.oldTimeComplexity : (typeof result.timeComplexity === "string" ? result.timeComplexity : "Unknown"),
+    newTimeComplexity: typeof result.newTimeComplexity === "string" ? result.newTimeComplexity : (typeof result.timeComplexity === "string" ? result.timeComplexity : "Unknown"),
+    oldSpaceComplexity: typeof result.oldSpaceComplexity === "string" ? result.oldSpaceComplexity : (typeof result.spaceComplexity === "string" ? result.spaceComplexity : "Unknown"),
+    newSpaceComplexity: typeof result.newSpaceComplexity === "string" ? result.newSpaceComplexity : (typeof result.spaceComplexity === "string" ? result.spaceComplexity : "Unknown"),
     improvedCode: typeof result.improvedCode === "string" ? result.improvedCode : "",
     score: Number.isFinite(Number(result.score)) ? Math.max(0, Math.min(100, Math.round(Number(result.score)))) : 0
   };
@@ -42,8 +48,10 @@ function createSimulatedReview(reason) {
   return {
     errors: [`[Simulated] ${reason}`],
     optimization: ["[Simulated] Configure GEMINI_API_KEY to get a real review."],
-    timeComplexity: "O(n)",
-    spaceComplexity: "O(1)",
+    oldTimeComplexity: "O(n²)",
+    newTimeComplexity: "O(n)",
+    oldSpaceComplexity: "O(n)",
+    newSpaceComplexity: "O(1)",
     improvedCode: "// Simulation response — configure GEMINI_API_KEY to get a real review.",
     score: 75,
     simulated: true
@@ -94,10 +102,10 @@ export async function analyzeCodeWithGemini(code) {
         responseSchema: REVIEW_SCHEMA,
         temperature: 0.1
       },
-      systemInstruction: "You are a senior software architect. Analyze the code for bugs, optimization, and complexity. For the improvedCode field, provide well-formatted, indented code with appropriate newlines. Respond ONLY with valid JSON."
+      systemInstruction: "You are a senior software architect. Analyze the code for bugs, optimization, and complexity. Identify both the original (older) complexity and the new (optimized) complexity. For the improvedCode field, provide well-formatted, indented code with appropriate newlines. Respond ONLY with valid JSON."
     });
 
-    const prompt = `Analyze the following code for DSA integrity and optimization:\n\n${code}`;
+    const prompt = `Analyze the following code for DSA integrity and optimization. Provide the original time/space complexity and the new optimized time/space complexity:\n\n${code}`;
 
     // Try up to 2 times for each model
     for (let i = 0; i < 2; i++) {
