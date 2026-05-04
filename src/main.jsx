@@ -16,6 +16,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <Route path="/logout" element={<Logout />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/confirm" element={<Confirm />} />
+      <Route path="/about" element={<App />} />
       <Route path="/dashboard" element={<App />} />
     </Routes>
 

@@ -6,6 +6,7 @@ import { CodeIntegrityEngine } from "./components/CodeIntegrityEngine.jsx";
 import { Hero } from "./components/Hero.jsx";
 import { TopNavigation } from "./components/TopNavigation.jsx";
 import { Preloader } from "./components/Preloader.jsx";
+import { About } from "./components/About.jsx";
 
 export default function App() {
   const navigate = useNavigate();
@@ -22,10 +23,6 @@ export default function App() {
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setUser(session?.user || null);
-
-        if (session?.user && location.pathname === "/") {
-          navigate("/dashboard");
-        }
 
         if (!session?.user && location.pathname === "/dashboard") {
           navigate("/");
@@ -71,7 +68,12 @@ export default function App() {
               onLogout={() => navigate("/logout")}
             />
           ) : (
-            <div className="site-shell" style={{ height: "100vh", overflow: "hidden", position: 'relative' }}>
+            <div className="site-shell" style={{ 
+              minHeight: "100vh", 
+              height: location.pathname === "/about" ? "auto" : "100vh",
+              overflowY: location.pathname === "/about" ? "auto" : "hidden", 
+              position: 'relative' 
+            }}>
               {/* 🌌 BACKGROUND STARS FOR LANDING */}
               <div className="stars"></div>
               <div className="shooting-stars">
@@ -86,7 +88,11 @@ export default function App() {
                 onLogout={() => navigate("/logout")}
               />
 
-              <Hero onLaunch={handleLaunchEngine} />
+              {location.pathname === "/about" ? (
+                <About onBack={() => navigate("/")} />
+              ) : (
+                <Hero onLaunch={handleLaunchEngine} />
+              )}
             </div>
           )}
 

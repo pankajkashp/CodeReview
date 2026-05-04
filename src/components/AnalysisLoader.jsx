@@ -24,17 +24,17 @@ export function AnalysisLoader() {
 
   return (
     <div className="analysis-loader-overlay">
-      <div className="orbit orbit-1"></div>
-      <div className="orbit orbit-2"></div>
-      
       <div className="analysis-loader-content">
+        <div className="orbit orbit-1"></div>
+        <div className="orbit orbit-2"></div>
+        
         <div className="hexagon-wrapper">
           <div className="hexagon"></div>
           <div className="hexagon-inner"></div>
           <div className="scan-line"></div>
         </div>
         
-        <div style={{ textAlign: 'center', zIndex: 10 }}>
+        <div className="loader-text-container">
           <div className="loader-status-text">
             {statusMessages[messageIndex]}
           </div>

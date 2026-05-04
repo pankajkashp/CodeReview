@@ -148,7 +148,8 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
 
   // 🚀 ANALYZE FUNCTION
   async function analyzeCode(codeToAnalyze = null) {
-    const targetCode = codeToAnalyze || code;
+    // 🛡️ Fix: Ensure we don't accidentally try to stringify a React event object
+    const targetCode = (typeof codeToAnalyze === 'string' && codeToAnalyze) ? codeToAnalyze : code;
     setStatus("loading");
     setError("");
 
@@ -265,7 +266,7 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                   </div>
                 </section>
 
-                <section className="engine-grid">
+                <section className="engine-grid" style={{ gridTemplateColumns: '1fr' }}>
                   <article className="code-editor">
                     <div className="language-tabs">
                       {languageOptions.map(lang => (
@@ -343,52 +344,53 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                     </footer>
                   </article>
 
-                  <aside className="engine-panel-stack">
-                    <article className="live-panel">
-                      <h2>Live Intelligence</h2>
+                  {/* 📡 Live Intelligence Horizontal Bar */}
+                  <article className="live-panel horizontal-intelligence" style={{ gridColumn: '1 / -1', marginTop: '24px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                      <h2 style={{ margin: 0 }}>Live Intelligence</h2>
+                      <div className="engine-status-badge" style={{ 
+                        background: 'rgba(255, 77, 77, 0.1)', 
+                        padding: '4px 12px', 
+                        borderRadius: '20px',
+                        fontSize: '0.65rem',
+                        fontWeight: '800',
+                        color: '#ff4d4d',
+                        letterSpacing: '1px'
+                      }}>
+                        {status.toUpperCase()}
+                      </div>
+                    </div>
 
-                      <div>
+                    <div className="intelligence-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+                      <div className="intel-item">
                         <strong>Engine Status</strong>
-                        <p className={status === "loading" ? "" : "muted"}>
+                        <p className={status === "loading" ? "pulse-text" : "muted"}>
                           {status === "loading" ? "Neural analysis in progress..." : "Standing by for input..."}
                         </p>
                       </div>
 
                       {error && (
-                        <div className="analysis-error" style={{ borderLeft: '3px solid #ff4d4d' }}>
-                          <strong>System Alert</strong>
-
+                        <div className="intel-item error" style={{ borderLeft: '2px solid #ff4d4d', paddingLeft: '15px' }}>
+                          <strong style={{ color: '#ff4d4d' }}>System Alert</strong>
                           <p>{error}</p>
                         </div>
                       )}
 
                       {analysis?.simulated && (
-                        <div className="analysis-notice">
-                          <strong>Simulation Active</strong>
-                          <p>Running in offline mode due to API configuration issues. Results are simulated.</p>
+                        <div className="intel-item warn" style={{ borderLeft: '2px solid #8a55ff', paddingLeft: '15px' }}>
+                          <strong style={{ color: '#8a55ff' }}>Simulation Active</strong>
+                          <p>Results are simulated due to offline mode.</p>
                         </div>
                       )}
 
                       {!error && status === "idle" && (
-                        <div>
-                          <strong>Ready</strong>
-                          <p>Upload or paste code to begin.</p>
+                        <div className="intel-item">
+                          <strong>Readiness</strong>
+                          <p>Neural core synchronized. Ready for code input.</p>
                         </div>
                       )}
-                    </article>
-
-                    <article className="model-panel">
-                      <div className="model-orbit">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                      </div>
-                      <div>
-                        <h2>K-Core v4.2</h2>
-                        <p>ACTIVE MODEL</p>
-                      </div>
-                    </article>
-                  </aside>
+                    </div>
+                  </article>
                 </section>
               </>
             )}
