@@ -1,81 +1,120 @@
-# ◊ CodeSage | Crimson & Carbon
+# ◊ CodeSage — AI Code Intelligence Engine
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/pankajkashp/CodeReview/main/public/favicon.svg" width="120" />
+  <img src="https://raw.githubusercontent.com/pankajkashp/CodeReview/main/public/favicon.svg" width="120"/>
 </p>
 
-<h2 align="center">AI-Powered Code Intelligence Engine</h2>
+<h2 align="center">Deep Logic. Real Intelligence.</h2>
 
 <p align="center">
-  <b>Scan. Refactor. Optimize.</b><br/>
-  Enterprise-grade code review for developers who value perfection.
+  <b>Scan • Refactor • Optimize</b><br/>
+  AI-powered code analysis built for developers who care about architecture.
+</p>
+
+<p align="center">
+  <a href="https://www.codesage.tech"><b>🌐 Live Demo</b></a> • 
+  <a href="https://github.com/pankajkashp/CodeReview"><b>📦 Repo</b></a>
 </p>
 
 ---
 
-## 🔥 Live Product Preview
+## ⚡ What is CodeSage?
+
+CodeSage is not another syntax checker.
+
+It is an **AI-powered architecture review engine** that analyzes your code for:
+- structural flaws
+- hidden inefficiencies
+- real-world performance issues
+
+> Built to think like a senior engineer — not a linter.
+
+---
+
+## 🔥 Product Showcase
 
 ### 🧠 Landing Experience
-![Landing](./screenshots/landing.png)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/pankajkashp/CodeReview/main/public/screenshots/landing.png" width="900"/>
+</p>
 
 ---
 
-### ⚡ Code Analysis Engine
-![Editor](./screenshots/editor.png)
+### ⚡ Code Analysis Workspace
+<p align="center">
+  <img src="https://raw.githubusercontent.com/pankajkashp/CodeReview/main/public/screenshots/editor.png" width="900"/>
+</p>
 
 ---
 
-### 🔍 Processing State (AI Engine Running)
-![Processing](./screenshots/processing.png)
+### 🔍 AI Processing Engine
+<p align="center">
+  <img src="https://raw.githubusercontent.com/pankajkashp/CodeReview/main/public/screenshots/processing.png" width="700"/>
+</p>
 
 ---
 
-### 📊 Structural Optimization Results
-![Results](./screenshots/results.png)
+### 📊 Optimization Results Dashboard
+<p align="center">
+  <img src="https://raw.githubusercontent.com/pankajkashp/CodeReview/main/public/screenshots/results.png" width="900"/>
+</p>
 
 ---
 
-## 🛠 Features
+## 🧠 Core Capabilities
 
 ### 🔴 Deep Logic Analysis
-- AI scans code for structural flaws
-- Detects inefficiencies & hidden bugs
+- Detects architectural issues (not just syntax)
+- Identifies performance bottlenecks
+- Finds hidden bugs & edge cases
+
+---
 
 ### ⚡ AI Refactoring Engine
-- One-click improved code generation
-- Clean, optimized, production-ready output
+- Generates optimized code instantly
+- Cleaner, safer, production-ready logic
+- Improves readability + maintainability
 
-### 📂 Multi Input System
-- Paste code
-- Upload files
-- Track previous sessions
+---
 
-### 📊 Visual Intelligence Dashboard
+### 📊 Intelligence Dashboard
 - Code score (0–100)
-- Bug detection
+- Bug detection count
 - Optimization insights
 - Execution flow analysis
 
-### 📄 Export System
-- Generate professional audit reports
+---
 
-### 🔐 Authentication Layer
-- Supabase-powered login system
-- Secure user sessions & history
+### 📂 Multi-Input System
+- Paste code
+- Upload files
+- Session history tracking
+
+---
+
+### 🔐 Authentication System
+- Supabase-powered login
+- User-specific analysis history
+
+---
+
+### 📄 Export Reports
+- Professional PDF audit reports
+- Shareable analysis outputs
 
 ---
 
 ## 🎨 Design Philosophy — *Crimson & Carbon*
 
-> Built like a **developer command center**, not a basic web app.
+> Not built like a website — built like a **command center**
 
 - 🔴 Primary: `#ff4d4d`
 - ⚫ Background: `#05070a`
-- 💡 Style:
+- ✨ Effects:
   - Glassmorphism UI
-  - Neon glow accents
-  - Motion-based interactions
-  - Infinite marquee data streams
+  - Neon glow system
+  - Motion-based transitions
+  - Infinite data streams
 
 ---
 
@@ -87,13 +126,13 @@
 | Backend      | Node.js |
 | AI Engine    | Google Gemini |
 | Auth & DB    | Supabase |
-| Styling      | Custom CSS (Glass + Motion UI) |
+| Styling      | Custom CSS (Cinematic UI) |
 
 ---
 
 ## 🚀 Getting Started
 
-### 1. Clone Project
+### 1. Clone
 ```bash
 git clone https://github.com/pankajkashp/CodeReview.git
 cd CodeReview
