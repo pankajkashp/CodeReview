@@ -1,85 +1,99 @@
 # ◊ CodeSage | Crimson & Carbon
 
-![Favicon](https://raw.githubusercontent.com/pankajkashp/CodeReview/main/public/favicon.svg)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/pankajkashp/CodeReview/main/public/favicon.svg" width="120" />
+</p>
 
-> **Enterprise-grade code integrity engine for developers who value perfection.**
+<h2 align="center">AI-Powered Code Intelligence Engine</h2>
 
-CodeSage is a high-performance, AI-driven architectural review platform designed to scan, refactor, and master your source code in seconds. Built with a high-contrast cinematic aesthetic, it provides deep intelligence on code structure, security, and optimization.
+<p align="center">
+  <b>Scan. Refactor. Optimize.</b><br/>
+  Enterprise-grade code review for developers who value perfection.
+</p>
+
+---
+
+## 🔥 Live Product Preview
+
+### 🧠 Landing Experience
+![Landing](./screenshots/landing.png)
+
+---
+
+### ⚡ Code Analysis Engine
+![Editor](./screenshots/editor.png)
+
+---
+
+### 🔍 Processing State (AI Engine Running)
+![Processing](./screenshots/processing.png)
+
+---
+
+### 📊 Structural Optimization Results
+![Results](./screenshots/results.png)
 
 ---
 
 ## 🛠 Features
 
-- **🔴 Red Alert Analytics**: High-impact visual feedback on code metrics and health scores.
-- **⚡ AI Refactoring**: One-click code optimization powered by Google Gemini 1.5 Flash.
-- **📂 Multi-Input Core**: Support for local file imports, manual entry, and real-time history tracking.
-- **📄 Export Suite**: Professional PDF reporting for architectural audits.
-- **🔐 Secure Console**: Modal-based authentication with Supabase for personalized session history.
+### 🔴 Deep Logic Analysis
+- AI scans code for structural flaws
+- Detects inefficiencies & hidden bugs
 
-## 🎨 Aesthetic: Crimson & Carbon
+### ⚡ AI Refactoring Engine
+- One-click improved code generation
+- Clean, optimized, production-ready output
 
-The platform follows a strict **Red and Black** design language:
-- **Primary Color:** `#ff4d4d` (Crimson Red)
-- **Background:** `#05070a` (Carbon Black)
-- **Typography:** Inter & Monospace for a technical, industrial feel.
-- **FX:** Glassmorphism, pulse animations, and dual-row infinite scrolling marquees.
+### 📂 Multi Input System
+- Paste code
+- Upload files
+- Track previous sessions
 
-## 🚀 Getting Started
+### 📊 Visual Intelligence Dashboard
+- Code score (0–100)
+- Bug detection
+- Optimization insights
+- Execution flow analysis
 
-### Prerequisites
-- Node.js (v18+)
-- Supabase Account
-- Google Gemini API Key
+### 📄 Export System
+- Generate professional audit reports
 
-### Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/pankajkashp/CodeReview.git
-   cd CodeReview
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Configure Environment:**
-   Create a `.env` file in the root:
-   ```env
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   GEMINI_API_KEY=your_gemini_api_key
-   ```
-
-4. **Launch the API server:**
-   ```bash
-   npm run server
-   ```
-
-5. **Launch Dev Server:**
-   ```bash
-   npm run dev
-   ```
-
-## 🗺 Project Structure
-
-```text
-src/
-├── components/
-│   ├── CodeIntegrityEngine.jsx  # Main workspace
-│   ├── Analytics.jsx            # Result visualization
-│   ├── AuthModal.jsx            # Styled login/signup
-│   └── Hero.jsx                 # Landing experience
-├── styles/
-│   ├── global.css               # Core theme variables
-│   └── analytics.css            # Red-highlighted UI components
-└── supabaseclient.js            # Infrastructure bridge
-```
+### 🔐 Authentication Layer
+- Supabase-powered login system
+- Secure user sessions & history
 
 ---
 
-## 🛡 Disclaimer
-*CodeSage is an engineering tool. While AI provides high-quality suggestions, always verify mission-critical logic in production environments.*
+## 🎨 Design Philosophy — *Crimson & Carbon*
 
-Built with ❤️ by the **CodeSage Team**.
+> Built like a **developer command center**, not a basic web app.
+
+- 🔴 Primary: `#ff4d4d`
+- ⚫ Background: `#05070a`
+- 💡 Style:
+  - Glassmorphism UI
+  - Neon glow accents
+  - Motion-based interactions
+  - Infinite marquee data streams
+
+---
+
+## ⚙️ Tech Stack
+
+| Layer        | Tech |
+|-------------|-----|
+| Frontend     | React + Vite |
+| Backend      | Node.js |
+| AI Engine    | Google Gemini |
+| Auth & DB    | Supabase |
+| Styling      | Custom CSS (Glass + Motion UI) |
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone Project
+```bash
+git clone https://github.com/pankajkashp/CodeReview.git
+cd CodeReview
