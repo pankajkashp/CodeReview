@@ -36,28 +36,28 @@ It is an **AI-powered architecture review engine** that analyzes your code for:
 
 ### 🧠 Landing Experience
 <p align="center">
-  <img src="https://raw.githubusercontent.com/pankajkashp/CodeReview/main/public/screenshots/landing.png" width="900"/>
+  <img src="screenshots/landing.png" width="900"/>
 </p>
 
 ---
 
-### ⚡ Code Analysis Workspace
+### ⚡ Code Analysis Dashboard
 <p align="center">
-  <img src="https://raw.githubusercontent.com/pankajkashp/CodeReview/main/public/screenshots/editor.png" width="900"/>
+  <img src="screenshots/dashboard.png" width="900"/>
 </p>
 
 ---
 
-### 🔍 AI Processing Engine
+### 🔍 AI Processing State
 <p align="center">
-  <img src="https://raw.githubusercontent.com/pankajkashp/CodeReview/main/public/screenshots/processing.png" width="700"/>
+  <img src="screenshots/loader.png" width="700"/>
 </p>
 
 ---
 
-### 📊 Optimization Results Dashboard
+### 📊 Final Optimization Results
 <p align="center">
-  <img src="https://raw.githubusercontent.com/pankajkashp/CodeReview/main/public/screenshots/results.png" width="900"/>
+  <img src="screenshots/result.png" width="900"/>
 </p>
 
 ---
