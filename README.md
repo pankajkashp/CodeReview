@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ◊ CodeSage — AI Code Intelligence Engine
 
 <p align="center">
@@ -127,12 +128,124 @@ It is an **AI-powered architecture review engine** that analyzes your code for:
 | AI Engine    | Google Gemini |
 | Auth & DB    | Supabase |
 | Styling      | Custom CSS (Cinematic UI) |
+=======
+# 🛡️ CodeSage — AI Code Review Tool
+
+![Header Image](https://raw.githubusercontent.com/pankajkashp/CodeReview/main/docs/images/banner.png)
+
+> **Redefining code integrity through autonomous neural analysis and structural refactoring.**
+
+CodeSage is a premium, high-performance **AI Code Review Tool** designed to analyze, refactor, and optimize source code with surgical precision. Built with a minimalist "Crimson & Carbon" aesthetic, it combines deep learning models with advanced static analysis to identify vulnerabilities, improve complexity, and enhance overall code quality.
+
+---
+
+## 🌌 Visual Tour
+
+### 1. Mission Control (Landing)
+The entry point to the neural engine, featuring a high-impact dark aesthetic and seamless navigation.
+![Landing Page](./docs/images/landing.png)
+
+### 2. The Core Engine (Dashboard)
+A distraction-free, full-width workspace where the neural scan begins.
+![Dashboard](./docs/images/dashboard.png)
+
+### 3. Neural Analysis (Results)
+Comprehensive insights into code score, bug detection, and algorithmic complexity improvements.
+![Results Page](./docs/images/results.png)
+
+---
+
+## ⚡ Key Features
+
+- **Neural Code Scanning**: Deep analysis of logic intent using advanced AI models.
+- **Complexity Delta**: Visualizes "Before vs After" improvements in Time and Space complexity.
+- **Structural Refactoring**: Generates optimized, production-ready code replacements.
+- **Live Intelligence Bar**: Real-time feedback on engine status and neural core synchronization.
+- **Interactive History**: Track and manage past reviews through an intuitive history dashboard.
+- **About Mission Control**: A dedicated transparency layer explaining the inner workings of the AI engine.
+
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Technology |
+| :--- | :--- |
+| **Frontend** | React.js, Vite |
+| **Styling** | Vanilla CSS (Crimson & Carbon Design System) |
+| **Backend** | Node.js, Express |
+| **Intelligence** | Google Gemini AI Engine |
+| **Database/Auth** | Supabase |
+| **Icons/Vectors** | Lucide & Custom SVG Architecture |
+>>>>>>> 32aab84 (screenshots)
 
 ---
 
 ## 🚀 Getting Started
 
+<<<<<<< HEAD
 ### 1. Clone
 ```bash
 git clone https://github.com/pankajkashp/CodeReview.git
 cd CodeReview
+=======
+### Prerequisites
+- Node.js (v18+)
+- Supabase Account
+- Gemini API Key
+
+### Installation
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/pankajkashp/CodeReview.git
+   cd CodeReview
+   ```
+
+2. **Install Dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Configure Environment**
+   Create a `.env` file in the root directory:
+   ```env
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_key
+   GEMINI_API_KEY=your_gemini_api_key
+   ```
+
+4. **Launch the Engine**
+   ```bash
+   # Start the AI Server
+   npm run server
+
+   # Start the Frontend
+   npm run dev
+   ```
+
+---
+
+## 📂 Project Structure
+
+```text
+├── src/
+│   ├── components/      # UI Components (Analytics, Engine, Profile)
+│   ├── styles/          # Design System (Crimson & Carbon)
+│   ├── App.jsx          # Core Routing Logic
+│   └── main.jsx         # App Entry Point
+├── reviewService.js     # AI Logic & Prompt Engineering
+├── server.js            # Express AI Gateway
+└── docs/                # Project Documentation & Assets
+```
+
+---
+
+## 🛡️ License
+Copyright © 2026 CodeSage. All rights reserved.
+Built for the next generation of code integrity.
+
+---
+
+> [!TIP]
+> To maintain high performance, screenshots are stored in the `docs/images` folder. This keeps them out of the production build while remaining accessible for documentation.
+>>>>>>> 32aab84 (screenshots)

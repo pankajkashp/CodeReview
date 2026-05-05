@@ -1,67 +1,77 @@
 # ◊ CodeSage System Documentation
 
-This guide maps the platform's architectural components for rapid maintenance and visual scaling.
+This guide maps the platform's architectural components for rapid maintenance and visual scaling. This file is intended for internal developer use.
+
+---
 
 ## 🏗 Component Map
 
 ### 1. The Gateway (`src/App.jsx`)
 - **Role:** Central router and state orchestra.
-- **Key States:** `activeView` (landing vs engine), `user` (auth session), `showAuth` (modal toggle).
-- **Sub-components:** `Preloader`, `TopNavigation`, `Hero`, `CodeIntegrityEngine`, `AuthModal`.
+- **Key States:** `user` (auth session), `location.pathname` (routing).
+- **Views:** Landing, About, Dashboard/Engine.
 
 ### 2. The Landing Zone (`src/components/Hero.jsx`)
-- **Aesthetic:** "Bloody Red" gradients and infinite scrolling marquees.
-- **Elements:**
-  - **Center Logo:** Pulsing Diamond (◇) with concentric rings.
-  - **Banner:** Testimonial-styled language cards featuring famous quotes.
-  - **Actions:** High-impact "LAUNCH SYSTEM" trigger.
+- **Aesthetic:** "Crimson & Carbon" minimalist design.
+- **Elements:** Pulsing Diamond logo, high-impact "Deep Logic Review" typography.
 
 ### 3. The Forge (`src/components/CodeIntegrityEngine.jsx`)
 - **Role:** Main developer workspace.
+- **Layout:** Full-width code editor with a **Horizontal Live Intelligence Bar** below.
 - **Panels:**
-  - **Terminal (Dashboard):** Real-time code entry and file imports.
-  - **Intelligence (Analytics):** Interactive stats, AI refactoring, and PDF export.
-  - **History:** Searchable audit trail of previous reviews with delete capability.
-- **API:** Posts code to `/api/review`, which is backed by Gemini through `GEMINI_API_KEY`.
+  - **Terminal (Dashboard):** Real-time code entry and re-analysis capabilities.
+  - **Intelligence (Analytics):** Side-by-side comparison of "Legacy" vs "Refactored" code.
+  - **Complexity Analysis:** Tracks Time and Space complexity improvements ($O(n)$ optimization tracking).
 
-### 4. Identity Terminal (`src/components/Profile.jsx`)
-- **Features:** 
-  - Update Display Name.
-  - Custom Avatar Integration (URL-based portraits).
-  - Security Logs (History view within profile).
-
-### 5. Access Console (`src/components/AuthModal.jsx`)
-- **Logic:** Modal-based login/signup with custom error handling ("Password not correct" detection).
-- **Styling:** `src/styles/auth.css` (Glassmorphic Red theme).
+### 4. Mission Transparency (`src/components/About.jsx`)
+- **Role:** Informational page explaining CodeSage's AI methodology.
+- **Aesthetic:** Glassmorphism cards with structured neural-scanning steps.
 
 ---
 
-## 🎨 Theme Tokens (`src/styles/global.css`)
+## 🎨 Design System (`src/styles/`)
 
-| Utility | Token/Value |
-| :--- | :--- |
-| **Primary Brand** | `#ff4d4d` (Crimson) |
-| **Background** | `#05070a` (Carbon) |
-| **Accent Text** | `#ffb7b7` (Light Red) |
-| **Border Glow** | `rgba(255, 77, 77, 0.4)` |
+| Token | Value | Description |
+| :--- | :--- | :--- |
+| **Crimson** | `#ff4d4d` | Primary brand action color. |
+| **Carbon** | `#05070a` | Base background depth. |
+| **Typography** | `'Outfit', sans-serif` | Brand font (900 weight for headers). |
+| **Glow** | `0 0 15px rgba(255, 77, 77, 0.4)` | Used for interactive elements. |
 
 ---
 
-## 🛠 Database Schema (Supabase)
+## ⚙️ AI Engine Configuration (`reviewService.js`)
 
-- **Table:** `analysis_history`
-  - `id` (UUID, primary key)
-  - `user_id` (FK to auth.users)
-  - `code` (text)
-  - `result` (jsonb - stores scores, summary, refactors)
-  - `created_at` (timestamptz)
+- **Model:** Google Gemini Pro.
+- **Prompt Logic:** Uses a strictly defined JSON schema to ensure the AI returns structured analysis including:
+  - `oldTimeComplexity` / `newTimeComplexity`
+  - `oldSpaceComplexity` / `newSpaceComplexity`
+  - `improvedCode` (Refactored logic)
+
+---
+
+## 🛠 Database & Security
+
+### Supabase Table: `reviews`
+- `user_id`: Links reviews to specific authenticated users.
+- `code`: The original source code provided.
+- `result`: JSONB blob containing the complete Gemini analysis.
+
+### Security Best Practices
+- **NEVER** commit the `.env` file to version control.
+- **NEVER** expose the `GEMINI_API_KEY` in client-side code (always route through `server.js`).
+- Use RLS (Row Level Security) policies in Supabase to protect user data.
 
 ---
 
 ## ⚡ Maintenance Commands
 
 - **Local Build:** `npm run build`
-- **API Server:** `npm run server`
-- **Dev UI:** `npm run dev`
-- **Linting Check:** `npm run lint` (if configured)
-- **Environment Sync:** Always update `.env` with valid Gemini/Supabase keys.
+- **AI Gateway Server:** `npm run server` (Must be running for analysis to work).
+- **Dev Environment:** `npm run dev`.
+- **Linting:** `npm run lint`.
+
+---
+
+> [!IMPORTANT]
+> This file is excluded from git via `.gitignore` to keep internal structural notes private from public forks.

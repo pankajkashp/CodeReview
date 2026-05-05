@@ -22,13 +22,20 @@ export function AnalysisLoader() {
     return () => clearInterval(interval);
   }, []);
 
+  // 🛡️ LOCK SCROLL ON MOUNT
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
   return (
     <div className="analysis-loader-overlay">
       <div className="analysis-loader-content">
-        <div className="orbit orbit-1"></div>
-        <div className="orbit orbit-2"></div>
-        
         <div className="hexagon-wrapper">
+          <div className="orbit orbit-1"></div>
+          <div className="orbit orbit-2"></div>
           <div className="hexagon"></div>
           <div className="hexagon-inner"></div>
           <div className="scan-line"></div>

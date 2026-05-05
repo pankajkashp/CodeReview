@@ -23,11 +23,11 @@
 
 .analysis-loader-content {
   position: relative;
-  width: 100px;
-  height: 100px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 32px;
 }
 
 /* 💠 HEXAGON LOADER */
@@ -36,6 +36,9 @@
   width: 100px;
   height: 100px;
   animation: float 3s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .hexagon {
@@ -51,8 +54,6 @@
 
 .hexagon-inner {
   position: absolute;
-  top: 15%;
-  left: 15%;
   width: 70%;
   height: 70%;
   background: #ff4d4d;
@@ -78,24 +79,25 @@
 .loader-text-container {
   text-align: center;
   z-index: 10;
-  position: absolute;
-  top: 140px; 
-  width: 300px;
+  width: 400px;
+  position: relative;
 }
 
 .loader-status-text {
-  font-size: 0.9rem;
-  letter-spacing: 2px;
+  font-size: 0.95rem;
+  letter-spacing: 2.5px;
   color: #ff4d4d;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
-  min-height: 20px;
+  min-height: 24px;
+  margin-bottom: 8px;
 }
 
 .loader-sub-text {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.4);
-  letter-spacing: 1px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 1.5px;
+  font-weight: 600;
 }
 
 /* ⛓️ ORBITS */
@@ -104,9 +106,8 @@
   border: 1px dashed rgba(255, 77, 77, 0.2);
   border-radius: 50%;
   left: 50%;
-  top: 50px; /* Center of the 100px hexagon-wrapper */
-  transform: translate(-50%, -50%);
-  z-index: 1;
+  top: 50%;
+  z-index: -1;
 }
 
 .orbit-1 {
