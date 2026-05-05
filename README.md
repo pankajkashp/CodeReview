@@ -13,8 +13,13 @@
 </p>
 
 <p align="center">
-  <a href="https://www.codesage.tech"><b>🌐 Live Demo</b></a> • 
-  <a href="https://github.com/pankajkashp/CodeReview"><b>📦 Repo</b></a>
+  <a href="https://www.codesage.tech">
+    <img src="https://img.shields.io/badge/🚀%20Live%20Demo-CodeSage-ff4d4d?style=for-the-badge&logo=vercel&logoColor=white"/>
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://github.com/pankajkashp/CodeReview">
+    <img src="https://img.shields.io/badge/💻%20Source%20Code-GitHub-111?style=for-the-badge&logo=github&logoColor=white"/>
+  </a>
 </p>
 
 ---
