@@ -2,7 +2,10 @@
 # ◊ CodeSage — AI Code Intelligence Engine
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/pankajkashp/CodeReview/main/public/favicon.svg" width="120"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <path fill="#ff4d4d" d="M50 5 L95 50 L50 95 L5 50 Z" />
+</svg>
+
 </p>
 
 <h2 align="center">Deep Logic. Real Intelligence.</h2>
