@@ -1,4 +1,3 @@
-
 # ◊ CodeSage — AI Code Intelligence Engine
 
 <p align="center">
@@ -136,28 +135,13 @@ It is an **AI-powered architecture review engine** that analyzes your code for:
 =======
 # 🛡️ CodeSage — AI Code Review Tool
 
-![Header Image](https://raw.githubusercontent.com/pankajkashp/CodeReview/main/docs/images/banner.png)
+<p align="center">
+  <img src="screenshots/landing.png" width="900"/>
+</p>
 
 > **Redefining code integrity through autonomous neural analysis and structural refactoring.**
 
 CodeSage is a premium, high-performance **AI Code Review Tool** designed to analyze, refactor, and optimize source code with surgical precision. Built with a minimalist "Crimson & Carbon" aesthetic, it combines deep learning models with advanced static analysis to identify vulnerabilities, improve complexity, and enhance overall code quality.
-
----
-
-## 🌌 Visual Tour
-
-### 1. Mission Control (Landing)
-The entry point to the neural engine, featuring a high-impact dark aesthetic and seamless navigation.
-![Landing Page](./docs/images/landing.png)
-
-### 2. The Core Engine (Dashboard)
-A distraction-free, full-width workspace where the neural scan begins.
-![Dashboard](./docs/images/dashboard.png)
-
-### 3. Neural Analysis (Results)
-Comprehensive insights into code score, bug detection, and algorithmic complexity improvements.
-![Results Page](./docs/images/results.png)
-
 ---
 
 ## ⚡ Key Features
@@ -181,13 +165,11 @@ Comprehensive insights into code score, bug detection, and algorithmic complexit
 | **Intelligence** | Google Gemini AI Engine |
 | **Database/Auth** | Supabase |
 | **Icons/Vectors** | Lucide & Custom SVG Architecture |
->>>>>>> 32aab84 (screenshots)
 
 ---
 
 ## 🚀 Getting Started
 
-<<<<<<< HEAD
 ### 1. Clone
 ```bash
 git clone https://github.com/pankajkashp/CodeReview.git
@@ -253,4 +235,3 @@ Built for the next generation of code integrity.
 
 > [!TIP]
 > To maintain high performance, screenshots are stored in the `docs/images` folder. This keeps them out of the production build while remaining accessible for documentation.
->>>>>>> 32aab84 (screenshots)
