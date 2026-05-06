@@ -34,18 +34,18 @@ export default function Confirm() {
       textAlign: 'center'
     }}>
       <div style={{
-        background: 'rgba(255, 77, 77, 0.1)',
+        background: 'rgba(59, 130, 246, 0.1)',
         borderRadius: '50%',
         width: '80px',
         height: '80px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        border: '1px solid #ff4d4d',
+        border: '1px solid var(--primary-color)',
         marginBottom: '24px',
         animation: 'pulse 2s infinite'
       }}>
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" strokeWidth="2.5">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" strokeWidth="2.5">
           <path d="M20 6L9 17L4 12" />
         </svg>
       </div>

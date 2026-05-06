@@ -45,7 +45,7 @@ export function UserProfile({ user, onLogout, onBack, setActivePanel, activePane
         <h3 style={{
           fontSize: '0.78rem',
           fontWeight: '900',
-          color: '#ff4d4d',
+          color: 'var(--primary-color)',
           textTransform: 'uppercase',
           letterSpacing: '1.5px',
           marginTop: '0px',
@@ -60,8 +60,8 @@ export function UserProfile({ user, onLogout, onBack, setActivePanel, activePane
         <div className="user-avatar-exclusive-box" style={{
           margin: 0,
           background: '#05070a',
-          boxShadow: '0 0 15px rgba(255, 77, 77, 0.4)',
-          border: '2px solid #ff4d4d',
+          boxShadow: '0 0 15px rgba(59, 130, 246, 0.4)',
+          border: '2px solid var(--primary-color)',
           height: '34px',
           width: '34px',
           borderRadius: '50%',
@@ -78,13 +78,13 @@ export function UserProfile({ user, onLogout, onBack, setActivePanel, activePane
 
       <style>{`
         .profile-trigger-new:hover {
-          background: rgba(255, 77, 77, 0.08) !important;
-          border-color: rgba(255, 77, 77, 0.4) !important;
-          box-shadow: 0 0 25px rgba(255, 77, 77, 0.2);
+          background: rgba(59, 130, 246, 0.08) !important;
+          border-color: rgba(59, 130, 246, 0.4) !important;
+          box-shadow: 0 0 25px rgba(59, 130, 246, 0.2);
         }
         .profile-trigger-new:hover h3 {
           color: #fff !important;
-          text-shadow: 0 0 12px rgba(255, 77, 77, 0.6);
+          text-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
         }
       `}</style>
 
@@ -139,7 +139,7 @@ export function UserProfile({ user, onLogout, onBack, setActivePanel, activePane
         </button>
 
         {onBack && (
-          <button onClick={() => { setMenuOpen(false); onBack(); }} style={{ color: '#ff4d4d' }}>
+          <button onClick={() => { setMenuOpen(false); onBack(); }} style={{ color: 'var(--primary-color)' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
               <polyline points="16 17 21 12 16 7" />

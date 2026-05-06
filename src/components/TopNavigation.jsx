@@ -45,7 +45,7 @@ export function TopNavigation({ user, onLoginClick, onLogout }) {
 
       <style>{`
         .nav-link-hover:hover {
-          color: #ff4d4d !important;
+          color: var(--primary-color) !important;
         }
       `}</style>
     </header>

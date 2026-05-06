@@ -75,7 +75,7 @@ export default function AuthModal({ supabase, onClose }) {
 
         <button className="close" onClick={onClose}>✕</button>
         
-        <div style={{ marginBottom: '20px', fontSize: '24px', color: '#ff4d4d' }}>◇</div>
+        <div style={{ marginBottom: '20px', fontSize: '24px', color: 'var(--primary-color)' }}>◇</div>
         <h2>{mode === "login" ? "Access Console" : "Initialize Identity"}</h2>
 
         <form onSubmit={mode === "login" ? handleLogin : handleSignup}>

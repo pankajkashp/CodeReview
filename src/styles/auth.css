@@ -15,8 +15,8 @@
   border-radius: 12px;
   width: 400px;
   text-align: center;
-  box-shadow: 0 0 40px rgba(255, 77, 77, 0.15);
-  border: 1px solid rgba(255, 77, 77, 0.1);
+  box-shadow: 0 0 40px rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.1);
   position: relative;
 }
 
@@ -40,15 +40,15 @@
 }
 
 .auth-box input:focus {
-  border-color: #ff4d4d;
+  border-color: var(--primary-color);
   outline: none;
-  box-shadow: 0 0 10px rgba(255, 77, 77, 0.2);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
 }
 
 .auth-box button[type="submit"] {
   width: 100%;
   padding: 14px;
-  background: #ff4d4d;
+  background: var(--primary-color);
   color: #000;
   border: none;
   border-radius: 6px;
@@ -63,14 +63,14 @@
 .auth-box button[type="submit"]:hover {
   background: #ff3333;
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(255, 77, 77, 0.4);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
 }
 
 .error {
   color: #ffb7b7;
   margin-top: 15px;
   font-size: 0.85rem;
-  background: rgba(255, 77, 77, 0.1);
+  background: rgba(59, 130, 246, 0.1);
   padding: 8px;
   border-radius: 4px;
 }
@@ -82,7 +82,7 @@
 }
 
 .switch span {
-  color: #ff4d4d;
+  color: var(--primary-color);
   cursor: pointer;
   font-weight: 700;
   margin-left: 5px;
@@ -101,7 +101,7 @@
 }
 
 .close:hover {
-  color: #ff4d4d;
+  color: var(--primary-color);
 }
 
 /* ================= 🌌 STARS & SHOOTING STARS ================= */
@@ -147,7 +147,7 @@
   position: absolute;
   width: 2px;
   height: 80px;
-  background: linear-gradient(-45deg, #ff4d4d, transparent);
+  background: linear-gradient(-45deg, var(--primary-color), transparent);
   opacity: 0;
   transform: rotate(45deg);
   animation: shoot 5s linear infinite;

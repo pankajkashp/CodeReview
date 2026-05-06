@@ -259,7 +259,7 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                       className="primary-btn" 
                       onClick={analyzeCode} 
                       disabled={status === "loading" || !code.trim()}
-                      style={{ padding: '0 30px', background: '#ff4d4d', color: '#000' }}
+                      style={{ padding: '0 30px', background: 'var(--primary-color)', color: 'var(--bg-deep)' }}
                     >
                       {status === "loading" ? "INITIALIZING..." : "START ANALYSIS"}
                     </button>
@@ -324,8 +324,8 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                           display: 'flex', 
                           alignItems: 'center', 
                           gap: '10px',
-                          background: '#ff4d4d',
-                          color: '#000',
+                          background: 'var(--primary-color)',
+                          color: 'var(--bg-deep)',
                           fontWeight: '900',
                           padding: '0 25px',
                           borderRadius: '4px',
@@ -349,12 +349,12 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                       <h2 style={{ margin: 0 }}>Live Intelligence</h2>
                       <div className="engine-status-badge" style={{ 
-                        background: 'rgba(255, 77, 77, 0.1)', 
+                        background: 'var(--primary-glow)', 
                         padding: '4px 12px', 
                         borderRadius: '20px',
                         fontSize: '0.65rem',
                         fontWeight: '800',
-                        color: '#ff4d4d',
+                        color: 'var(--primary-color)',
                         letterSpacing: '1px'
                       }}>
                         {status.toUpperCase()}
@@ -370,8 +370,8 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                       </div>
 
                       {error && (
-                        <div className="intel-item error" style={{ borderLeft: '2px solid #ff4d4d', paddingLeft: '15px' }}>
-                          <strong style={{ color: '#ff4d4d' }}>System Alert</strong>
+                        <div className="intel-item error" style={{ borderLeft: '2px solid var(--primary-color)', paddingLeft: '15px' }}>
+                          <strong style={{ color: 'var(--primary-color)' }}>System Alert</strong>
                           <p>{error}</p>
                         </div>
                       )}
@@ -399,7 +399,7 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
               <section className="history-panel" style={{ animation: 'fadeIn 0.4s ease' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                   <h2 style={{ margin: 0 }}>Review History</h2>
-                  {searchTerm && <span style={{ color: '#ff4d4d', fontSize: '0.8rem' }}>FILTERING BY: "{searchTerm}"</span>}
+                  {searchTerm && <span style={{ color: 'var(--primary-color)', fontSize: '0.8rem' }}>FILTERING BY: "{searchTerm}"</span>}
                 </div>
                 <div className="history-list">
                   {history.filter(h => 

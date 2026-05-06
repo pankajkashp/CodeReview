@@ -209,7 +209,7 @@ export default function Profile() {
                       <span>{new Date(record.created_at).toLocaleString()}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                      <div className="history-score" style={{ background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d', border: '1px solid rgba(255, 77, 77, 0.2)' }}>
+                      <div className="history-score" style={{ background: 'rgba(59, 130, 246, 0.1)', color: 'var(--primary-color)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
                         {record.result?.score || 85}
                       </div>
                       <button
@@ -285,7 +285,7 @@ export default function Profile() {
                 </button>
 
                 {error && (
-                  <div className="error-message" style={{ color: '#ff4d4d', fontSize: '0.85rem', marginTop: '15px', textAlign: 'center', padding: '10px', background: 'rgba(255, 77, 77, 0.1)', borderRadius: '4px' }}>
+                  <div className="error-message" style={{ color: 'var(--primary-color)', fontSize: '0.85rem', marginTop: '15px', textAlign: 'center', padding: '10px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '4px' }}>
                     {error}
                   </div>
                 )}

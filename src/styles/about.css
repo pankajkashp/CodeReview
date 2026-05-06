@@ -30,13 +30,13 @@
 .about-badge {
   display: inline-block;
   padding: 6px 16px;
-  background: rgba(255, 77, 77, 0.1);
-  border: 1px solid rgba(255, 77, 77, 0.2);
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 4px;
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 3px;
-  color: #ff4d4d;
+  color: var(--primary-color);
   margin-bottom: 24px;
   text-transform: uppercase;
 }
@@ -50,7 +50,7 @@
 
 .about-title .highlight {
   color: #fff;
-  text-shadow: 0 0 40px rgba(255, 77, 77, 0.3);
+  text-shadow: 0 0 40px rgba(59, 130, 246, 0.3);
 }
 
 .about-subtitle {
@@ -74,7 +74,7 @@
 
 .section-card:hover {
   background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 77, 77, 0.2);
+  border-color: rgba(59, 130, 246, 0.2);
   transform: translateY(-5px);
   box-shadow: 0 20px 40px rgba(0,0,0,0.4);
 }
@@ -89,12 +89,12 @@
 .card-icon {
   width: 48px;
   height: 48px;
-  background: rgba(255, 77, 77, 0.1);
+  background: rgba(59, 130, 246, 0.1);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ff4d4d;
+  color: var(--primary-color);
 }
 
 .section-card h2 {
@@ -111,7 +111,7 @@
 }
 
 .section-card strong {
-  color: #ff4d4d;
+  color: var(--primary-color);
   font-weight: 700;
 }
 
@@ -131,7 +131,7 @@
 .step-number {
   font-size: 2rem;
   font-weight: 900;
-  color: rgba(255, 77, 77, 0.2);
+  color: rgba(59, 130, 246, 0.2);
   margin-bottom: 16px;
   font-family: 'Courier New', Courier, monospace;
 }

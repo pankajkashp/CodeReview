@@ -17,7 +17,7 @@ const languagesRow2 = [
 
 export function Hero({ onLaunch }) {
   return (
-    <section className="hero" style={{ height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden' }}>
+    <section className="hero" style={{ minHeight: '110vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden', padding: '120px 0' }}>
       <div className="hero-noise"></div>
 
       <div className="hero-inner" style={{ paddingTop: '0', zIndex: 2, marginBottom: '60px' }}>
@@ -25,14 +25,15 @@ export function Hero({ onLaunch }) {
         <div style={{
           width: '160px',
           height: '160px',
-          background: 'radial-gradient(circle, rgba(255,77,77,0.25) 0%, transparent 70%)',
-          margin: '0 auto 30px',
+          background: 'radial-gradient(circle, var(--primary-glow) 0%, transparent 70%)',
+          margin: '0 auto 25px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
-          filter: 'drop-shadow(0 0 40px rgba(255, 77, 77, 0.3))',
-          animation: 'breath 4s ease-in-out infinite'
+          filter: 'drop-shadow(0 0 35px var(--primary-color))',
+          animation: 'breath 4s ease-in-out infinite',
+          zIndex: 1
         }}>
 
           {/* SYMBOL */}
@@ -51,7 +52,7 @@ export function Hero({ onLaunch }) {
             position: 'absolute',
             width: '100%',
             height: '100%',
-            border: '1px solid rgba(255, 77, 77, 0.15)',
+            border: '1px solid var(--primary-glow)',
             borderRadius: '50%',
             transform: 'rotateX(60deg) rotateY(20deg)',
             animation: 'spinSlow 20s linear infinite'
@@ -63,31 +64,31 @@ export function Hero({ onLaunch }) {
             width: '140%',
             height: '140%',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(255,77,77,0.15), transparent)',
-            animation: 'glowPulse 5s ease-in-out infinite'
+            background: 'radial-gradient(circle, var(--primary-glow) 0%, transparent 70%)',
+            animation: 'glowPulse 5s ease-in-out infinite',
+            mixBlendMode: 'screen'
           }}></div>
 
         </div>
 
         <h1 style={{ fontSize: 'clamp(3.5rem, 8vw, 6.5rem)', marginBottom: '5px' }}>
           <span style={{
-            background: 'linear-gradient(180deg, #ff4d4d 0%, #a00000 100%)',
+            background: 'var(--gradient-hero)',
             WebkitBackgroundClip: 'text',
-            backgroundImage: 'linear-gradient(180deg, #ff4c4c 10%, #d90429 60%, #8d021f 100%)',
             color: 'transparent'
           }}>CodeSage</span>
         </h1>
-        <p className="pill" style={{ borderColor: '#ff4d4d', color: '#ff4d4d', fontSize: '0.65rem', marginBottom: '24px' }}>
+        <p className="pill" style={{ borderColor: 'var(--primary-color)', color: 'var(--primary-color)', fontSize: '0.65rem', marginBottom: '24px' }}>
           THE AI THAT ACTUALLY REVIEWS ARCHITECTURE.
         </p>
 
-        <p className="hero-copy" style={{ marginBottom: '40px', color: 'rgba(255,255,255,0.6)', fontSize: '1.05rem', lineHeight: '1.4' }}>
+        <p className="hero-copy" style={{ marginBottom: '40px', color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: '1.4' }}>
           Scan, refactor, and master your source code in seconds.<br />
           Enterprise-grade intelligence for developers who value perfection.
         </p>
 
-        <div className="hero-actions" style={{ justifyContent: 'center', gap: '20px' }}>
-          <button className="primary-btn pulse" onClick={onLaunch} style={{ padding: '0 50px', height: '60px', fontSize: '1.1rem', borderRadius: '8px' }}>
+        <div className="hero-actions" style={{ justifyContent: 'center', gap: '20px', marginTop: '20px', marginBottom: '80px' }}>
+          <button className="primary-btn pulse" onClick={onLaunch} style={{ padding: '0 50px', height: '60px', fontSize: '1.1rem', borderRadius: '8px', background: 'var(--primary-color)', color: 'var(--bg-deep)' }}>
             LAUNCH SYSTEM
           </button>
         </div>
@@ -96,7 +97,7 @@ export function Hero({ onLaunch }) {
       {/* TESTIMONIAL STYLE BANNER - POSITIONED LOWER */}
       <div style={{
         position: 'absolute',
-        bottom: '4%',
+        bottom: '15%',
         width: '100%',
         zIndex: 1,
         maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)'
@@ -167,8 +168,8 @@ export function Hero({ onLaunch }) {
            transition: all 0.3s ease;
         }
         .test-card:hover {
-           border-color: rgba(255, 77, 77, 0.3);
-           background: rgba(255, 77, 77, 0.02);
+           border-color: var(--primary-glow);
+           background: var(--primary-glow);
            transform: translateY(-2px);
         }
         .test-avatar {
@@ -176,8 +177,8 @@ export function Hero({ onLaunch }) {
            height: 40px;
            border-radius: 8px;
            background: #111;
-           border: 1px solid rgba(255, 77, 77, 0.2);
-           color: #ff4d4d;
+           border: 1px solid var(--primary-glow);
+           color: var(--primary-color);
            display: flex;
            align-items: center;
            justify-content: center;
@@ -195,22 +196,22 @@ export function Hero({ onLaunch }) {
         }
         .test-tag {
            font-size: 0.65rem;
-           color: #ff4d4d;
+           color: var(--primary-color);
            font-weight: 800;
            letter-spacing: 1px;
            text-transform: uppercase;
-           border: 1px solid rgba(255, 77, 77, 0.3);
+           border: 1px solid var(--primary-glow);
            padding: 2px 8px;
            border-radius: 4px;
         }
            @keyframes breath {
   0%, 100% {
     transform: scale(1);
-    filter: drop-shadow(0 0 20px rgba(255, 77, 77, 0.2));
+    filter: drop-shadow(0 0 20px var(--primary-glow));
   }
   50% {
     transform: scale(1.05);
-    filter: drop-shadow(0 0 60px rgba(255, 77, 77, 0.4));
+    filter: drop-shadow(0 0 60px var(--primary-glow));
   }
 }
 

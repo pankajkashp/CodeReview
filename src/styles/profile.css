@@ -27,7 +27,7 @@
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ff4d4d, #b64c4c);
+  background: linear-gradient(135deg, var(--primary-color), #b64c4c);
   margin: 0 auto 20px;
   display: flex;
   align-items: center;
@@ -85,7 +85,7 @@
 
 .profile-nav button:hover, .profile-nav button.active {
   background: rgba(255, 255, 255, 0.05);
-  color: #ff4d4d;
+  color: var(--primary-color);
 }
 
 .profile-main {
@@ -138,7 +138,7 @@
 }
 
 .history-item:hover {
-  border-color: #ff4d4d66;
+  border-color: var(--primary-color)66;
   background: rgba(255, 255, 255, 0.04);
 }
 

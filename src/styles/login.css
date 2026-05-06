@@ -59,7 +59,7 @@
   position: absolute;
   width: 2px;
   height: 80px;
-  background: linear-gradient(-45deg, #ff4d4d, transparent);
+  background: linear-gradient(-45deg, var(--primary-color), transparent);
   opacity: 0;
   transform: rotate(45deg);
   animation: shoot 5s linear infinite;
@@ -113,7 +113,7 @@
   z-index: 2;
 }
 .login-card::before {
-  background: linear-gradient(90deg, #ff4d4d, #b64c4c);
+  background: linear-gradient(90deg, var(--primary-color), #b64c4c);
   content: "";
   height: 2px;
   left: 0;
@@ -172,15 +172,15 @@
 }
 
 .form-group input:focus {
-  border-color: #ff4d4d;
-  box-shadow: 0 0 0 4px rgba(255, 77, 77, 0.12);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
   outline: 0;
 }
 
 /* ================= BUTTON ================= */
 
 .login-submit {
-  background: #ff4d4d;
+  background: var(--primary-color);
   border: 0;
   border-radius: 6px;
   color: #020305;
@@ -195,7 +195,7 @@
 }
 
 .login-submit:hover {
-  box-shadow: 0 0 20px rgba(255, 77, 77, 0.4);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
   transform: translateY(-2px);
 }
 
@@ -209,7 +209,7 @@
 .login-footer button {
   background: transparent;
   border: 0;
-  color: #ff4d4d;
+  color: var(--primary-color);
   cursor: pointer;
   font-size: 0.88rem;
   font-weight: 600;
@@ -224,9 +224,9 @@
   font-size: 0.85rem;
   text-align: center;
   animation: fadeIn 0.3s ease;
-  background: rgba(255, 77, 77, 0.1);
-  border: 1px solid rgba(255, 77, 77, 0.3);
-  color: #ff4d4d;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: var(--primary-color);
 }
 
 /* ================= BACK BUTTON ================= */
