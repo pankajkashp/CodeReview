@@ -24,7 +24,7 @@ export default function Login() {
           email,
           password,
           options: {
-            emailRedirectTo: "http://localhost:5173/confirm"
+            emailRedirectTo: window.location.origin + "/confirm"
           }
         });
         if (signUpError) throw signUpError;
