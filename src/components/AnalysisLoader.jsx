@@ -40,14 +40,10 @@ export function AnalysisLoader() {
           <div className="hexagon-inner"></div>
           <div className="scan-line"></div>
         </div>
-        
+
         <div className="loader-text-container">
-          <div className="loader-status-text">
-            {statusMessages[messageIndex]}
-          </div>
-          <div className="loader-sub-text">
-            DO NOT CLOSE OR REFRESH
-          </div>
+          <div className="loader-status-text">{statusMessages[messageIndex]}</div>
+          <div className="loader-sub-text">DO NOT CLOSE OR REFRESH</div>
         </div>
       </div>
     </div>

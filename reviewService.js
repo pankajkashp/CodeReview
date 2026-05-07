@@ -90,8 +90,6 @@ export async function analyzeCodeWithGemini(code) {
   const modelsToTry = ["gemini-3-flash-preview", "gemini-2.0-flash", "gemini-flash-lite-latest"];
   const genAI = new GoogleGenerativeAI(apiKey);
 
-  let lastError;
-
   for (const modelName of modelsToTry) {
     console.log(`🤖 INITIALIZING ANALYSIS WITH MODEL: ${modelName}`);
     
@@ -116,7 +114,6 @@ export async function analyzeCodeWithGemini(code) {
         console.log(`✅ SUCCESS WITH ${modelName} ON ATTEMPT ${i + 1}`);
         return normalizeReviewResult(parsed);
       } catch (err) {
-        lastError = err;
         console.warn(`⚠️ MODEL ${modelName} ATTEMPT ${i + 1} FAILED:`, err.message);
         
         // Wait a bit if it's a rate limit or server issue

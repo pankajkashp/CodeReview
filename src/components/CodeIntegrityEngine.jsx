@@ -231,6 +231,7 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
             originalCode={code}
             onApplyChanges={() => setActivePanel("dashboard")}
             onExit={onBack}
+            loading={status === "loading"}
             onAnalyze={(newCode) => {
               setCode(newCode);
               analyzeCode(newCode);
@@ -257,14 +258,15 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                       style={{ display: 'none' }} 
                       onChange={handleFileChange}
                     />
-                    <button onClick={handleImportClick}>IMPORT FILE</button>
-                    <button 
-                      className="primary-btn" 
-                      onClick={analyzeCode} 
+                    <button className="engine-secondary-btn" onClick={handleImportClick}>
+                      IMPORT FILE
+                    </button>
+                    <button
+                      className="primary-btn engine-start-btn pulse"
+                      onClick={analyzeCode}
                       disabled={status === "loading" || !code.trim()}
-                      style={{ padding: '0 30px', background: 'var(--primary-color)', color: 'var(--bg-deep)' }}
                     >
-                      {status === "loading" ? "INITIALIZING..." : "START ANALYSIS"}
+                      <span>{status === "loading" ? "INITIALIZING..." : "START ANALYSIS"}</span>
                     </button>
                   </div>
                 </section>

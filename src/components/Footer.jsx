@@ -1,9 +1,3 @@
-const footerGroups = [
-  ["Product", "Platform", "Integrations", "Pricing"],
-  ["Resources", "Docs", "Blog", "Security"],
-  ["Company", "About", "Privacy", "Terms"]
-];
-
 export function Footer() {
   return (
     <footer className="site-footer">

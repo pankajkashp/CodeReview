@@ -11,7 +11,6 @@ import { About } from "./components/About.jsx";
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeView, setActiveView] = useState("landing");
   const [user, setUser] = useState(null);
 
   // ✅ AUTH LISTENER
@@ -33,18 +32,11 @@ export default function App() {
     return () => {
       listener.subscription.unsubscribe();
     };
-  }, [location.pathname]);
+  }, [location.pathname, navigate]);
 
   // 🔐 LOGIN → REDIRECT
   const handleLogin = () => {
     navigate("/login");
-  };
-
-  // 🚪 LOGOUT
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setActiveView("landing");
   };
 
   // 🚀 ENGINE ACCESS

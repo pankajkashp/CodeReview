@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { EngineEffect } from "./EngineEffect";
 
 const languagesRow1 = [
@@ -14,10 +13,10 @@ const languagesRow2 = [
 
 export function Hero({ onLaunch }) {
   return (
-    <section className="hero" style={{ minHeight: '110vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden', padding: '120px 0' }}>
+    <section className="hero" style={{ minHeight: '110vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden', padding: '120px 0 120px' }}>
       <div className="hero-noise"></div>
 
-      <div className="hero-inner" style={{ paddingTop: '0', zIndex: 2, marginBottom: '60px' }}>
+      <div className="hero-inner" style={{ paddingTop: '0', zIndex: 2, marginBottom: '0' }}>
         {/* BIG CENTERED SVG LOGO */}
         <div style={{
           width: '160px',
@@ -84,17 +83,16 @@ export function Hero({ onLaunch }) {
           Enterprise-grade intelligence for developers who value perfection.
         </p>
 
-        <div className="hero-actions" style={{ justifyContent: 'center', gap: '20px', marginTop: '20px', marginBottom: '80px' }}>
-          <button className="primary-btn pulse" onClick={onLaunch} style={{ padding: '0 50px', height: '60px', fontSize: '1.1rem', borderRadius: '8px', background: 'var(--primary-color)', color: 'var(--bg-deep)' }}>
-            LAUNCH SYSTEM
+        <div className="hero-actions" style={{ justifyContent: 'center', gap: '20px', marginTop: '20px', marginBottom: '36px' }}>
+          <button className="primary-btn hero-launch-btn pulse" onClick={onLaunch}>
+            <span>LAUNCH SYSTEM</span>
           </button>
         </div>
       </div>
 
       {/* TESTIMONIAL STYLE BANNER - POSITIONED LOWER */}
-      <div style={{
-        position: 'absolute',
-        bottom: '15%',
+      <div className="hero-banner" style={{
+        position: 'relative',
         width: '100%',
         zIndex: 1,
         maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)'

@@ -10,7 +10,7 @@ async function testModel(modelName) {
   try {
     console.log(`Testing ${modelName}...`);
     const model = genAI.getGenerativeModel({ model: modelName });
-    const result = await model.generateContent("hello");
+    const _result = await model.generateContent("hello");
     console.log(`SUCCESS with ${modelName}`);
     return true;
   } catch (err) {
