@@ -4,15 +4,12 @@ import { EngineEffect } from "./EngineEffect";
 const languagesRow1 = [
   { name: "JavaScript", logo: "JS", tag: "@brendan_eich", text: "Any application that can be written in JavaScript, will eventually be written in JavaScript." },
   { name: "Python", logo: "PY", tag: "@guido_van", text: "Beautiful is better than ugly. Explicit is better than implicit. Simple is better than complex." },
-  { name: "Rust", logo: "RS", tag: "@graydon_hoare", text: "Fearless concurrency. Performance of C++, safety of a managed language. Truly zero-cost." },
-  { name: "Go", logo: "GO", tag: "@rob_pike", text: "Go is not meant to innovate. It is meant to be used. Complexity is what kills software." }
+  { name: "C", logo: "C", tag: "@dennis_ritchie", text: "C is quirky, flawed, and an enormous success. It is the language that power the world's kernels." }
 ];
 
 const languagesRow2 = [
-  { name: "TypeScript", logo: "TS", tag: "@anders_hejlsberg", text: "Static typing for the dynamic web. Optional types, ultimate developer experience." },
   { name: "C++", logo: "C+", tag: "@bjarne_stroustrup", text: "C makes it easy to shoot yourself in the foot; C++ makes it harder, but when you do it blows your whole leg off." },
-  { name: "Java", logo: "JV", tag: "@james_gosling", text: "Write once, run everywhere. The powerhouse of the enterprise ecosystem for decades." },
-  { name: "Swift", logo: "SW", tag: "@chris_lattner", text: "Safe, fast, and expressive. The future of high-performance modern application development." }
+  { name: "Java", logo: "JV", tag: "@james_gosling", text: "Write once, run everywhere. The powerhouse of the enterprise ecosystem for decades." }
 ];
 
 export function Hero({ onLaunch }) {

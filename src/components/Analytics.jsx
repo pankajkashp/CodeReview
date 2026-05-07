@@ -48,7 +48,7 @@ export function Analytics({ onApplyChanges, analysis = {}, originalCode = "", on
             <header className="pane-header">
               <div className="header-left">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 8l0 4l2 2" /><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5" /></svg>
-                <span>LEGACY SOURCE (EDITABLE)</span>
+                <span>LEGACY SOURCE {bugs.length > 0 && <span style={{ color: 'var(--error-color)', marginLeft: '8px' }}>(VULNERABLE ⚠️)</span>}</span>
               </div>
               <button className="reanalyze-btn" onClick={() => onAnalyze(editableCode)}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 12c0-4.4 3.6-8 8-8 3.3 0 6.1 2 7.3 4.9M22 12c0 4.4-3.6 8-8 8-3.3 0-6.1-2-7.3-4.9"/></svg>
@@ -69,7 +69,7 @@ export function Analytics({ onApplyChanges, analysis = {}, originalCode = "", on
             <header className="pane-header">
               <div className="header-left">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                <span>CODESAGE REFACTORED</span>
+                <span>CODESAGE REFACTORED (BOLD & OPTIMIZED)</span>
               </div>
               <button className="copy-btn" onClick={() => navigator.clipboard.writeText(analysis.improvedCode || "")}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
@@ -97,13 +97,16 @@ export function Analytics({ onApplyChanges, analysis = {}, originalCode = "", on
               </div>
               <span className="count">{String(bugs.length).padStart(2, '0')}</span>
             </header>
-            <h3>Bugs Detected</h3>
-            <p>Issues securely identified for structural remediation.</p>
+            <h3>Bug Discovery Protocol</h3>
+            <p>System has identified following vulnerabilities in source code:</p>
             <div className="alert-list">
               {bugs.length > 0 ? bugs.map((bug, idx) => (
-                <div key={idx} className="alert error">{bug}</div>
+                <div key={idx} className="alert error">
+                  <span style={{ marginRight: '10px' }}>⚠️</span>
+                  {bug}
+                </div>
               )) : (
-                <div className="alert warn">No critical bugs found</div>
+                <div className="alert warn">No critical vulnerabilities detected.</div>
               )}
             </div>
           </article>

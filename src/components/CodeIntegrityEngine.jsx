@@ -9,42 +9,44 @@ const languageOptions = [
     id: "javascript",
     label: "JavaScript",
     fileName: "analysis.js",
-    template: `function calculateTotal(items) {
-  let total = 0;
-  for (let i = 0; i < items.length; i++) {
-    total += items[i].price * items[i].quantity;
-  }
-  return total;
-}`
+    template: `console.log("CodeSage");`
   },
   {
     id: "python",
     label: "Python",
     fileName: "main.py",
-    template: `def calculate_total(items):
-    total = 0
-    for item in items:
-        total += item['price'] * item['quantity']
-    return total`
+    template: `print("CodeSage")`
   },
   {
-    id: "rust",
-    label: "Rust",
-    fileName: "main.rs",
-    template: `fn calculate_total(items: &[Item]) -> f64 {
-    items.iter().map(|i| i.price * i.quantity).sum()
+    id: "cpp",
+    label: "C++",
+    fileName: "main.cpp",
+    template: `#include <iostream>
+
+int main() {
+    std::cout << "CodeSage" << std::endl;
+    return 0;
 }`
   },
   {
-    id: "go",
-    label: "Go",
-    fileName: "main.go",
-    template: `func CalculateTotal(items []Item) float64 {
-    var total float64
-    for _, item := range items {
-        total += item.Price * float64(item.Quantity)
+    id: "c",
+    label: "C",
+    fileName: "main.c",
+    template: `#include <stdio.h>
+
+int main() {
+    printf("CodeSage\\n");
+    return 0;
+}`
+  },
+  {
+    id: "java",
+    label: "Java",
+    fileName: "Main.java",
+    template: `public class Main {
+    public static void main(String[] args) {
+        System.out.println("CodeSage");
     }
-    return total
 }`
   }
 ];
@@ -122,8 +124,9 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
       // Python doesn't use braces for blocks generally
       if (!input.includes("def ")) return false;
     }
-    if (langId === "rust" && !input.includes("fn ") && (input.includes("function") || input.includes("def "))) return false;
-    if (langId === "go" && !input.includes("func ") && (input.includes("def "))) return false;
+    if (langId === "cpp" && !input.includes("#include") && input.includes("def ")) return false;
+    if (langId === "c" && input.includes("public class") && input.includes("java")) return false;
+    if (langId === "java" && !input.includes("class ") && input.includes("def ")) return false;
     
     return true;
   };
