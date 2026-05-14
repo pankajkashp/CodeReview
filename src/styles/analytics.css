@@ -221,6 +221,12 @@
   color: var(--text);
 }
 
+.ghost-button.copied {
+  border-color: var(--accent);
+  color: var(--accent-2);
+  background: rgba(20, 184, 166, 0.08);
+}
+
 .primary-button:hover,
 .ghost-button:hover,
 .tab-button:hover,

@@ -631,7 +631,7 @@ function HighlightedCode({ code = "", language = "javascript", status = "neutral
   );
 }
 
-function DiffPane({ title, code, language, statuses, tone, subtitle, onCopy }) {
+function DiffPane({ title, code, language, statuses, tone, subtitle, onCopy, isCopied }) {
   const lines = React.useMemo(() => String(code || "").split("\n"), [code]);
 
   return (
@@ -641,8 +641,8 @@ function DiffPane({ title, code, language, statuses, tone, subtitle, onCopy }) {
           <span className="diff-pane-kicker">{subtitle}</span>
           <strong>{title}</strong>
         </div>
-        <button type="button" className="ghost-button" onClick={onCopy}>
-          Copy
+        <button type="button" className={`ghost-button ${isCopied ? "copied" : ""}`} onClick={onCopy}>
+          {isCopied ? "Copied!" : "Copy"}
         </button>
       </div>
       <div className="code-shell">
@@ -660,7 +660,7 @@ function DiffPane({ title, code, language, statuses, tone, subtitle, onCopy }) {
   );
 }
 
-function CodeDiffViewer({ model, onCopyOriginal, onCopyOptimized }) {
+function CodeDiffViewer({ model, onCopyOriginal, onCopyOptimized, copyState }) {
   return (
     <SectionShell
       eyebrow="Before vs After"
@@ -677,6 +677,7 @@ function CodeDiffViewer({ model, onCopyOriginal, onCopyOptimized }) {
           statuses={model.diff.originalStatus}
           tone="original"
           onCopy={onCopyOriginal}
+          isCopied={copyState === "Original copied"}
         />
         <DiffPane
           title="Optimized Code"
@@ -686,6 +687,7 @@ function CodeDiffViewer({ model, onCopyOriginal, onCopyOptimized }) {
           statuses={model.diff.improvedStatus}
           tone="optimized"
           onCopy={onCopyOptimized}
+          isCopied={copyState === "Optimized copied"}
         />
       </div>
       <div className="diff-stats">
@@ -697,9 +699,10 @@ function CodeDiffViewer({ model, onCopyOriginal, onCopyOptimized }) {
   );
 }
 
-function ApproachTabs({ model }) {
+function ApproachTabs({ model, onCopy, copyState }) {
   const [active, setActive] = React.useState("brute");
   const current = model.approaches.find((item) => item.id === active) || model.approaches[0];
+  const isCopied = copyState === `${current.title} copied`;
 
   return (
     <SectionShell
@@ -719,7 +722,17 @@ function ApproachTabs({ model }) {
         <div className="approach-card-top">
           <div>
             <span className="summary-eyebrow">{current.badge}</span>
-            <h3>{current.title}</h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <h3 style={{ margin: 0 }}>{current.title}</h3>
+              <button 
+                type="button" 
+                className={`ghost-button ${isCopied ? "copied" : ""}`}
+                style={{ fontSize: '0.65rem', padding: '2px 8px' }}
+                onClick={() => onCopy(current.code, `${current.title} copied`)}
+              >
+                {isCopied ? "Copied!" : "Copy Code"}
+              </button>
+            </div>
           </div>
           <div className="complexity-chip-group">
             <span className="complexity-chip">Time {current.complexity}</span>

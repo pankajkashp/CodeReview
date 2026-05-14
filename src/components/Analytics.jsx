@@ -35,15 +35,35 @@ export function Analytics({
   );
 
   const copyToClipboard = async (text, label) => {
+    const cleanText = String(text || "").trim();
+    if (!cleanText) return;
+
     try {
-      await navigator.clipboard.writeText(text || "");
+      // Primary: Clipboard API
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(cleanText);
+      } else {
+        // Fallback: Textarea hack
+        const textArea = document.createElement("textarea");
+        textArea.value = cleanText;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        textArea.remove();
+      }
+      
       setCopyState(label);
       window.clearTimeout(copyTimerRef.current);
-      copyTimerRef.current = window.setTimeout(() => setCopyState(""), 1400);
-    } catch {
+      copyTimerRef.current = window.setTimeout(() => setCopyState(""), 2000);
+    } catch (err) {
+      console.error("Copy failed:", err);
       setCopyState("Copy failed");
       window.clearTimeout(copyTimerRef.current);
-      copyTimerRef.current = window.setTimeout(() => setCopyState(""), 1400);
+      copyTimerRef.current = window.setTimeout(() => setCopyState(""), 2000);
     }
   };
 
@@ -81,8 +101,12 @@ export function Analytics({
               <button type="button" className="primary-button" onClick={onBackToDashboard}>
                 Back to dashboard
               </button>
-              <button type="button" className="ghost-button" onClick={() => copyToClipboard(model.optimizedCode || "", "Optimized code copied")}>
-                {copyState || "Copy optimized code"}
+              <button 
+                type="button" 
+                className={`ghost-button ${copyState === "Optimized copied" ? "copied" : ""}`} 
+                onClick={() => copyToClipboard(model.optimizedCode || "", "Optimized copied")}
+              >
+                {copyState === "Optimized copied" ? "Optimized copied!" : "Copy optimized code"}
               </button>
             </div>
           </div>
@@ -116,11 +140,16 @@ export function Analytics({
 
         <CodeDiffViewer
           model={model}
-          onCopyOriginal={() => copyToClipboard(originalCode, "Original code copied")}
-          onCopyOptimized={() => copyToClipboard(model.optimizedCode || "", "Optimized code copied")}
+          copyState={copyState}
+          onCopyOriginal={() => copyToClipboard(originalCode, "Original copied")}
+          onCopyOptimized={() => copyToClipboard(model.optimizedCode || "", "Optimized copied")}
         />
 
-        <ApproachTabs model={model} />
+        <ApproachTabs 
+          model={model} 
+          onCopy={copyToClipboard}
+          copyState={copyState}
+        />
 
         <ExplanationTabs model={model} />
 
