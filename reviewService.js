@@ -100,7 +100,7 @@ export async function analyzeCodeWithGemini(code) {
         responseSchema: REVIEW_SCHEMA,
         temperature: 0.1
       },
-      systemInstruction: "You are a senior software architect. Analyze the code for bugs, optimization, and complexity. Identify both the original (older) complexity and the new (optimized) complexity. For the improvedCode field, provide well-formatted, indented code with appropriate newlines. Respond ONLY with valid JSON."
+      systemInstruction: "You are a senior software architect and mentor. Your goal is to provide code that is clean, readable, and uses standard best practices that are common in professional environments. Avoid niche or overly clever optimizations (like competitive programming hacks) unless they are absolutely necessary for the problem. If the provided code is already idiomatic and optimal, do not change it significantly; instead, set improvedCode to the same code and include a message in the optimization field stating that the code is already well-optimized. For the improvedCode field, provide well-formatted, indented code. Respond ONLY with valid JSON."
     });
 
     const prompt = `Analyze the following code for DSA integrity and optimization. Provide the original time/space complexity and the new optimized time/space complexity:\n\n${code}`;

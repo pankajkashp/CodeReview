@@ -484,14 +484,28 @@ function buildDiffMap(originalCode = "", improvedCode = "") {
 }
 
 function syntaxHighlight(line, language = "javascript") {
-  const rules = syntaxRules[language] || syntaxRules.javascript;
-  let html = escapeHtml(line);
+  const rules = syntaxRules[language] || syntaxRules.plain;
+  const escapedLine = escapeHtml(line);
+  
+  const tokenPatterns = [
+    { type: 'comment', regex: rules.comment.source },
+    { type: 'string', regex: rules.string.source },
+    { type: 'number', regex: rules.number.source },
+    { type: 'keyword', regex: rules.keyword.source }
+  ];
 
-  html = html.replace(rules.comment, '<span class="token token-comment">$&</span>');
-  html = html.replace(rules.string, '<span class="token token-string">$&</span>');
-  html = html.replace(rules.number, '<span class="token token-number">$&</span>');
-  html = html.replace(rules.keyword, '<span class="token token-keyword">$&</span>');
-  return html;
+  const combinedRegex = new RegExp(
+    tokenPatterns.map(p => `(${p.regex})`).join('|'),
+    'g'
+  );
+
+  return escapedLine.replace(combinedRegex, (...args) => {
+    const match = args[0];
+    const index = tokenPatterns.findIndex((_, i) => args[i + 1] !== undefined);
+    if (index === -1) return match;
+    const type = tokenPatterns[index].type;
+    return `<span class="token token-${type}">${match}</span>`;
+  });
 }
 
 export function buildAnalysisViewModel({ analysis = {}, originalCode = "" }) {

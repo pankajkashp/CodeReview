@@ -167,31 +167,10 @@ export function Analytics({
         />
       </main>
 
-      <footer className="analytics-footer">
-        <div className="footer-metrics">
-          <div className="footer-metric">
-            <small>Readability</small>
-            <strong>{model.readabilityScore}</strong>
-          </div>
-          <div className="footer-metric">
-            <small>Maintainability</small>
-            <strong>{model.maintainabilityScore}</strong>
-          </div>
-          <div className="footer-metric">
-            <small>Diff lines</small>
-            <strong>{model.diffStats.changedLines}</strong>
-          </div>
-          <div className="footer-metric">
-            <small>Pattern</small>
-            <strong>{model.pattern.title}</strong>
-          </div>
-        </div>
-        <div className="footer-actions">
-          <button type="button" className="ghost-button" onClick={onExit || onBackToDashboard}>
-            Exit review
-          </button>
-          <button type="button" className="primary-button" onClick={onApplyChanges}>
-            Apply all changes
+      <footer className="analytics-footer" style={{ justifyContent: 'center' }}>
+        <div className="footer-actions" style={{ marginLeft: 0 }}>
+          <button type="button" className="primary-button" onClick={onExit || onBackToDashboard}>
+            Go back
           </button>
         </div>
       </footer>
