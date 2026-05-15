@@ -22,9 +22,10 @@ const languageOptions = [
     label: "C++",
     fileName: "main.cpp",
     template: `#include <iostream>
+using namespace std;
 
 int main() {
-    std::cout << "CodeSage" << std::endl;
+    cout << "CodeSage" << endl;
     return 0;
 }`
   },
