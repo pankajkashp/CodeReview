@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import supabase from "./supabaseClient.js";
+import supabase from "./lib/supabaseClient.js";
 
-import { CodeIntegrityEngine } from "./components/CodeIntegrityEngine.jsx";
-import { Hero } from "./components/Hero.jsx";
-import { TopNavigation } from "./components/TopNavigation.jsx";
-import { Preloader } from "./components/Preloader.jsx";
-import { About } from "./components/About.jsx";
+import { CodeIntegrityEngine } from "./components/dashboard/CodeIntegrityEngine.jsx";
+import { Hero } from "./components/layout/Hero.jsx";
+import { TopNavigation } from "./components/layout/TopNavigation.jsx";
+import { Preloader } from "./components/layout/Preloader.jsx";
+import { About } from "./pages/About.jsx";
 
 export default function App() {
   const navigate = useNavigate();

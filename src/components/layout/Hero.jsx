@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
-import '../styles/hero.css';
+import '../../styles/hero.css';
 
 gsap.registerPlugin(TextPlugin);
 

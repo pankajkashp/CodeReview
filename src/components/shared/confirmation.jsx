@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import supabase from "../supabaseClient.js";
+import supabase from "../../lib/supabaseClient.js";
 import { useNavigate } from "react-router-dom";
 
 export default function Confirm() {

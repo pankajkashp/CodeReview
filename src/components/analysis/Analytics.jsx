@@ -1,32 +1,18 @@
 import React from "react";
-import "../styles/analytics.css";
+import "../../styles/analytics.css";
 import {
-  ApproachTabs,
   CodeDiffViewer,
-  ExplanationTabs,
-  FeedbackPanel,
-  LearningPanel,
-  ReanalyzePanel,
-  SuggestionsPanel,
   SummaryStrip,
   buildAnalysisViewModel
-} from "./analysis/AnalysisSections.jsx";
+} from "./AnalysisSections.jsx";
 
 export function Analytics({
   analysis = {},
   originalCode = "",
-  onExit,
-  onAnalyze,
-  onBackToDashboard,
-  loading = false
+  onBackToDashboard
 }) {
-  const [editableCode, setEditableCode] = React.useState(originalCode);
   const [copyState, setCopyState] = React.useState("");
   const copyTimerRef = React.useRef(null);
-
-  React.useEffect(() => {
-    setEditableCode(originalCode);
-  }, [originalCode]);
 
   const model = React.useMemo(
     () => buildAnalysisViewModel({ analysis: { ...analysis, originalCode }, originalCode }),
@@ -65,9 +51,6 @@ export function Analytics({
       copyTimerRef.current = window.setTimeout(() => setCopyState(""), 2000);
     }
   };
-
-  const timeLabel = model.timeComplexity || analysis.oldTimeComplexity || "Unknown";
-  const spaceLabel = model.spaceComplexity || analysis.oldSpaceComplexity || "Unknown";
 
   const getScoreStatus = (score) => {
     if (score >= 90) return { label: "EXCELLENT", color: "var(--semantic-success)" };

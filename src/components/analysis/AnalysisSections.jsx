@@ -499,11 +499,83 @@ function syntaxHighlight(line, language = "javascript") {
   });
 }
 
+function extractAndFormatCode(rawCode) {
+  let text = String(rawCode || "").trim();
+  
+  // 1. Remove markdown fences if present
+  const fenceRegex = /^```[a-z]*\n([\s\S]*?)```$/i;
+  const match = text.match(fenceRegex);
+  if (match) {
+    text = match[1].trim();
+  } else {
+    // Fallback block fence stripping
+    if (text.startsWith("\`\`\`")) {
+      const lines = text.split("\\n");
+      if (lines.length > 1) {
+        lines.shift();
+        if (lines[lines.length - 1].startsWith("\`\`\`")) {
+          lines.pop();
+        }
+        text = lines.join("\\n").trim();
+      }
+    }
+  }
+
+  // 2. Handle literal "\\n" if Gemini stringified it poorly
+  text = text.replace(/\\\\n/g, '\\n');
+
+  // 3. Fallback auto-formatting if the text is entirely on one line
+  if (text.length > 30 && !text.includes('\\n')) {
+    let formatted = "";
+    let indentLevel = 0;
+    const indentChar = "    ";
+    let inString = false;
+    let stringChar = "";
+    
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      if (inString) {
+        formatted += char;
+        if (char === stringChar && text[i-1] !== '\\\\') inString = false;
+        continue;
+      }
+      
+      if (char === '"' || char === "'" || char === "\`") {
+        inString = true;
+        stringChar = char;
+        formatted += char;
+        continue;
+      }
+      
+      if (char === '{') {
+        indentLevel++;
+        formatted += " {\\n" + indentChar.repeat(indentLevel);
+      } else if (char === '}') {
+        indentLevel = Math.max(0, indentLevel - 1);
+        formatted += "\\n" + indentChar.repeat(indentLevel) + "}\\n" + indentChar.repeat(indentLevel);
+      } else if (char === ';') {
+        const lookback = text.slice(Math.max(0, i - 20), i);
+        if (/for\\s*\\([^)]*$/.test(lookback)) {
+          formatted += "; ";
+        } else {
+          formatted += ";\\n" + indentChar.repeat(indentLevel);
+        }
+      } else {
+        formatted += char;
+      }
+    }
+    
+    text = formatted.replace(/\\n\\s*\\n/g, '\\n').trim();
+  }
+  
+  return text;
+}
+
 export function buildAnalysisViewModel({ analysis = {}, originalCode = "" }) {
   const code = String(originalCode || "");
   const language = detectLanguageLabel(code);
   const pattern = detectPattern(code);
-  const optimizedCode = String(analysis.improvedCode || "").trim() || pattern.optimalTemplate;
+  const optimizedCode = extractAndFormatCode(analysis.improvedCode) || pattern.optimalTemplate;
   const score = Number.isFinite(Number(analysis.score)) ? Math.max(0, Math.min(100, Math.round(Number(analysis.score)))) : 0;
   const timeComplexity = analysis.newTimeComplexity || analysis.oldTimeComplexity || "Unknown";
   const spaceComplexity = analysis.newSpaceComplexity || analysis.oldSpaceComplexity || "Unknown";

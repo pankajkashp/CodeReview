@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import supabase from "../supabaseClient.js";
-import { Analytics } from "./Analytics";
-import { UserProfile } from "./UserProfile.jsx";
-import { AnalysisLoader } from "./AnalysisLoader.jsx";
+import supabase from "../../lib/supabaseClient.js";
+import { Analytics } from "../analysis/Analytics.jsx";
+import { UserProfile } from "../shared/UserProfile.jsx";
+import { AnalysisLoader } from "../analysis/AnalysisLoader.jsx";
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
@@ -15,72 +15,81 @@ const languageOptions = [
     id: "javascript",
     label: "JavaScript",
     fileName: "analysis.js",
-    template: `function analyzeData(items) {
-  for (let i = 0; i < items.length; i++) {
-    for (let j = 0; j < items.length; j++) {
-      if (items[i] === items[j]) {
-        console.log(items[i]);
+    template: `function twoSum(nums, target) {
+  for (let i = 0; i < nums.length; i++) {
+    for (let j = i + 1; j < nums.length; j++) {
+      if (nums[i] + nums[j] === target) {
+        return [i, j];
       }
     }
   }
+  return [];
 }`
   },
   {
     id: "python",
     label: "Python",
     fileName: "main.py",
-    template: `def analyze_data(items):
-    for i in range(len(items)):
-        for j in range(len(items)):
-            if items[i] == items[j]:
-                print(items[i])`
+    template: `def two_sum(nums, target):
+    for i in range(len(nums)):
+        for j in range(i + 1, len(nums)):
+            if nums[i] + nums[j] == target:
+                return [i, j]
+    return []`
   },
   {
     id: "cpp",
     label: "C++",
     fileName: "main.cpp",
-    template: `#include <iostream>
-#include <vector>
+    template: `#include <vector>
 
-void analyzeData(const std::vector<int>& items) {
-    for (size_t i = 0; i < items.size(); i++) {
-        for (size_t j = 0; j < items.size(); j++) {
-            if (items[i] == items[j]) {
-                std::cout << items[i] << std::endl;
+std::vector<int> twoSum(std::vector<int>& nums, int target) {
+    for (int i = 0; i < nums.size(); i++) {
+        for (int j = i + 1; j < nums.size(); j++) {
+            if (nums[i] + nums[j] == target) {
+                return {i, j};
             }
         }
     }
+    return {};
 }`
   },
   {
     id: "c",
     label: "C",
     fileName: "main.c",
-    template: `#include <stdio.h>
+    template: `#include <stdlib.h>
 
-void analyze_data(int items[], int size) {
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            if (items[i] == items[j]) {
-                printf("%d\\n", items[i]);
+int* twoSum(int* nums, int numsSize, int target, int* returnSize) {
+    for (int i = 0; i < numsSize; i++) {
+        for (int j = i + 1; j < numsSize; j++) {
+            if (nums[i] + nums[j] == target) {
+                int* result = malloc(2 * sizeof(int));
+                result[0] = i;
+                result[1] = j;
+                *returnSize = 2;
+                return result;
             }
         }
     }
+    *returnSize = 0;
+    return NULL;
 }`
   },
   {
     id: "java",
     label: "Java",
     fileName: "Main.java",
-    template: `public class Main {
-    public static void analyzeData(int[] items) {
-        for (int i = 0; i < items.length; i++) {
-            for (int j = 0; j < items.length; j++) {
-                if (items[i] == items[j]) {
-                    System.out.println(items[i]);
+    template: `public class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        for (int i = 0; i < nums.length; i++) {
+            for (int j = i + 1; j < nums.length; j++) {
+                if (nums[i] + nums[j] == target) {
+                    return new int[] { i, j };
                 }
             }
         }
+        return new int[] {};
     }
 }`
   }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import "../styles/analysis-loader.css";
+import "../../styles/analysis-loader.css";
 
 export function AnalysisLoader({ filename = "analysis.js" }) {
   const [visibleLines, setVisibleLines] = useState([]);

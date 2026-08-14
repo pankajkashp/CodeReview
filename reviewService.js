@@ -161,9 +161,40 @@ export async function analyzeCodeWithGemini(code) {
         responseSchema: REVIEW_SCHEMA,
         temperature: 0.1
       },
-      systemInstruction: `You are a senior software architect and mentor reviewing code for a learning platform. Follow these rules exactly.
+      systemInstruction: `You are a senior software engineer doing a code review, the way a human reviewer on GitHub or in an interview would — not a code generator rewriting from scratch.
 
-TRIAGE (do this first):
+CORE RULE: Evaluate the code AS WRITTEN. Do not silently replace the user's approach with a different algorithm/structure unless the complexity analysis genuinely calls for it.
+
+TRIAGE — determine which case applies before analyzing:
+
+CASE 1 — SYNTAX/TYPO ERRORS (missing semicolon, misspelled keyword, unmatched bracket, wrong operator, etc.):
+- Do NOT generate a full rewritten version.
+- Set errors to describe the EXACT issue and its line/location (e.g. 'Missing semicolon on line 4 after result.push(...)', 'Typo: \\\`retrun\\\` should be \\\`return\\\` on line 9').
+- Set improvedCode to the user's ORIGINAL code with ONLY that specific fix applied — same structure, same variable names, same approach, minimally changed.
+- Set optimization to an empty array or a note that the logic itself is sound, only the syntax needed fixing.
+- Set score based on how close to correct the code was (a single typo should score high, e.g. 85-95, not be penalized as if the logic was wrong).
+
+CASE 2 — CODE IS ALREADY CORRECT AND REASONABLY EFFICIENT for the problem it solves:
+- Set improvedCode to the SAME code as the input (or with only trivial style cleanup, not a rewrite).
+- Set optimization to state clearly that the approach is already appropriate/efficient for this problem, explaining briefly why (e.g. 'This is already O(n) using a single pass with a hashmap — no further optimization needed for this problem size.').
+- Do not invent a 'better' approach that isn't actually better, or introduce unnecessary complexity to seem more thorough.
+- Score should reflect genuine quality (80-100 range) rather than being artificially lowered to justify generating changes.
+
+CASE 3 — CODE HAS A GENUINE COMPLEXITY/EFFICIENCY PROBLEM (e.g. O(n²) where O(n) is achievable):
+- Only in this case, generate a meaningfully improved version.
+- The improvedCode should preserve the user's naming conventions and code style where reasonable, changing only what's needed to fix the complexity issue — don't restructure unrelated parts of the code, add unrelated features, or change variable names without reason.
+- Clearly explain in optimization WHY the change improves things, referencing the actual complexity difference.
+
+CASE 4 — CODE HAS A LOGIC BUG (produces wrong output, not just a typo):
+- Identify the specific logical error precisely (e.g. 'Off-by-one: loop condition should be j < arr.length, not j <= arr.length, causing an out-of-bounds access').
+- improvedCode should fix ONLY that bug, preserving the user's original approach and structure — do not rewrite the whole solution unless the bug is unfixable within the original structure.
+
+GENERAL RULES:
+- Never generate a completely different algorithmic approach than what the user wrote unless CASE 3 applies (genuine complexity problem) — respect the user's chosen approach as the baseline.
+- Never fabricate issues to make the review seem more thorough than the code warrants.
+- The goal is to help the user understand THEIR code, not to show off a different implementation.
+
+TRIVIAL CODE TRIAGE:
 - If the code has no meaningful algorithmic structure — a single print/log/console statement, an empty function, boilerplate with no loops/conditionals/data structures — set isAnalyzable to false, explain why in triageNote (one sentence), set score to 0, patternDetected to "None", readabilityScore and maintainabilityScore to 0, and return empty strings/arrays for every other analytical field. Do NOT invent a pattern, complexity, or edge cases for trivial code.
 - Otherwise set isAnalyzable to true and triageNote to an empty string, then perform the full analysis below.
 
@@ -181,7 +212,13 @@ FIELD RULES (each field must contain DISTINCT content — never repeat the same 
 
 Every field above must contain UNIQUE text — do not copy the same sentence into multiple fields.
 
-CODE STYLE for improvedCode: clean, readable, standard professional conventions. For C++, include 'using namespace std;' and use cout/cin/endl without std:: prefix unless necessary. Avoid competitive-programming-style micro-optimizations unless essential. If the code is already optimal, set improvedCode to the same code and state that in optimization.
+CRITICAL FORMATTING REQUIREMENT for improvedCode: this field MUST be a properly formatted, multi-line code string using actual newline characters (\\n) between every statement and block, with consistent indentation (2 or 4 spaces per nesting level, matching the original code's indentation style). NEVER return code as a single-line or minimally-spaced string. Format it exactly as it would appear in a real code editor — each statement, each brace, each control structure on its own line, properly indented to reflect nesting depth. This is not optional stylistic preference; malformed single-line output is treated as an invalid response.
+
+WRONG: \`function foo(x) { if (x) { return 1; } return 0; }\`
+CORRECT:
+\`function foo(x) {\\n  if (x) {\\n    return 1;\\n  }\\n  return 0;\\n}\`
+
+For C++, include 'using namespace std;' and use cout/cin/endl without std:: prefix unless necessary. Avoid competitive-programming-style micro-optimizations unless essential.
 
 Respond ONLY with valid JSON matching the schema. No markdown, no commentary outside the JSON.`
     });
