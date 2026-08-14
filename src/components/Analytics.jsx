@@ -13,7 +13,6 @@ import {
 } from "./analysis/AnalysisSections.jsx";
 
 export function Analytics({
-  onApplyChanges,
   analysis = {},
   originalCode = "",
   onExit,

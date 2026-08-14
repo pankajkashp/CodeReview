@@ -3,6 +3,12 @@ import supabase from "../supabaseClient.js";
 import { Analytics } from "./Analytics";
 import { UserProfile } from "./UserProfile.jsx";
 import { AnalysisLoader } from "./AnalysisLoader.jsx";
+import CodeMirror from '@uiw/react-codemirror';
+import { javascript } from '@codemirror/lang-javascript';
+import { python } from '@codemirror/lang-python';
+import { cpp } from '@codemirror/lang-cpp';
+import { java } from '@codemirror/lang-java';
+import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 
 const languageOptions = [
   {
@@ -63,9 +69,6 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
   const [history, setHistory] = useState([]);
   const [activePanel, setActivePanel] = useState("dashboard");
 
-  const searchTerm = "";
-
-  const lineRailRef = useRef(null);
   const fileInputRef = useRef(null);
 
   const lineCount = useMemo(() => code.split("\n").length, [code]);
@@ -115,23 +118,6 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
     fetchHistory();
   }, [fetchHistory]);
 
-  // 🛡️ LANGUAGE VALIDATION
-  const validateCode = (input, langId) => {
-    if (!input.trim()) return true;
-    
-    // Basic heuristic checks
-    if (langId === "javascript" && input.includes("def ") && !input.includes("function")) return false;
-    if (langId === "python" && (input.includes("function ") || input.includes("{") && input.includes("}"))) {
-      // Python doesn't use braces for blocks generally
-      if (!input.includes("def ")) return false;
-    }
-    if (langId === "cpp" && !input.includes("#include") && input.includes("def ")) return false;
-    if (langId === "c" && input.includes("public class") && input.includes("java")) return false;
-    if (langId === "java" && !input.includes("class ") && input.includes("def ")) return false;
-    
-    return true;
-  };
-
   const handleLanguageUpdate = (lang) => {
     setSelectedLanguage(lang);
     setCode(lang.template);
@@ -139,15 +125,9 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
     setStatus("idle");
   };
 
-  const handleCodeChange = (e) => {
-    const newCode = e.target.value;
-    setCode(newCode);
-    
-    if (!validateCode(newCode, selectedLanguage.id)) {
-      setError(`Language Mismatch: The code looks like it's not ${selectedLanguage.label}. Please switch language or check your code.`);
-    } else {
-      setError("");
-    }
+  const handleCodeChange = (val) => {
+    setCode(val);
+    setError("");
   };
 
   // 🚀 ANALYZE FUNCTION
@@ -190,7 +170,7 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
         await supabase.from("reviews").insert([
           {
             user_id: user.id,
-            code,
+            code: targetCode,
             result: data
           }
         ]);
@@ -206,7 +186,7 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
 
   return (
     <div className="engine-shell no-sidebar">
-      {status === "loading" && <AnalysisLoader />}
+      {status === "loading" && <AnalysisLoader filename={selectedLanguage.fileName} />}
 
       <section className="engine-workspace">
         <header className="engine-topbar">
@@ -230,7 +210,6 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
           <Analytics
             analysis={analysis}
             originalCode={code}
-            onApplyChanges={() => setActivePanel("dashboard")}
             onExit={onBack}
             loading={status === "loading"}
             onAnalyze={(newCode) => {
@@ -288,40 +267,27 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
 
 
                     <div className="editor-toolbar">
-                      <div>
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                      </div>
                       <strong>{selectedLanguage.fileName}</strong>
-                      <em>{selectedLanguage.label}</em>
-
                     </div>
 
-                    <div className="code-input-frame">
-                      <div className="line-rail-wrapper">
-                        <div className="line-rail" ref={lineRailRef}>
-                          {Array.from({ length: lineCount }, (_, i) => (
-                            <span key={i}>{i + 1}</span>
-                          ))}
-                        </div>
-                      </div>
-
-                      <textarea
+                    <div className="code-input-frame" style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                      <CodeMirror
                         value={code}
+                        theme={vscodeDark}
+                        extensions={[
+                          selectedLanguage.id === 'javascript' ? javascript({ jsx: true }) :
+                          selectedLanguage.id === 'python' ? python() :
+                          (selectedLanguage.id === 'cpp' || selectedLanguage.id === 'c') ? cpp() :
+                          selectedLanguage.id === 'java' ? java() : javascript()
+                        ]}
                         onChange={handleCodeChange}
-                        placeholder={`Paste your ${selectedLanguage.label} code here...`}
-
-                        onScroll={(e) => {
-                          if (lineRailRef.current) {
-                            lineRailRef.current.style.transform = `translateY(-${e.target.scrollTop}px)`;
-                          }
-                        }}
+                        style={{ fontSize: '14px', fontFamily: 'var(--font-main)' }}
+                        minHeight="300px"
                       />
                     </div>
 
                     <footer className="editor-footer">
-                      <small>{lineCount} lines</small>
+                      <small>{lineCount} {lineCount === 1 ? 'line' : 'lines'}</small>
                       <button 
                         className="pulse"
                         onClick={analyzeCode} 
@@ -330,8 +296,8 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                           display: 'flex', 
                           alignItems: 'center', 
                           gap: '10px',
-                          background: 'var(--primary-color)',
-                          color: 'var(--bg-deep)',
+                          background: 'var(--color-accent-primary)',
+                          color: 'var(--color-bg-page)',
                           fontWeight: '900',
                           padding: '0 25px',
                           borderRadius: '4px',
@@ -339,7 +305,7 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                         }}
                       >
                         {status === "loading" ? (
-                          <div className="tire-loader" style={{ width: '14px', height: '14px', border: '2px solid #000', borderTop: '2px solid #fff', animation: 'tire-spin 1s linear infinite' }}></div>
+                          <div className="tire-loader" style={{ width: '14px', height: '14px', border: '2px solid var(--color-border-subtle)', borderTop: '2px solid var(--color-text-primary)', animation: 'tire-spin 1s linear infinite' }}></div>
                         ) : (
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                             <path d="M5 12l5 5L20 7" />
@@ -355,12 +321,12 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                       <h2 style={{ margin: 0 }}>Live Intelligence</h2>
                       <div className="engine-status-badge" style={{ 
-                        background: 'var(--primary-glow)', 
+                         
                         padding: '4px 12px', 
                         borderRadius: '20px',
                         fontSize: '0.65rem',
                         fontWeight: '800',
-                        color: 'var(--primary-color)',
+                        color: 'var(--color-accent-primary)',
                         letterSpacing: '1px'
                       }}>
                         {status.toUpperCase()}
@@ -376,15 +342,15 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                       </div>
 
                       {error && (
-                        <div className="intel-item error" style={{ borderLeft: '2px solid var(--primary-color)', paddingLeft: '15px' }}>
-                          <strong style={{ color: 'var(--primary-color)' }}>System Alert</strong>
+                        <div className="intel-item error" style={{ borderLeft: '2px solid var(--color-accent-primary)', paddingLeft: '15px' }}>
+                          <strong style={{ color: 'var(--color-accent-primary)' }}>System Alert</strong>
                           <p>{error}</p>
                         </div>
                       )}
 
                       {analysis?.simulated && (
-                        <div className="intel-item warn" style={{ borderLeft: '2px solid #8a55ff', paddingLeft: '15px' }}>
-                          <strong style={{ color: '#8a55ff' }}>Simulation Active</strong>
+                        <div className="intel-item warn" style={{ borderLeft: '2px solid var(--color-status-warning)', paddingLeft: '15px' }}>
+                          <strong style={{ color: 'var(--color-status-warning)' }}>Simulation Active</strong>
                           <p>Results are simulated due to offline mode.</p>
                         </div>
                       )}
@@ -405,19 +371,10 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
               <section className="history-panel" style={{ animation: 'fadeIn 0.4s ease' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                   <h2 style={{ margin: 0 }}>Review History</h2>
-                  {searchTerm && <span style={{ color: 'var(--primary-color)', fontSize: '0.8rem' }}>FILTERING BY: "{searchTerm}"</span>}
                 </div>
                 <div className="history-list">
-                  {history.filter(h => 
-                    h.code.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                    (h.result?.summary || "").toLowerCase().includes(searchTerm.toLowerCase())
-                  ).length > 0 ? (
-                    history
-                      .filter(h => 
-                        h.code.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                        (h.result?.summary || "").toLowerCase().includes(searchTerm.toLowerCase())
-                      )
-                      .map((h) => (
+                  {history.length > 0 ? (
+                    history.map((h) => (
                       <article 
                         key={h.id} 
                         className="history-card"

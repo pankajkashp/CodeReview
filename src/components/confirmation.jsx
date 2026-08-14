@@ -24,33 +24,33 @@ export default function Confirm() {
 
   return (
     <div style={{
-      background: '#020305',
+      background: 'var(--color-bg-page)',
       height: '100vh',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      color: 'white',
+      color: 'var(--color-text-primary)',
       textAlign: 'center'
     }}>
       <div style={{
-        background: 'rgba(59, 130, 246, 0.1)',
+        
         borderRadius: '50%',
         width: '80px',
         height: '80px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        border: '1px solid var(--primary-color)',
+        border: '1px solid var(--color-accent-primary)',
         marginBottom: '24px',
         animation: 'pulse 2s infinite'
       }}>
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" strokeWidth="2.5">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-primary)" strokeWidth="2.5">
           <path d="M20 6L9 17L4 12" />
         </svg>
       </div>
       <h1 style={{ fontSize: '2.4rem', fontWeight: '900', marginBottom: '8px' }}>Identity Verified</h1>
-      <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1.1rem' }}>Your account is now fully secured. Redirecting to terminal...</p>
+      <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem' }}>Your account is now fully secured. Redirecting to terminal...</p>
 
       <div style={{ marginTop: '40px' }} className="tire-loader"></div>
     </div>

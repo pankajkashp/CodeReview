@@ -67,12 +67,7 @@ export default function App() {
               position: 'relative' 
             }}>
               {/* 🌌 BACKGROUND STARS FOR LANDING */}
-              <div className="stars"></div>
-              <div className="shooting-stars">
-                <span></span><span></span><span></span><span></span>
-                <span></span><span></span><span></span><span></span>
-              </div>
-
+                            
 
               <TopNavigation
                 user={user}

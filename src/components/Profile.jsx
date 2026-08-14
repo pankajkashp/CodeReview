@@ -174,7 +174,7 @@ export default function Profile() {
               accept="image/*"
             />
             <h1 style={{ fontSize: '1.2rem', margin: '10px 0 4px' }}>{fullName || "Developer"}</h1>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>{user.email}</p>
+            <p style={{ color: 'var(--color-border-subtle)', fontSize: '0.85rem' }}>{user.email}</p>
           </div>
 
           <nav className="profile-nav">
@@ -195,7 +195,7 @@ export default function Profile() {
 
         <main className="profile-main">
           {activeTab === "history" ? (
-            <section className="history-card" style={{ background: '#0d1117' }}>
+            <section className="history-card" style={{ background: 'var(--color-bg-surface)' }}>
               <header className="card-header">
                 <h2>Security Log</h2>
                 <p>Tracked records of your source code integrity reviews.</p>
@@ -209,7 +209,7 @@ export default function Profile() {
                       <span>{new Date(record.created_at).toLocaleString()}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                      <div className="history-score" style={{ background: 'rgba(59, 130, 246, 0.1)', color: 'var(--primary-color)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                      <div className="history-score" style={{  color: 'var(--color-accent-primary)',  }}>
                         {record.result?.score || 85}
                       </div>
                       <button
@@ -229,7 +229,7 @@ export default function Profile() {
               </div>
             </section>
           ) : (
-            <section className="settings-card" style={{ background: '#0d1117' }}>
+            <section className="settings-card" style={{ background: 'var(--color-bg-surface)' }}>
               <header className="card-header">
                 <h2>Account Configuration</h2>
                 <p>Maintain your developer identity and security preferences.</p>
@@ -270,7 +270,7 @@ export default function Profile() {
                       {uploading ? "..." : "UPLOAD FILE"}
                     </button>
                   </div>
-                  <p style={{ fontSize: '0.7rem', color: '#666', marginTop: '5px' }}>
+                  <p style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', marginTop: '5px' }}>
                     Paste a link or upload a file from your desktop.
                   </p>
                 </div>
@@ -285,13 +285,13 @@ export default function Profile() {
                 </button>
 
                 {error && (
-                  <div className="error-message" style={{ color: 'var(--primary-color)', fontSize: '0.85rem', marginTop: '15px', textAlign: 'center', padding: '10px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '4px' }}>
+                  <div className="error-message" style={{ color: 'var(--color-status-error)', fontSize: '0.85rem', marginTop: '15px', textAlign: 'center', padding: '10px', background: 'var(--color-status-error)', borderRadius: '4px' }}>
                     {error}
                   </div>
                 )}
 
                 {success && (
-                  <div className="success-message" style={{ color: '#34d399', fontSize: '0.85rem', marginTop: '15px', textAlign: 'center', padding: '10px', background: 'rgba(52, 211, 153, 0.1)', borderRadius: '4px' }}>
+                  <div className="success-message" style={{ color: 'var(--color-status-success)', fontSize: '0.85rem', marginTop: '15px', textAlign: 'center', padding: '10px',  borderRadius: '4px' }}>
                     {success}
                   </div>
                 )}

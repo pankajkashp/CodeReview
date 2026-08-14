@@ -9,38 +9,22 @@
   justify-content: center;
   height: 100vh;
 
-  background-color: #020305;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-color: var(--color-bg-inverse);
+
   background-size: 32px 32px;
 }
 
 
 /* ================= 🌌 STARS BACKGROUND ================= */
 
-.stars {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-}
 
-.stars::before {
-  content: "";
-  position: absolute;
-  width: 200%;
-  height: 200%;
-  background-image: radial-gradient(#ffffff 1.5px, transparent 1.5px);
-  background-size: 30px 30px;
-  opacity: 0.18;
-  animation: moveStars 40s linear infinite;
-}
 
 .stars::after {
   content: "";
   position: absolute;
   width: 200%;
   height: 200%;
-  background-image: radial-gradient(#ffffff 2.2px, transparent 2.2px);
+
   background-size: 80px 80px;
   opacity: 0.12;
   animation: moveStars 25s linear infinite;
@@ -48,22 +32,7 @@
 
 /* ================= ☄️ SHOOTING STARS ================= */
 
-.shooting-stars {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
 
-.shooting-stars span {
-  position: absolute;
-  width: 2px;
-  height: 80px;
-  background: linear-gradient(-45deg, var(--primary-color), transparent);
-  opacity: 0;
-  transform: rotate(45deg);
-  animation: shoot 5s linear infinite;
-}
 
 .shooting-stars span:nth-child(1) {
   top: 10%;
@@ -86,11 +55,11 @@
 /* ================= CARD ================= */
 
 .login-card {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--color-border-subtle);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--color-border-subtle);
   border-radius: 12px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 25px 50px -12px var(--color-bg-page);
   max-width: 420px;
   padding: 48px 40px;
   position: relative;
@@ -113,7 +82,7 @@
   z-index: 2;
 }
 .login-card::before {
-  background: linear-gradient(90deg, var(--primary-color), #b64c4c);
+
   content: "";
   height: 2px;
   left: 0;
@@ -162,28 +131,28 @@
 }
 
 .form-group input {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--color-bg-page);
+  border: 1px solid var(--color-border-subtle);
   border-radius: 6px;
-  color: #ffffff;
+  color: var(--color-text-primary)fff;
   min-height: 48px;
   padding: 0 16px;
   transition: all 0.2s ease;
 }
 
 .form-group input:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+  border-color: var(--color-accent-primary);
+
   outline: 0;
 }
 
 /* ================= BUTTON ================= */
 
 .login-submit {
-  background: var(--primary-color);
+  background: var(--color-accent-primary);
   border: 0;
   border-radius: 6px;
-  color: #020305;
+  color: var(--color-bg-inverse);
   cursor: pointer;
   font-size: 0.72rem;
   font-weight: 950;
@@ -195,7 +164,7 @@
 }
 
 .login-submit:hover {
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+
   transform: translateY(-2px);
 }
 
@@ -209,7 +178,7 @@
 .login-footer button {
   background: transparent;
   border: 0;
-  color: var(--primary-color);
+  color: var(--color-accent-primary);
   cursor: pointer;
   font-size: 0.88rem;
   font-weight: 600;
@@ -224,9 +193,9 @@
   font-size: 0.85rem;
   text-align: center;
   animation: fadeIn 0.3s ease;
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  color: var(--primary-color);
+  background: var(--color-accent-muted);
+  border: 1px solid var(--color-accent-muted);
+  color: var(--color-accent-primary);
 }
 
 /* ================= BACK BUTTON ================= */
@@ -243,7 +212,7 @@
 }
 
 .back-to-site:hover {
-  color: #ffffff;
+  color: var(--color-text-primary)fff;
 }
 
 /* ================= ANIMATIONS ================= */

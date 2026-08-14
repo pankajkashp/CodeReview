@@ -365,7 +365,7 @@ function createLearningData(pattern) {
   };
 }
 
-function createFeedbackData({ analysis, pattern, originalCode, readabilityScore, maintainabilityScore }) {
+function createFeedbackData({ analysis, pattern, readabilityScore, maintainabilityScore }) {
   const errors = Array.isArray(analysis.errors)
     ? analysis.errors.map(String)
     : Array.isArray(analysis.bugs)
@@ -373,24 +373,15 @@ function createFeedbackData({ analysis, pattern, originalCode, readabilityScore,
       : [];
 
   const optimization = Array.isArray(analysis.optimization) ? analysis.optimization.map(String) : [];
-  const hasSingleLetterNames = /\b([a-zA-Z])\b/.test(originalCode);
 
   return {
-    codingMistakes: errors.length ? errors : [pattern.explanation],
-    namingIssues: hasSingleLetterNames
-      ? ["The code uses short names in places where descriptive names would make intent clearer."]
-      : ["Variable names are reasonably clear, but a few helper names could be more descriptive."],
-    missedEdgeCases: [
-      "Check empty input, single-item input, and repeated values.",
-      "Make sure the optimized path still behaves correctly with minimal data."
-    ],
-    scalabilityProblems: [
-      analysis.oldTimeComplexity || "The current approach may not scale well on large inputs.",
-      "Repeated scanning is the main source of runtime pressure."
-    ],
+    codingMistakes: analysis.codingMistakes ? [analysis.codingMistakes] : errors,
+    namingIssues: analysis.namingIssues ? [analysis.namingIssues] : [],
+    missedEdgeCases: Array.isArray(analysis.missedEdgeCases) && analysis.missedEdgeCases.length > 0 
+      ? analysis.missedEdgeCases 
+      : [],
+    scalabilityProblems: analysis.scalabilityNotes ? [analysis.scalabilityNotes] : [],
     bestPractices: [
-      "Use guard clauses to keep the main logic flat.",
-      "Prefer a lookup structure when membership checks repeat.",
       "Keep the optimized flow easy to read for future maintainers."
     ],
     optimization,
@@ -549,28 +540,27 @@ export function buildAnalysisViewModel({ analysis = {}, originalCode = "" }) {
       {
         id: "why",
         label: "Why it works",
-        copy: pattern.explanation
+        copy: analysis.whyItWorks || pattern.explanation
       },
       {
         id: "pattern",
         label: "Pattern used",
-        copy: `${pattern.title} is a ${pattern.category.toLowerCase()} pattern that becomes useful when repeated work is the main problem.`
+        copy: analysis.patternExplanation || `${pattern.title} is a ${pattern.category.toLowerCase()} pattern that becomes useful when repeated work is the main problem.`
       },
       {
         id: "intuition",
         label: "Interview intuition",
-        copy: pattern.interview
+        copy: analysis.interviewIntuition || pattern.interview
       },
       {
         id: "beginner",
         label: "Beginner-friendly",
-        copy: pattern.beginner
+        copy: analysis.beginnerFriendlyNote || pattern.beginner
       }
     ],
     feedback: createFeedbackData({
       analysis,
       pattern,
-      originalCode: code,
       readabilityScore,
       maintainabilityScore
     }),

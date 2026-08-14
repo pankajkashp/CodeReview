@@ -2,7 +2,7 @@
   min-height: 100vh;
   width: 100%;
   background: transparent;
-  color: #fff;
+  color: var(--color-text-primary);
   display: flex;
   justify-content: center;
   padding: 120px 20px 80px;
@@ -30,13 +30,13 @@
 .about-badge {
   display: inline-block;
   padding: 6px 16px;
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  background: var(--color-accent-muted);
+  border: 1px solid var(--color-accent-muted);
   border-radius: 4px;
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 3px;
-  color: var(--primary-color);
+  color: var(--color-accent-primary);
   margin-bottom: 24px;
   text-transform: uppercase;
 }
@@ -49,8 +49,8 @@
 }
 
 .about-title .highlight {
-  color: #fff;
-  text-shadow: 0 0 40px rgba(59, 130, 246, 0.3);
+  color: var(--color-text-primary);
+  text-shadow: 0 0 40px var(--color-accent-muted);
 }
 
 .about-subtitle {
@@ -62,8 +62,8 @@
 }
 
 .section-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--color-border-subtle);
+  border: 1px solid var(--color-border-subtle);
   border-radius: 16px;
   padding: 40px;
   margin-bottom: 24px;
@@ -73,10 +73,10 @@
 }
 
 .section-card:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(59, 130, 246, 0.2);
+  background: var(--color-border-subtle);
+  border-color: var(--color-accent-muted);
   transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  box-shadow: 0 20px 40px var(--color-bg-page);
 }
 
 .card-header {
@@ -89,18 +89,18 @@
 .card-icon {
   width: 48px;
   height: 48px;
-  background: rgba(59, 130, 246, 0.1);
+  background: var(--color-accent-muted);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--primary-color);
+  color: var(--color-accent-primary);
 }
 
 .section-card h2 {
   font-size: 1.8rem;
   margin: 0;
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .section-card p {
@@ -111,7 +111,7 @@
 }
 
 .section-card strong {
-  color: var(--primary-color);
+  color: var(--color-accent-primary);
   font-weight: 700;
 }
 
@@ -131,7 +131,7 @@
 .step-number {
   font-size: 2rem;
   font-weight: 900;
-  color: rgba(59, 130, 246, 0.2);
+  color: var(--color-accent-muted);
   margin-bottom: 16px;
   font-family: 'Courier New', Courier, monospace;
 }
@@ -139,7 +139,7 @@
 .section-card.secondary h3 {
   font-size: 1.2rem;
   margin-bottom: 16px;
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .section-card.secondary p {
@@ -155,8 +155,8 @@
 
 .back-btn {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #fff;
+  border: 1px solid var(--color-border-subtle);
+  color: var(--color-text-primary);
   padding: 12px 32px;
   border-radius: 40px;
   font-size: 0.8rem;
@@ -170,9 +170,9 @@
 }
 
 .back-btn:hover {
-  background: #fff;
+  background: var(--color-text-primary);
   color: #000;
-  border-color: #fff;
+  border-color: var(--color-text-primary);
   transform: scale(1.05);
 }
 

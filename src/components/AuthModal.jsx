@@ -64,18 +64,12 @@ export default function AuthModal({ supabase, onClose }) {
   return (
     <div className="auth-overlay">
       {/* 🌌 BACKGROUND */}
-      <div className="stars"></div>
-      <div className="shooting-stars">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-
+            
       <div className="auth-box">
 
         <button className="close" onClick={onClose}>✕</button>
         
-        <div style={{ marginBottom: '20px', fontSize: '24px', color: 'var(--primary-color)' }}>◇</div>
+        <div style={{ marginBottom: '20px', fontSize: '24px', color: 'var(--color-accent-primary)' }}>◇</div>
         <h2>{mode === "login" ? "Access Console" : "Initialize Identity"}</h2>
 
         <form onSubmit={mode === "login" ? handleLogin : handleSignup}>

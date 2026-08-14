@@ -56,13 +56,8 @@ export default function Login() {
 
       {/* 🌌 BACKGROUND LAYER */}
       <div className="login-bg">
-        <div className="stars"></div>
-
-        <div className="shooting-stars">
-          <span></span><span></span><span></span><span></span>
-          <span></span><span></span><span></span><span></span>
-        </div>
-
+        
+        
       </div>
 
       {/* 💠 LOGIN CARD */}

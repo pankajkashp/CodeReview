@@ -4,22 +4,51 @@ import process from "node:process";
 const REVIEW_SCHEMA = {
   type: SchemaType.OBJECT,
   properties: {
-    errors: {
+    isAnalyzable: { type: SchemaType.BOOLEAN },
+    triageNote: { type: SchemaType.STRING },
+
+    patternDetected: { type: SchemaType.STRING },
+    readabilityScore: { type: SchemaType.INTEGER },
+    maintainabilityScore: { type: SchemaType.INTEGER },
+
+    whyItWorks: { type: SchemaType.STRING },
+    patternExplanation: { type: SchemaType.STRING },
+    interviewIntuition: { type: SchemaType.STRING },
+    beginnerFriendlyNote: { type: SchemaType.STRING },
+
+    codingMistakes: { type: SchemaType.STRING },
+    namingIssues: { type: SchemaType.STRING },
+    missedEdgeCases: {
       type: SchemaType.ARRAY,
       items: { type: SchemaType.STRING }
     },
-    optimization: {
-      type: SchemaType.ARRAY,
-      items: { type: SchemaType.STRING }
-    },
+    scalabilityNotes: { type: SchemaType.STRING },
+
+    errors: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+    optimization: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+
     oldTimeComplexity: { type: SchemaType.STRING },
     newTimeComplexity: { type: SchemaType.STRING },
     oldSpaceComplexity: { type: SchemaType.STRING },
     newSpaceComplexity: { type: SchemaType.STRING },
+
     improvedCode: { type: SchemaType.STRING },
     score: { type: SchemaType.INTEGER }
   },
   required: [
+    "isAnalyzable",
+    "triageNote",
+    "patternDetected",
+    "readabilityScore",
+    "maintainabilityScore",
+    "whyItWorks",
+    "patternExplanation",
+    "interviewIntuition",
+    "beginnerFriendlyNote",
+    "codingMistakes",
+    "namingIssues",
+    "missedEdgeCases",
+    "scalabilityNotes",
     "errors",
     "optimization",
     "oldTimeComplexity",
@@ -33,12 +62,31 @@ const REVIEW_SCHEMA = {
 
 function normalizeReviewResult(result) {
   return {
+    isAnalyzable: typeof result.isAnalyzable === "boolean" ? result.isAnalyzable : true,
+    triageNote: typeof result.triageNote === "string" ? result.triageNote : "",
+
+    patternDetected: typeof result.patternDetected === "string" ? result.patternDetected : "Unknown",
+    readabilityScore: Number.isFinite(Number(result.readabilityScore)) ? Math.max(0, Math.min(100, Math.round(Number(result.readabilityScore)))) : 0,
+    maintainabilityScore: Number.isFinite(Number(result.maintainabilityScore)) ? Math.max(0, Math.min(100, Math.round(Number(result.maintainabilityScore)))) : 0,
+
+    whyItWorks: typeof result.whyItWorks === "string" ? result.whyItWorks : "",
+    patternExplanation: typeof result.patternExplanation === "string" ? result.patternExplanation : "",
+    interviewIntuition: typeof result.interviewIntuition === "string" ? result.interviewIntuition : "",
+    beginnerFriendlyNote: typeof result.beginnerFriendlyNote === "string" ? result.beginnerFriendlyNote : "",
+
+    codingMistakes: typeof result.codingMistakes === "string" ? result.codingMistakes : "",
+    namingIssues: typeof result.namingIssues === "string" ? result.namingIssues : "",
+    missedEdgeCases: Array.isArray(result.missedEdgeCases) ? result.missedEdgeCases.map(String) : [],
+    scalabilityNotes: typeof result.scalabilityNotes === "string" ? result.scalabilityNotes : "",
+
     errors: Array.isArray(result.errors) ? result.errors.map(String) : [],
     optimization: Array.isArray(result.optimization) ? result.optimization.map(String) : [],
-    oldTimeComplexity: typeof result.oldTimeComplexity === "string" ? result.oldTimeComplexity : (typeof result.timeComplexity === "string" ? result.timeComplexity : "Unknown"),
-    newTimeComplexity: typeof result.newTimeComplexity === "string" ? result.newTimeComplexity : (typeof result.timeComplexity === "string" ? result.timeComplexity : "Unknown"),
-    oldSpaceComplexity: typeof result.oldSpaceComplexity === "string" ? result.oldSpaceComplexity : (typeof result.spaceComplexity === "string" ? result.spaceComplexity : "Unknown"),
-    newSpaceComplexity: typeof result.newSpaceComplexity === "string" ? result.newSpaceComplexity : (typeof result.spaceComplexity === "string" ? result.spaceComplexity : "Unknown"),
+
+    oldTimeComplexity: typeof result.oldTimeComplexity === "string" ? result.oldTimeComplexity : "Unknown",
+    newTimeComplexity: typeof result.newTimeComplexity === "string" ? result.newTimeComplexity : "Unknown",
+    oldSpaceComplexity: typeof result.oldSpaceComplexity === "string" ? result.oldSpaceComplexity : "Unknown",
+    newSpaceComplexity: typeof result.newSpaceComplexity === "string" ? result.newSpaceComplexity : "Unknown",
+
     improvedCode: typeof result.improvedCode === "string" ? result.improvedCode : "",
     score: Number.isFinite(Number(result.score)) ? Math.max(0, Math.min(100, Math.round(Number(result.score)))) : 0
   };
@@ -46,6 +94,19 @@ function normalizeReviewResult(result) {
 
 function createSimulatedReview(reason) {
   return {
+    isAnalyzable: true,
+    triageNote: "",
+    patternDetected: "Simulated Pattern",
+    readabilityScore: 70,
+    maintainabilityScore: 70,
+    whyItWorks: "[Simulated] Configure GEMINI_API_KEY for a real explanation.",
+    patternExplanation: "[Simulated] Pattern explanation unavailable offline.",
+    interviewIntuition: "[Simulated] Interview intuition unavailable offline.",
+    beginnerFriendlyNote: "[Simulated] Beginner note unavailable offline.",
+    codingMistakes: "[Simulated] No live analysis performed.",
+    namingIssues: "[Simulated] No live analysis performed.",
+    missedEdgeCases: ["[Simulated] Configure GEMINI_API_KEY to check real edge cases."],
+    scalabilityNotes: "[Simulated] Scalability notes unavailable offline.",
     errors: [`[Simulated] ${reason}`],
     optimization: ["[Simulated] Configure GEMINI_API_KEY to get a real review."],
     oldTimeComplexity: "O(n²)",
@@ -100,10 +161,32 @@ export async function analyzeCodeWithGemini(code) {
         responseSchema: REVIEW_SCHEMA,
         temperature: 0.1
       },
-      systemInstruction: "You are a senior software architect and mentor. Your goal is to provide code that is clean, readable, and uses standard best practices that are common in professional environments. For C++ code, always include 'using namespace std;' at the top and use standard names (like cout, cin, endl) without the 'std::' prefix unless there is a specific reason not to. Avoid niche or overly clever optimizations (like competitive programming hacks) unless they are absolutely necessary for the problem. If the provided code is already idiomatic and optimal, do not change it significantly; instead, set improvedCode to the same code and include a message in the optimization field stating that the code is already well-optimized. For the improvedCode field, provide well-formatted, indented code. Respond ONLY with valid JSON."
+      systemInstruction: `You are a senior software architect and mentor reviewing code for a learning platform. Follow these rules exactly.
+
+TRIAGE (do this first):
+- If the code has no meaningful algorithmic structure — a single print/log/console statement, an empty function, boilerplate with no loops/conditionals/data structures — set isAnalyzable to false, explain why in triageNote (one sentence), set score to 0, patternDetected to "None", readabilityScore and maintainabilityScore to 0, and return empty strings/arrays for every other analytical field. Do NOT invent a pattern, complexity, or edge cases for trivial code.
+- Otherwise set isAnalyzable to true and triageNote to an empty string, then perform the full analysis below.
+
+FIELD RULES (each field must contain DISTINCT content — never repeat the same sentence across two fields):
+- whyItWorks: explain the reasoning behind the pattern/approach used (1-2 sentences). This is about WHY the technique is correct.
+- patternExplanation: name the algorithmic pattern and why THIS code matches it specifically (different angle from whyItWorks — focus on pattern recognition, not correctness proof).
+- interviewIntuition: how an interviewer would expect the candidate to arrive at this approach out loud.
+- beginnerFriendlyNote: a plain-language one-liner a beginner could understand, avoiding jargon.
+- codingMistakes: concrete mistakes found in THIS code (not generic advice). If none, say "No significant coding mistakes found."
+- namingIssues: comment specifically on variable/function names in THIS code. If names are fine, say so explicitly.
+- missedEdgeCases: array of SPECIFIC edge cases this code fails to handle (empty input, nulls, duplicates, overflow, etc.) — only list ones that actually apply.
+- scalabilityNotes: how this code behaves as input size grows, referencing the actual complexity found.
+- errors: array of concrete bugs, if any.
+- optimization: array of concrete optimization suggestions, if any.
+
+Every field above must contain UNIQUE text — do not copy the same sentence into multiple fields.
+
+CODE STYLE for improvedCode: clean, readable, standard professional conventions. For C++, include 'using namespace std;' and use cout/cin/endl without std:: prefix unless necessary. Avoid competitive-programming-style micro-optimizations unless essential. If the code is already optimal, set improvedCode to the same code and state that in optimization.
+
+Respond ONLY with valid JSON matching the schema. No markdown, no commentary outside the JSON.`
     });
 
-    const prompt = `Analyze the following code for DSA integrity and optimization. Provide the original time/space complexity and the new optimized time/space complexity:\n\n${code}`;
+    const prompt = `Review the following code. First determine if it is substantial enough to analyze (see TRIAGE rules). If yes, provide a full DSA-focused review: pattern detection, complexity (before/after), readability and maintainability scoring, concrete mistakes, edge cases, and an optimized version.\n\nCode:\n${code}`;
 
     // Try up to 2 times for each model
     for (let i = 0; i < 2; i++) {

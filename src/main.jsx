@@ -6,6 +6,7 @@ import Confirm from "./components/confirmation.jsx";
 import Login from "./components/Login.jsx";
 import Logout from "./components/Logout.jsx";
 import Profile from "./components/Profile.jsx";
+import "./styles/tokens.css";
 import "./styles/global.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(

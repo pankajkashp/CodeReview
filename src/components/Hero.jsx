@@ -1,246 +1,156 @@
-import { EngineEffect } from "./EngineEffect";
+import { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { TextPlugin } from 'gsap/TextPlugin';
+import '../styles/hero.css';
 
-const languagesRow1 = [
-  { name: "JavaScript", logo: "JS", tag: "@brendan_eich", text: "Any application that can be written in JavaScript, will eventually be written in JavaScript." },
-  { name: "Python", logo: "PY", tag: "@guido_van", text: "Beautiful is better than ugly. Explicit is better than implicit. Simple is better than complex." },
-  { name: "C", logo: "C", tag: "@dennis_ritchie", text: "C is quirky, flawed, and an enormous success. It is the language that power the world's kernels." }
-];
+gsap.registerPlugin(TextPlugin);
 
-const languagesRow2 = [
-  { name: "C++", logo: "C+", tag: "@bjarne_stroustrup", text: "C makes it easy to shoot yourself in the foot; C++ makes it harder, but when you do it blows your whole leg off." },
-  { name: "Java", logo: "JV", tag: "@james_gosling", text: "Write once, run everywhere. The powerhouse of the enterprise ecosystem for decades." }
-];
+function AnimatedCodeSnippet() {
+  const codeRef = useRef(null);
+  
+  useEffect(() => {
+    let ctx = gsap.context(() => {
+      // Respect prefers-reduced-motion
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        // Clear text before starting
+        const el = codeRef.current;
+        if (el) el.innerHTML = "";
+        
+        // Target raw code text
+        const codeText = `function analyzeArchitecture(ast) {
+  // 1. Tokenize input stream
+  const tokens = lexer(ast.raw);
+  
+  // 2. Build semantic tree
+  const tree = buildTree(tokens);
+  
+  // 3. Detect O(N^2) patterns
+  const bottlenecks = detectLoops(tree);
+  
+  if (bottlenecks.length > 0) {
+    return optimize(bottlenecks);
+  }
+  
+  return { status: 'OPTIMAL', score: 98 };
+}`;
+        
+        // We use a looping timeline
+        const typeTl = gsap.timeline({ repeat: -1, delay: 1.5 });
+        typeTl.to(el, {
+          duration: 4,
+          text: {
+            value: codeText,
+            preserveSpaces: true
+          },
+          ease: "none"
+        }).to(el, {
+          duration: 1.5,
+          text: {
+            value: "",
+            preserveSpaces: true
+          },
+          ease: "none",
+          delay: 3 // Wait 3 seconds before erasing and repeating
+        });
+      });
+      
+      mm.add("(prefers-reduced-motion: reduce)", () => {
+        const el = codeRef.current;
+        if (el) el.innerHTML = `function analyzeArchitecture(ast) {\n  const tokens = lexer(ast.raw);\n  const tree = buildTree(tokens);\n  const bottlenecks = detectLoops(tree);\n  if (bottlenecks.length > 0) {\n    return optimize(bottlenecks);\n  }\n  return { status: 'OPTIMAL' };\n}`;
+      });
+    });
+    
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <div className="hero-ambient-code">
+      <div style={{ color: 'var(--color-text-secondary)', marginBottom: '10px', fontSize: '0.75rem', letterSpacing: '1px' }}>
+        // SYSTEM.THREAD_01
+      </div>
+      <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+        <code ref={codeRef} style={{ color: 'var(--color-text-primary)' }}></code>
+        <span className="hero-typing-cursor"></span>
+      </pre>
+    </div>
+  );
+}
 
 export function Hero({ onLaunch }) {
+  const heroRef = useRef(null);
+  const leftRef = useRef(null);
+  const rightRef = useRef(null);
+  const btnRef = useRef(null);
+  const bgRef = useRef(null);
+
+  useEffect(() => {
+    let ctx = gsap.context(() => {
+      const mm = gsap.matchMedia();
+      
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const tl = gsap.timeline();
+        
+        // Initial states
+        gsap.set(bgRef.current, { opacity: 0 });
+        gsap.set(leftRef.current.children, { y: 30, opacity: 0 });
+        gsap.set(rightRef.current, { x: 30, opacity: 0 });
+        gsap.set(btnRef.current, { scale: 0.8, opacity: 0 });
+        
+        // Sequence
+        tl.to(bgRef.current, { opacity: 0.2, duration: 1, ease: "power2.out" })
+          .to(leftRef.current.children, { y: 0, opacity: 1, duration: 0.8, stagger: 0.15, ease: "power2.out" }, "-=0.5")
+          .to(rightRef.current, { x: 0, opacity: 1, duration: 0.8, ease: "power2.out" }, "-=0.6")
+          .to(btnRef.current, { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.5)" }, "-=0.2");
+      });
+      
+    }, heroRef);
+    
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="hero" style={{ minHeight: '110vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden', padding: '120px 0 120px' }}>
-      <div className="hero-noise"></div>
+    <section className="hero-section" ref={heroRef}>
+      
+      {/* 1. BACKGROUND: Full-Bleed Overlay Image */}
+      <div className="hero-bg-overlay" ref={bgRef}></div>
 
-      <div className="hero-inner" style={{ paddingTop: '0', zIndex: 2, marginBottom: '0' }}>
-        {/* BIG CENTERED SVG LOGO */}
-        <div style={{
-          width: '160px',
-          height: '160px',
-          background: 'radial-gradient(circle, var(--primary-glow) 0%, transparent 70%)',
-          margin: '0 auto 25px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-          filter: 'drop-shadow(0 0 35px var(--primary-color))',
-          animation: 'breath 4s ease-in-out infinite',
-          zIndex: 1
-        }}>
-
-          {/* SYMBOL */}
-          <div style={{
-            fontSize: '90px',
-            color: '#fff',
-            fontWeight: '900',
-            letterSpacing: '2px',
-            animation: 'symbolPulse 4s ease-in-out infinite'
-          }}>
-            ◇
+      {/* FOREGROUND CONTENT */}
+      <div style={{ position: 'relative', zIndex: 10, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        
+        {/* 2. GRID LAYOUT: Content over background */}
+        <div className="hero-inner-grid">
+          
+          {/* Left Side: Typography */}
+          <div className="hero-content-left" ref={leftRef}>
+            <h1 className="hero-headline">
+              <span style={{ color: 'var(--color-accent-primary)', opacity: 0.8 }}>{">_"}</span>
+              <span style={{ color: 'var(--color-text-primary)' }}>CodeSage</span>
+            </h1>
+            <p className="hero-copy-text" style={{ marginBottom: '10px', fontWeight: 'bold' }}>
+              The AI that actually reviews architecture.
+            </p>
+            <p className="hero-copy-text">
+              Scan, refactor, and master your source code in seconds. Detects algorithmic patterns like a senior engineer.
+            </p>
           </div>
 
-          {/* ORBIT RING */}
-          <div style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            border: '1px solid var(--primary-glow)',
-            borderRadius: '50%',
-            transform: 'rotateX(60deg) rotateY(20deg)',
-            animation: 'spinSlow 20s linear infinite'
-          }}></div>
-
-          {/* EXTRA GLOW RING (NEW 🔥) */}
-          <div style={{
-            position: 'absolute',
-            width: '140%',
-            height: '140%',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, var(--primary-glow) 0%, transparent 70%)',
-            animation: 'glowPulse 5s ease-in-out infinite',
-            mixBlendMode: 'screen'
-          }}></div>
-
+          {/* Right Side: Animated Ambient Element */}
+          <div className="hero-content-right" ref={rightRef}>
+            <AnimatedCodeSnippet />
+          </div>
+          
         </div>
 
-        <h1 style={{ fontSize: 'clamp(3.5rem, 8vw, 6.5rem)', marginBottom: '5px' }}>
-          <span style={{
-            background: 'var(--gradient-hero)',
-            WebkitBackgroundClip: 'text',
-            color: 'transparent'
-          }}>CodeSage</span>
-        </h1>
-        <p className="pill" style={{ borderColor: 'var(--primary-color)', color: 'var(--primary-color)', fontSize: '0.65rem', marginBottom: '24px' }}>
-          THE AI THAT ACTUALLY REVIEWS ARCHITECTURE.
-        </p>
-
-        <p className="hero-copy" style={{ marginBottom: '40px', color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: '1.4' }}>
-          Scan, refactor, and master your source code in seconds.<br />
-          Enterprise-grade intelligence for developers who value perfection.
-        </p>
-
-        <div className="hero-actions" style={{ justifyContent: 'center', gap: '20px', marginTop: '20px', marginBottom: '36px' }}>
-          <button className="primary-btn hero-launch-btn pulse" onClick={onLaunch}>
-            <span>LAUNCH SYSTEM</span>
+        {/* 3. CENTER: Action */}
+        <div className="hero-action-center" ref={btnRef}>
+          <button className="hero-launch-btn" onClick={onLaunch}>
+            ./launch_system.sh
           </button>
         </div>
+
       </div>
 
-      {/* TESTIMONIAL STYLE BANNER - POSITIONED LOWER */}
-      <div className="hero-banner" style={{
-        position: 'relative',
-        width: '100%',
-        zIndex: 1,
-        maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)'
-      }}>
-        {/* Row 1 */}
-        <div style={{
-          display: 'flex',
-          gap: '24px',
-          width: 'max-content',
-          animation: 'marquee 45s linear infinite',
-          marginBottom: '20px'
-        }}>
-          {[...languagesRow1, ...languagesRow1].map((lang, i) => (
-            <div key={i} className="test-card">
-              <div className="test-avatar">{lang.logo}</div>
-              <div className="test-content">
-                <p>"{lang.text}"</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span className="test-tag">{lang.name}</span>
-                  <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)' }}>{lang.tag}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Row 2 */}
-        <div style={{
-          display: 'flex',
-          gap: '24px',
-          width: 'max-content',
-          animation: 'marquee-reverse 45s linear infinite'
-        }}>
-          {[...languagesRow2, ...languagesRow2].map((lang, i) => (
-            <div key={i} className="test-card">
-              <div className="test-avatar">{lang.logo}</div>
-              <div className="test-content">
-                <p>"{lang.text}"</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span className="test-tag">{lang.name}</span>
-                  <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)' }}>{lang.tag}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <style>{`
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        @keyframes marquee-reverse {
-          0% { transform: translateX(-50%); }
-          100% { transform: translateX(0); }
-        }
-        .test-card {
-           background: rgba(255, 255, 255, 0.02);
-           backdrop-filter: blur(12px);
-           border: 1px solid rgba(255, 255, 255, 0.05);
-           border-radius: 12px;
-           padding: 16px 20px;
-           display: flex;
-           gap: 16px;
-           min-width: 420px;
-           align-items: flex-start;
-           transition: all 0.3s ease;
-        }
-        .test-card:hover {
-           border-color: var(--primary-glow);
-           background: var(--primary-glow);
-           transform: translateY(-2px);
-        }
-        .test-avatar {
-           width: 40px;
-           height: 40px;
-           border-radius: 8px;
-           background: #111;
-           border: 1px solid var(--primary-glow);
-           color: var(--primary-color);
-           display: flex;
-           align-items: center;
-           justify-content: center;
-           font-weight: 900;
-           font-size: 0.85rem;
-           flex: 0 0 auto;
-        }
-        .test-content p {
-           margin: 0 0 10px 0;
-           font-size: 0.82rem;
-           color: rgba(255,255,255,0.65);
-           line-height: 1.5;
-           font-style: italic;
-           font-family: serif;
-        }
-        .test-tag {
-           font-size: 0.65rem;
-           color: var(--primary-color);
-           font-weight: 800;
-           letter-spacing: 1px;
-           text-transform: uppercase;
-           border: 1px solid var(--primary-glow);
-           padding: 2px 8px;
-           border-radius: 4px;
-        }
-           @keyframes breath {
-  0%, 100% {
-    transform: scale(1);
-    filter: drop-shadow(0 0 20px var(--primary-glow));
-  }
-  50% {
-    transform: scale(1.05);
-    filter: drop-shadow(0 0 60px var(--primary-glow));
-  }
-}
-
-@keyframes symbolPulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.9;
-  }
-  50% {
-    transform: scale(1.08);
-    opacity: 1;
-  }
-}
-
-@keyframes spinSlow {
-  0% {
-    transform: rotateX(60deg) rotateY(20deg) rotate(0deg);
-  }
-  100% {
-    transform: rotateX(60deg) rotateY(20deg) rotate(360deg);
-  }
-}
-
-@keyframes glowPulse {
-  0%, 100% {
-    opacity: 0.3;
-    transform: scale(0.9);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(1.1);
-  }
-}
-      `}</style>
     </section>
   );
 }

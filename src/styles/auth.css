@@ -1,7 +1,7 @@
 .auth-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: var(--color-bg-page);
   backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
@@ -15,8 +15,8 @@
   border-radius: 12px;
   width: 400px;
   text-align: center;
-  box-shadow: 0 0 40px rgba(59, 130, 246, 0.15);
-  border: 1px solid rgba(59, 130, 246, 0.1);
+
+  border: 1px solid var(--color-accent-muted);
   position: relative;
 }
 
@@ -33,22 +33,22 @@
   padding: 14px;
   margin: 10px 0;
   background: #000;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--color-border-subtle);
   color: white;
   border-radius: 6px;
   font-family: inherit;
 }
 
 .auth-box input:focus {
-  border-color: var(--primary-color);
+  border-color: var(--color-accent-primary);
   outline: none;
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+
 }
 
 .auth-box button[type="submit"] {
   width: 100%;
   padding: 14px;
-  background: var(--primary-color);
+  background: var(--color-accent-primary);
   color: #000;
   border: none;
   border-radius: 6px;
@@ -63,14 +63,14 @@
 .auth-box button[type="submit"]:hover {
   background: #ff3333;
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+
 }
 
 .error {
   color: #ffb7b7;
   margin-top: 15px;
   font-size: 0.85rem;
-  background: rgba(59, 130, 246, 0.1);
+  background: var(--color-accent-muted);
   padding: 8px;
   border-radius: 4px;
 }
@@ -82,7 +82,7 @@
 }
 
 .switch span {
-  color: var(--primary-color);
+  color: var(--color-accent-primary);
   cursor: pointer;
   font-weight: 700;
   margin-left: 5px;
@@ -101,57 +101,26 @@
 }
 
 .close:hover {
-  color: var(--primary-color);
+  color: var(--color-accent-primary);
 }
 
 /* ================= 🌌 STARS & SHOOTING STARS ================= */
 
-.stars {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-}
 
-.stars::before {
-  content: "";
-  position: absolute;
-  width: 200%;
-  height: 200%;
-  background-image: radial-gradient(#ffffff 1.5px, transparent 1.5px);
-  background-size: 30px 30px;
-  opacity: 0.18;
-  animation: moveStars 40s linear infinite;
-}
 
 .stars::after {
   content: "";
   position: absolute;
   width: 200%;
   height: 200%;
-  background-image: radial-gradient(#ffffff 2.2px, transparent 2.2px);
+
   background-size: 80px 80px;
   opacity: 0.12;
   animation: moveStars 25s linear infinite;
 }
 
 
-.shooting-stars {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
 
-.shooting-stars span {
-  position: absolute;
-  width: 2px;
-  height: 80px;
-  background: linear-gradient(-45deg, var(--primary-color), transparent);
-  opacity: 0;
-  transform: rotate(45deg);
-  animation: shoot 5s linear infinite;
-}
 
 .shooting-stars span:nth-child(1) {
   top: 10%;
