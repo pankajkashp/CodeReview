@@ -66,13 +66,19 @@ function AnimatedCodeSnippet() {
 
   return (
     <div className="hero-ambient-code">
-      <div style={{ color: 'var(--color-text-secondary)', marginBottom: '10px', fontSize: '0.75rem', letterSpacing: '1px' }}>
-        // SYSTEM.THREAD_01
+      <div className="hero-ambient-header">
+        <span className="hero-ambient-status">
+          <span className="hero-status-dot"></span> SYSTEM.READY
+        </span>
+        <span className="hero-ambient-thread">// THREAD_01</span>
       </div>
+      
       <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
-        <code ref={codeRef} style={{ color: 'var(--color-text-primary)' }}></code>
+        <code ref={codeRef} className="hero-ambient-text"></code>
         <span className="hero-typing-cursor"></span>
       </pre>
+      
+      <div className="hero-scan-line"></div>
     </div>
   );
 }
@@ -83,6 +89,8 @@ export function Hero({ onLaunch }) {
   const rightRef = useRef(null);
   const btnRef = useRef(null);
   const bgRef = useRef(null);
+  const dividerRef = useRef(null);
+  const featuresRef = useRef(null);
 
   useEffect(() => {
     let ctx = gsap.context(() => {
@@ -96,12 +104,15 @@ export function Hero({ onLaunch }) {
         gsap.set(leftRef.current.children, { y: 30, opacity: 0 });
         gsap.set(rightRef.current, { x: 30, opacity: 0 });
         gsap.set(btnRef.current, { scale: 0.8, opacity: 0 });
+        if (dividerRef.current) gsap.set(dividerRef.current, { scaleX: 0, opacity: 0 });
+        if (featuresRef.current) gsap.set(featuresRef.current.children, { y: 20, opacity: 0 });
         
         // Sequence
-        tl.to(bgRef.current, { opacity: 0.2, duration: 1, ease: "power2.out" })
+        tl.to(bgRef.current, { opacity: 0.1, duration: 1, ease: "power2.out" })
           .to(leftRef.current.children, { y: 0, opacity: 1, duration: 0.8, stagger: 0.15, ease: "power2.out" }, "-=0.5")
-          .to(rightRef.current, { x: 0, opacity: 1, duration: 0.8, ease: "power2.out" }, "-=0.6")
-          .to(btnRef.current, { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.5)" }, "-=0.2");
+          .to(dividerRef.current, { scaleX: 1, opacity: 1, duration: 0.8, ease: "power2.out" }, "-=0.4")
+          .to(featuresRef.current.children, { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: "power2.out" }, "-=0.4")
+          .to(rightRef.current, { x: 0, opacity: 1, duration: 0.8, ease: "power2.out" }, "-=0.8");
       });
       
     }, heroRef);
@@ -124,15 +135,57 @@ export function Hero({ onLaunch }) {
           {/* Left Side: Typography */}
           <div className="hero-content-left" ref={leftRef}>
             <h1 className="hero-headline">
-              <span style={{ color: 'var(--color-accent-primary)', opacity: 0.8 }}>{">_"}</span>
-              <span style={{ color: 'var(--color-text-primary)' }}>CodeSage</span>
+              <span className="hero-headline-accent">{">_"}</span>
+              <span className="hero-headline-text">CodeSage</span>
             </h1>
-            <p className="hero-copy-text" style={{ marginBottom: '10px', fontWeight: 'bold' }}>
+            <p className="hero-copy-text" style={{ marginBottom: '10px', fontWeight: 'bold', color: 'var(--color-text-primary)' }}>
               The AI that actually reviews architecture.
             </p>
-            <p className="hero-copy-text">
-              Scan, refactor, and master your source code in seconds. Detects algorithmic patterns like a senior engineer.
+            <p className="hero-copy-text" style={{ marginBottom: '48px' }}>
+              Scan, refactor, and master your source code in seconds. Detects algorithmic patterns and hidden dependencies like a senior engineer.
             </p>
+            
+            <div className="hero-action-left" ref={btnRef}>
+              <button className="hero-launch-btn" onClick={onLaunch}>
+                ./launch_system.sh
+              </button>
+            </div>
+
+            <div className="hero-divider" ref={dividerRef}></div>
+            
+            <div className="hero-features-container" ref={featuresRef}>
+              <div className="hero-features-header">
+                <span className="hero-features-eyebrow">What CodeSage Sees</span>
+                <p className="hero-features-subtitle">Not just syntax. Your entire code structure.</p>
+              </div>
+              
+              <div className="hero-features-grid">
+                <div className="hero-feature-item feature-logic">
+                  <span className="hero-feature-num">01</span>
+                  <div className="hero-feature-title">LOGIC</div>
+                  <p className="hero-feature-desc">Detect inefficient algorithms and hidden bottlenecks.</p>
+                </div>
+                
+                <div className="hero-feature-item feature-architecture">
+                  <span className="hero-feature-num">02</span>
+                  <div className="hero-feature-title">ARCHITECTURE</div>
+                  <p className="hero-feature-desc">Understand dependencies, structure, and patterns.</p>
+                </div>
+                
+                <div className="hero-feature-item feature-security">
+                  <span className="hero-feature-num">03</span>
+                  <div className="hero-feature-title">SECURITY</div>
+                  <p className="hero-feature-desc">Find suspicious and vulnerable code paths.</p>
+                </div>
+                
+                <div className="hero-feature-item feature-quality">
+                  <span className="hero-feature-num">04</span>
+                  <div className="hero-feature-title">QUALITY</div>
+                  <p className="hero-feature-desc">Improve readability, maintainability, and scalability.</p>
+                </div>
+              </div>
+            </div>
+
           </div>
 
           {/* Right Side: Animated Ambient Element */}
@@ -140,13 +193,6 @@ export function Hero({ onLaunch }) {
             <AnimatedCodeSnippet />
           </div>
           
-        </div>
-
-        {/* 3. CENTER: Action */}
-        <div className="hero-action-center" ref={btnRef}>
-          <button className="hero-launch-btn" onClick={onLaunch}>
-            ./launch_system.sh
-          </button>
         </div>
 
       </div>

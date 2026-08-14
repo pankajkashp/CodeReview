@@ -1,75 +1,12 @@
-import React from "react";
-import "../styles/analytics.css";
-import {
-  ApproachTabs,
-  CodeDiffViewer,
-  ExplanationTabs,
-  FeedbackPanel,
-  LearningPanel,
-  ReanalyzePanel,
-  SuggestionsPanel,
-  SummaryStrip,
-  buildAnalysisViewModel
-} from "./analysis/AnalysisSections.jsx";
+const fs = require('fs');
+const path = require('path');
 
-export function Analytics({
-  analysis = {},
-  originalCode = "",
-  onExit,
-  onAnalyze,
-  onBackToDashboard,
-  loading = false
-}) {
-  const [editableCode, setEditableCode] = React.useState(originalCode);
-  const [copyState, setCopyState] = React.useState("");
-  const copyTimerRef = React.useRef(null);
+const jsxPath = path.join(__dirname, '../src/components/Analytics.jsx');
+let jsxContent = fs.readFileSync(jsxPath, 'utf8');
 
-  React.useEffect(() => {
-    setEditableCode(originalCode);
-  }, [originalCode]);
-
-  const model = React.useMemo(
-    () => buildAnalysisViewModel({ analysis: { ...analysis, originalCode }, originalCode }),
-    [analysis, originalCode]
-  );
-
-  const copyToClipboard = async (text, label) => {
-    const cleanText = String(text || "").trim();
-    if (!cleanText) return;
-
-    try {
-      // Primary: Clipboard API
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(cleanText);
-      } else {
-        // Fallback: Textarea hack
-        const textArea = document.createElement("textarea");
-        textArea.value = cleanText;
-        textArea.style.position = "fixed";
-        textArea.style.left = "-9999px";
-        textArea.style.top = "0";
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        document.execCommand("copy");
-        textArea.remove();
-      }
-      
-      setCopyState(label);
-      window.clearTimeout(copyTimerRef.current);
-      copyTimerRef.current = window.setTimeout(() => setCopyState(""), 2000);
-    } catch (err) {
-      console.error("Copy failed:", err);
-      setCopyState("Copy failed");
-      window.clearTimeout(copyTimerRef.current);
-      copyTimerRef.current = window.setTimeout(() => setCopyState(""), 2000);
-    }
-  };
-
-  const timeLabel = model.timeComplexity || analysis.oldTimeComplexity || "Unknown";
-  const spaceLabel = model.spaceComplexity || analysis.oldSpaceComplexity || "Unknown";
-
-  const getScoreStatus = (score) => {
+// Replace the return statement
+const oldReturnStart = `  return (`;
+const newReturn = `  const getScoreStatus = (score) => {
     if (score >= 90) return { label: "EXCELLENT", color: "var(--semantic-success)" };
     if (score >= 75) return { label: "GOOD", color: "var(--color-accent-primary)" };
     if (score >= 50) return { label: "NEEDS IMPROVEMENT", color: "var(--semantic-warning)" };
@@ -109,7 +46,7 @@ export function Analytics({
               </button>
               <button 
                 type="button" 
-                className={`primary-button ${copyState === "Optimized copied" ? "copied" : ""}`} 
+                className={\`primary-button \${copyState === "Optimized copied" ? "copied" : ""}\`} 
                 onClick={() => copyToClipboard(model.optimizedCode || "", "Optimized copied")}
               >
                 {copyState === "Optimized copied" ? "COPIED!" : "COPY OPTIMIZED CODE"}
@@ -147,5 +84,14 @@ export function Analytics({
         />
       </main>
     </div>
-  );
+  );`;
+
+const returnIdx = jsxContent.indexOf(oldReturnStart);
+const fileEnd = jsxContent.lastIndexOf('}');
+if (returnIdx !== -1) {
+  jsxContent = jsxContent.substring(0, returnIdx) + newReturn + "\n}\n";
+  fs.writeFileSync(jsxPath, jsxContent);
+  console.log("Successfully refactored Analytics.jsx.");
+} else {
+  console.error("Could not find return block in Analytics.jsx.");
 }

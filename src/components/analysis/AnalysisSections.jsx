@@ -599,12 +599,12 @@ function SectionShell({ title, eyebrow, description, children, className = "", d
   );
 }
 
-function MetricCard({ label, value, hint, accent = "primary", size = "md" }) {
+function MetricCard({ label, value, status, statusColor, accent = "primary", icon }) {
   return (
-    <article className={`metric-card metric-card-${accent} metric-card-${size}`}>
-      <span className="metric-label">{label}</span>
+    <article className={`metric-card metric-card-${accent}`}>
+      <span className="metric-label">{icon && <span className="metric-icon">{icon}</span>}{label}</span>
       <strong className="metric-value">{value}</strong>
-      {hint ? <p className="metric-hint">{hint}</p> : null}
+      {status && <span className="metric-status" style={{ color: statusColor }}>{status}</span>}
     </article>
   );
 }
@@ -667,9 +667,9 @@ function DiffPane({ title, code, language, statuses, tone, subtitle, onCopy, isC
 function CodeDiffViewer({ model, onCopyOriginal, onCopyOptimized, copyState }) {
   return (
     <SectionShell
-      eyebrow="Before vs After"
-      title="Code Comparison"
-      description="A line-by-line comparison that shows what was removed, what was added, and where the optimized logic wins."
+      eyebrow="CODE COMPARISON"
+      title="BEFORE VS AFTER"
+      description="See exactly what CodeSage recommends changing."
       className="diff-section"
     >
       <div className="diff-grid">
@@ -884,44 +884,58 @@ function SuggestionsPanel({ suggestions }) {
 }
 
 function SummaryStrip({ model }) {
+  const getComplexityStatus = (complexity) => {
+    if (!complexity) return { label: "", color: "" };
+    const c = complexity.toLowerCase();
+    if (c.includes("1") || c.includes("log")) return { label: "EXCELLENT", color: "var(--semantic-success)" };
+    if (c.includes("n") && !c.includes("^2")) return { label: "GOOD", color: "#00E5FF" };
+    if (c.includes("^2") || c.includes("^3")) return { label: "NEEDS IMPROVEMENT", color: "var(--semantic-warning)" };
+    return { label: "CRITICAL", color: "var(--semantic-danger)" };
+  };
+  const getScoreStatus = (score) => {
+    if (score >= 90) return { label: "EXCELLENT", color: "var(--semantic-success)" };
+    if (score >= 75) return { label: "GOOD", color: "#00E5FF" };
+    if (score >= 50) return { label: "NEEDS IMPROVEMENT", color: "var(--semantic-warning)" };
+    return { label: "CRITICAL", color: "var(--semantic-danger)" };
+  };
+
   return (
     <div className="summary-grid">
       <MetricCard
-        label="Overall Code Score"
+        label="OVERALL SCORE"
         value={model.score || "—"}
-        hint="Quality benchmark"
-        accent="primary"
-        size="lg"
-      />
-      <MetricCard
-        label="Time Complexity"
-        value={model.timeComplexity}
-        hint={model.complexityCards[0].oldValue}
-        accent="accent"
-      />
-      <MetricCard
-        label="Space Complexity"
-        value={model.spaceComplexity}
-        hint={model.complexityCards[1].oldValue}
-        accent="neutral"
-      />
-      <MetricCard
-        label="Readability Score"
-        value={model.readabilityScore}
-        hint="How easy this is to read"
+        status={getScoreStatus(model.score || 0).label} statusColor={getScoreStatus(model.score || 0).color}
         accent="primary"
       />
       <MetricCard
-        label="Maintainability Score"
-        value={model.maintainabilityScore}
-        hint="How easy this is to evolve"
-        accent="accent"
+        label="TIME COMPLEXITY"
+        value={model.timeComplexity || "Unknown"}
+        status={getComplexityStatus(model.timeComplexity).label} statusColor={getComplexityStatus(model.timeComplexity).color}
+        accent="warning"
       />
       <MetricCard
-        label="Pattern Detected"
+        label="SPACE COMPLEXITY"
+        value={model.spaceComplexity || "Unknown"}
+        status={getComplexityStatus(model.spaceComplexity).label} statusColor={getComplexityStatus(model.spaceComplexity).color}
+        accent="info"
+      />
+      <MetricCard
+        label="READABILITY"
+        value={model.readabilityScore || "—"}
+        status={getScoreStatus(model.readabilityScore || 0).label} statusColor={getScoreStatus(model.readabilityScore || 0).color}
+        accent="success"
+      />
+      <MetricCard
+        label="MAINTAINABILITY"
+        value={model.maintainabilityScore || "—"}
+        status={getScoreStatus(model.maintainabilityScore || 0).label} statusColor={getScoreStatus(model.maintainabilityScore || 0).color}
+        accent="success"
+      />
+      <MetricCard
+        label="PATTERN DETECTED"
         value={model.pattern.title}
-        hint={model.pattern.category}
-        accent="neutral"
+        icon="✦ "
+        accent="ai"
       />
     </div>
   );

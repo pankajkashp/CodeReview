@@ -15,24 +15,41 @@ const languageOptions = [
     id: "javascript",
     label: "JavaScript",
     fileName: "analysis.js",
-    template: `console.log("CodeSage");`
+    template: `function analyzeData(items) {
+  for (let i = 0; i < items.length; i++) {
+    for (let j = 0; j < items.length; j++) {
+      if (items[i] === items[j]) {
+        console.log(items[i]);
+      }
+    }
+  }
+}`
   },
   {
     id: "python",
     label: "Python",
     fileName: "main.py",
-    template: `print("CodeSage")`
+    template: `def analyze_data(items):
+    for i in range(len(items)):
+        for j in range(len(items)):
+            if items[i] == items[j]:
+                print(items[i])`
   },
   {
     id: "cpp",
     label: "C++",
     fileName: "main.cpp",
     template: `#include <iostream>
-using namespace std;
+#include <vector>
 
-int main() {
-    cout << "CodeSage" << endl;
-    return 0;
+void analyzeData(const std::vector<int>& items) {
+    for (size_t i = 0; i < items.size(); i++) {
+        for (size_t j = 0; j < items.size(); j++) {
+            if (items[i] == items[j]) {
+                std::cout << items[i] << std::endl;
+            }
+        }
+    }
 }`
   },
   {
@@ -41,9 +58,14 @@ int main() {
     fileName: "main.c",
     template: `#include <stdio.h>
 
-int main() {
-    printf("CodeSage\\n");
-    return 0;
+void analyze_data(int items[], int size) {
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            if (items[i] == items[j]) {
+                printf("%d\\n", items[i]);
+            }
+        }
+    }
 }`
   },
   {
@@ -51,8 +73,14 @@ int main() {
     label: "Java",
     fileName: "Main.java",
     template: `public class Main {
-    public static void main(String[] args) {
-        System.out.println("CodeSage");
+    public static void analyzeData(int[] items) {
+        for (int i = 0; i < items.length; i++) {
+            for (int j = 0; j < items.length; j++) {
+                if (items[i] == items[j]) {
+                    System.out.println(items[i]);
+                }
+            }
+        }
     }
 }`
   }
@@ -186,9 +214,10 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
 
   return (
     <div className="engine-shell no-sidebar">
+      <div className="hero-bg-overlay" style={{ opacity: 0.1, position: 'fixed', zIndex: 0 }}></div>
       {status === "loading" && <AnalysisLoader filename={selectedLanguage.fileName} />}
 
-      <section className="engine-workspace">
+      <section className="engine-workspace" style={{ position: 'relative', zIndex: 10 }}>
         <header className="engine-topbar">
           <div className="engine-brand">
             <strong>CODE INTEGRITY</strong>
@@ -219,104 +248,121 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
             onBackToDashboard={() => setActivePanel("dashboard")}
           />
         ) : (
-          <main className="engine-main">
+          <main className="engine-main workspace-main">
             {activePanel === "dashboard" && (
               <>
-                <section className="engine-hero">
-                  <div>
-                    <p>SYSTEM READY</p>
-                    <h1><em>Deep</em> Logic Review.</h1>
-                    <span>
-                      Initialize the neural engine to analyze your code for structural
-                      integrity, security vulnerabilities, and logic optimizations.
-                    </span>
+                <section className="workspace-page-header">
+                  <div className="workspace-status-eyebrow">
+                    <span>AI CODE ANALYSIS</span>
+                    <span className="workspace-status-dot">● SYSTEM READY</span>
                   </div>
-                  <div className="engine-actions">
-                    <input 
-                      type="file" 
-                      ref={fileInputRef} 
-                      style={{ display: 'none' }} 
-                      onChange={handleFileChange}
-                    />
-                    <button className="engine-secondary-btn" onClick={handleImportClick}>
-                      IMPORT FILE
-                    </button>
-                    <button
-                      className="primary-btn engine-start-btn pulse"
-                      onClick={analyzeCode}
-                      disabled={status === "loading" || !code.trim()}
-                    >
-                      <span>{status === "loading" ? "INITIALIZING..." : "START ANALYSIS"}</span>
-                    </button>
-                  </div>
+                  <h1 className="workspace-headline">
+                    <span className="workspace-headline-accent">Deep Logic</span> Review.
+                  </h1>
+                  <p className="workspace-subtitle">
+                    Initialize the neural engine to analyze your code for structural integrity, security vulnerabilities, and logic optimizations.
+                  </p>
                 </section>
 
-                <section className="engine-grid" style={{ gridTemplateColumns: '1fr' }}>
-                  <article className="code-editor">
-                    <div className="language-tabs">
+                <div className="workspace-label">SOURCE CODE</div>
+
+                <section className="analysis-workspace">
+                  <div className="workspace-editor-header">
+                    <div className="weh-left">
+                      <span className="weh-dot">●</span>
+                      <span className="weh-filename">{selectedLanguage.fileName.toUpperCase()}</span>
+                    </div>
+                    <div className="weh-center">
+                      <span className="weh-language">{selectedLanguage.label.toUpperCase()}</span>
+                    </div>
+                    <div className="weh-right">
+                      <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        style={{ display: 'none' }} 
+                        onChange={handleFileChange}
+                      />
+                      <button className="weh-import-btn" onClick={handleImportClick}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="17 8 12 3 7 8" />
+                          <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                        IMPORT FILE
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="workspace-tabs-container">
+                    <div className="workspace-tabs">
                       {languageOptions.map(lang => (
                         <button 
                           key={lang.id}
-                          className={selectedLanguage.id === lang.id ? "active" : ""}
+                          className={selectedLanguage.id === lang.id ? "workspace-tab active" : "workspace-tab"}
                           onClick={() => handleLanguageUpdate(lang)}
                         >
                           {lang.label.toUpperCase()}
                         </button>
                       ))}
                     </div>
+                  </div>
 
+                  <div className="workspace-editor-body">
+                    <CodeMirror
+                      value={code}
+                      theme={vscodeDark}
+                      extensions={[
+                        selectedLanguage.id === 'javascript' ? javascript({ jsx: true }) :
+                        selectedLanguage.id === 'python' ? python() :
+                        (selectedLanguage.id === 'cpp' || selectedLanguage.id === 'c') ? cpp() :
+                        selectedLanguage.id === 'java' ? java() : javascript()
+                      ]}
+                      onChange={handleCodeChange}
+                      className="workspace-codemirror"
+                    />
+                  </div>
 
-                    <div className="editor-toolbar">
-                      <strong>{selectedLanguage.fileName}</strong>
+                  <div className="workspace-editor-footer">
+                    <div className="wef-left">
+                      <span>{lineCount} {lineCount === 1 ? 'line' : 'lines'}</span>
+                      <span className="wef-separator">|</span>
+                      <span>{selectedLanguage.label}</span>
                     </div>
-
-                    <div className="code-input-frame" style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                      <CodeMirror
-                        value={code}
-                        theme={vscodeDark}
-                        extensions={[
-                          selectedLanguage.id === 'javascript' ? javascript({ jsx: true }) :
-                          selectedLanguage.id === 'python' ? python() :
-                          (selectedLanguage.id === 'cpp' || selectedLanguage.id === 'c') ? cpp() :
-                          selectedLanguage.id === 'java' ? java() : javascript()
-                        ]}
-                        onChange={handleCodeChange}
-                        style={{ fontSize: '14px', fontFamily: 'var(--font-main)' }}
-                        minHeight="300px"
-                      />
+                    <div className="wef-center">
+                      <span>UTF-8</span>
+                      <span className="wef-separator">|</span>
+                      <span>LF</span>
                     </div>
-
-                    <footer className="editor-footer">
-                      <small>{lineCount} {lineCount === 1 ? 'line' : 'lines'}</small>
+                    <div className="wef-right">
+                      <span className="wef-status">● READY</span>
+                      
                       <button 
-                        className="pulse"
+                        className="workspace-analyze-btn"
                         onClick={analyzeCode} 
                         disabled={status === "loading" || !code.trim()}
-                        style={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          gap: '10px',
-                          background: 'var(--color-accent-primary)',
-                          color: 'var(--color-bg-page)',
-                          fontWeight: '900',
-                          padding: '0 25px',
-                          borderRadius: '4px',
-                          height: '36px'
-                        }}
                       >
                         {status === "loading" ? (
-                          <div className="tire-loader" style={{ width: '14px', height: '14px', border: '2px solid var(--color-border-subtle)', borderTop: '2px solid var(--color-text-primary)', animation: 'tire-spin 1s linear infinite' }}></div>
+                          <div className="tire-loader" style={{ width: '14px', height: '14px', border: '2px solid rgba(0,229,255,0.3)', borderTop: '2px solid #00E5FF', animation: 'tire-spin 1s linear infinite' }}></div>
                         ) : (
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                            <path d="M5 12l5 5L20 7" />
-                          </svg>
+                          <span className="wab-icon">✦</span>
                         )}
-                        {status === "loading" ? "ANALYZING..." : "RUN ANALYSIS"}
+                        {status === "loading" ? "ANALYZING..." : "RUN AI ANALYSIS"}
                       </button>
-                    </footer>
-                  </article>
 
-                  {/* 📡 Live Intelligence Horizontal Bar */}
+                    </div>
+                  </div>
+                </section>
+
+                <section className="workspace-actions">
+                  <div className="workspace-capabilities">
+                    <span className="wcap-item"><span className="wcap-dot wcap-logic">●</span> LOGIC</span>
+                    <span className="wcap-item"><span className="wcap-dot wcap-arch">●</span> ARCHITECTURE</span>
+                    <span className="wcap-item"><span className="wcap-dot wcap-sec">●</span> SECURITY</span>
+                    <span className="wcap-item"><span className="wcap-dot wcap-comp">●</span> COMPLEXITY</span>
+                  </div>
+                </section>
+
+                {/* 📡 Live Intelligence Horizontal Bar */}
                   <article className="live-panel horizontal-intelligence" style={{ gridColumn: '1 / -1', marginTop: '24px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                       <h2 style={{ margin: 0 }}>Live Intelligence</h2>
@@ -363,7 +409,6 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                       )}
                     </div>
                   </article>
-                </section>
               </>
             )}
 
