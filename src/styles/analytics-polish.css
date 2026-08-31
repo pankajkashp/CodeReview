@@ -9,7 +9,6 @@
     var(--color-bg-page);
 }
 
-/* Keep the supplied circuit artwork visible without letting it overpower the UI. */
 .analytics-view::before {
   content: "";
   position: fixed;
@@ -20,12 +19,11 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0.20;
+  opacity: 0.17;
   filter: invert(1) hue-rotate(180deg);
   mix-blend-mode: screen;
 }
 
-/* Darken the outer edges so the eye stays on the review content. */
 .analytics-view::after {
   content: "";
   position: fixed;
@@ -34,164 +32,238 @@
   pointer-events: none;
   background: radial-gradient(
     ellipse at center,
-    rgba(3, 8, 18, 0) 30%,
-    rgba(2, 5, 12, 0.22) 62%,
-    rgba(1, 3, 8, 0.62) 100%
+    rgba(3, 8, 18, 0) 28%,
+    rgba(2, 5, 12, 0.20) 60%,
+    rgba(1, 3, 8, 0.68) 100%
   );
 }
 
-.analytics-backdrop {
-  opacity: 0.48;
-}
+.analytics-backdrop { opacity: 0.38; }
 
 .analytics-shell {
-  width: min(100%, 1580px);
-  max-width: 1580px;
-  padding: 36px clamp(20px, 3.4vw, 48px) 44px;
+  width: min(100%, 1500px);
+  max-width: 1500px;
+  padding: 28px clamp(18px, 2.6vw, 36px) 40px;
 }
 
-/* The hero is intentionally simple: large review summary + compact score panel. */
+/* Compact two-column hero: less empty vertical space, stronger visual balance. */
 .analytics-hero {
-  grid-template-columns: minmax(0, 1fr) minmax(285px, 330px);
-  gap: 28px;
-  margin: 0 auto 28px;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 290px);
+  gap: 14px;
+  margin: 0 auto 18px;
   align-items: stretch;
 }
 
 .hero-copy,
 .hero-score-card {
-  background: rgba(7, 13, 24, 0.78);
-  border: 1px solid rgba(102, 133, 178, 0.30);
+  background: rgba(7, 13, 24, 0.80);
+  border: 1px solid rgba(102, 133, 178, 0.28);
   box-shadow:
-    0 24px 70px rgba(0, 0, 0, 0.30),
+    0 18px 48px rgba(0, 0, 0, 0.30),
     inset 0 1px 0 rgba(255, 255, 255, 0.025);
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(14px);
 }
 
 .hero-copy {
-  border-top: 1px solid rgba(138, 114, 255, 0.92);
-  border-radius: 24px;
-  padding: clamp(30px, 3.2vw, 42px);
-  min-height: 410px;
+  border-top: 1px solid rgba(138, 114, 255, 0.90);
+  border-radius: 20px;
+  padding: clamp(24px, 2.6vw, 32px);
+  min-height: 320px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
 .hero-kicker {
-  margin-bottom: 18px;
-  gap: 10px;
+  margin-bottom: 12px;
+  gap: 8px;
 }
 
 .hero-badge {
-  background: rgba(138, 114, 255, 0.08);
-  border-color: rgba(138, 114, 255, 0.24);
+  background: rgba(138, 114, 255, 0.07);
+  border-color: rgba(138, 114, 255, 0.22);
   color: #b8a8ff;
-  padding: 7px 11px;
+  padding: 6px 10px;
 }
 
 .hero-copy h1 {
-  font-size: clamp(2.55rem, 4vw, 4.35rem);
-  line-height: 0.99;
-  max-width: 18ch;
-  letter-spacing: -0.048em;
+  font-size: clamp(2.2rem, 3.4vw, 3.65rem);
+  line-height: 1.02;
+  max-width: 19ch;
+  letter-spacing: -0.045em;
   text-wrap: balance;
 }
 
 .hero-ai-summary {
   max-width: 68ch;
-  color: rgba(231, 238, 250, 0.76) !important;
-  font-size: 1rem;
-  line-height: 1.7;
+  color: rgba(231, 238, 250, 0.74) !important;
+  font-size: 0.94rem;
+  line-height: 1.6;
 }
 
-/* Replace the inline CORE TAKEAWAY treatment with a calmer, integrated pill. */
 .hero-copy > div[style*="CORE TAKEAWAY"] {
-  max-width: 760px;
-  background: rgba(255, 255, 255, 0.035) !important;
-  border-color: rgba(125, 150, 190, 0.18) !important;
-  color: rgba(255, 255, 255, 0.72);
-  margin-top: 14px !important;
-  margin-bottom: 4px !important;
+  max-width: 700px;
+  background: rgba(255, 255, 255, 0.032) !important;
+  border-color: rgba(125, 150, 190, 0.16) !important;
+  color: rgba(255, 255, 255, 0.70);
+  margin-top: 10px !important;
+  margin-bottom: 0 !important;
 }
 
 .hero-actions {
-  margin-top: 22px;
-  gap: 10px;
+  margin-top: 16px;
+  gap: 8px;
 }
 
 .hero-actions .primary-button,
 .hero-actions .ghost-button {
-  min-height: 46px;
-  border-radius: 11px;
-  padding: 0 17px;
+  min-height: 42px;
+  border-radius: 10px;
+  padding: 0 15px;
 }
 
 .hero-score-card {
-  border-color: rgba(0, 229, 255, 0.30);
-  border-radius: 24px;
-  padding: 28px 24px;
-  min-height: 410px;
-  gap: 20px;
+  border-color: rgba(0, 229, 255, 0.28);
+  border-radius: 20px;
+  padding: 20px 18px;
+  min-height: 320px;
+  gap: 12px;
   box-shadow:
-    0 24px 70px rgba(0, 0, 0, 0.30),
-    0 0 60px rgba(0, 229, 255, 0.055);
+    0 18px 48px rgba(0, 0, 0, 0.30),
+    0 0 45px rgba(0, 229, 255, 0.045);
 }
 
 .score-ring {
-  width: 190px;
-  height: 190px;
+  width: 154px;
+  height: 154px;
   animation: none;
-  box-shadow: 0 0 24px color-mix(in srgb, var(--score-color, var(--semantic-primary)) 28%, transparent);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--score-color, var(--semantic-primary)) 24%, transparent);
 }
 
 .score-ring::before {
-  inset: 9px;
-  background: rgba(4, 10, 18, 0.94);
+  inset: 8px;
+  background: rgba(4, 10, 18, 0.95);
 }
 
 .score-ring-inner strong {
-  font-size: clamp(3.1rem, 4vw, 3.7rem);
+  font-size: 3rem;
 }
 
 .hero-score-status {
-  font-size: 0.76rem;
-  letter-spacing: 0.18em;
+  font-size: 0.70rem;
+  letter-spacing: 0.16em;
   font-weight: 900;
 }
 
-/* Keep code comparison visually connected to the hero instead of competing with it. */
 #code-changes {
   margin-top: 0;
 }
 
 #code-changes > * {
   background: rgba(5, 11, 20, 0.76);
-  border-color: rgba(92, 124, 168, 0.28);
-  box-shadow: 0 22px 65px rgba(0, 0, 0, 0.25);
+  border-color: rgba(92, 124, 168, 0.25);
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.24);
 }
 
-/* Optimal state should feel like a clear result, not another oversized panel. */
+/* Full-code inspection: make the corrected source the primary artifact. */
+.full-code-container {
+  padding: 4px;
+}
+
+.full-code-grid {
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 12px !important;
+}
+
+.full-code-pane {
+  border-radius: 14px !important;
+  overflow: hidden;
+}
+
+.full-code-pane:first-child {
+  order: 2;
+  opacity: 0.72;
+}
+
+.full-code-pane:last-child {
+  order: 1;
+  border-color: rgba(0, 229, 255, 0.34) !important;
+  box-shadow: 0 0 28px rgba(0, 229, 255, 0.055);
+}
+
+.full-code-pane:last-child .full-code-header {
+  background: rgba(0, 229, 255, 0.055);
+  border-bottom-color: rgba(0, 229, 255, 0.18);
+}
+
+.full-code-pane:last-child .full-code-header > span::before {
+  content: "✓ ";
+  color: var(--semantic-success);
+}
+
+.full-code-body {
+  max-height: 620px;
+  overflow: auto;
+}
+
+/* Changed improved lines are visually distinct while unchanged lines stay calm. */
+.full-code-pane:last-child .code-row-optimized {
+  position: relative;
+}
+
+/* Keep the copy action prominent because it copies the entire improved source. */
+.full-code-pane:last-child .ghost-button {
+  border-color: rgba(0, 229, 255, 0.55);
+  color: var(--semantic-primary);
+}
+
+/* Reduce the visual dominance of focused hunk cards. The exact changes remain highlighted. */
+.diff-focused-list {
+  gap: 12px;
+}
+
+.diff-change-card {
+  border-radius: 16px !important;
+}
+
+.diff-change-panes-grid {
+  gap: 10px !important;
+}
+
+.diff-toolbar {
+  gap: 10px !important;
+  margin-bottom: 12px !important;
+}
+
+.diff-mode-switcher {
+  gap: 6px !important;
+}
+
+/* Put Full Code first visually in the mode switcher. */
+.diff-mode-switcher .diff-mode-btn:nth-child(4) {
+  order: -1;
+}
+
 .optimal-code-card {
   background: linear-gradient(180deg, rgba(7, 20, 28, 0.80), rgba(5, 13, 22, 0.72));
-  border-color: rgba(0, 230, 118, 0.38);
-  box-shadow: inset 0 0 42px rgba(0, 230, 118, 0.022), 0 18px 50px rgba(0, 0, 0, 0.20);
+  border-color: rgba(0, 230, 118, 0.34);
+  box-shadow: inset 0 0 35px rgba(0, 230, 118, 0.018), 0 16px 44px rgba(0, 0, 0, 0.20);
 }
 
 @media (max-width: 980px) {
   .analytics-hero {
-    grid-template-columns: minmax(0, 1fr) 290px;
-    gap: 18px;
+    grid-template-columns: minmax(0, 1fr) 250px;
+    gap: 12px;
   }
 
   .hero-copy,
   .hero-score-card {
-    min-height: 380px;
+    min-height: 300px;
   }
 
   .score-ring {
-    width: 170px;
-    height: 170px;
+    width: 140px;
+    height: 140px;
   }
 }
 
@@ -206,23 +278,27 @@
   }
 
   .hero-score-card {
-    min-height: 290px;
+    min-height: 250px;
+  }
+
+  .full-code-grid {
+    grid-template-columns: 1fr !important;
   }
 }
 
 @media (max-width: 560px) {
   .analytics-shell {
-    padding: 22px 14px 32px;
+    padding: 18px 12px 30px;
   }
 
   .hero-copy,
   .hero-score-card {
-    border-radius: 18px;
-    padding: 22px;
+    border-radius: 16px;
+    padding: 20px;
   }
 
   .hero-copy h1 {
-    font-size: 2.2rem;
+    font-size: 2rem;
     max-width: none;
   }
 
