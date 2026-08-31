@@ -817,63 +817,6 @@ export function CodeIntegrityEngine({ onBack, user, onLogout }) {
                     </div>
                   </div>
                 </section>
-
-                <section className="workspace-actions">
-                  <div className="workspace-capabilities">
-                    <span className="wcap-item"><span className="wcap-dot wcap-logic">●</span> LOGIC</span>
-                    <span className="wcap-item"><span className="wcap-dot wcap-arch">●</span> ARCHITECTURE</span>
-                    <span className="wcap-item"><span className="wcap-dot wcap-sec">●</span> SECURITY</span>
-                    <span className="wcap-item"><span className="wcap-dot wcap-comp">●</span> COMPLEXITY</span>
-                  </div>
-                </section>
-
-                {/* 📡 Live Intelligence Horizontal Bar */}
-                  <article className="live-panel horizontal-intelligence" style={{ gridColumn: '1 / -1', marginTop: '24px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                      <h2 style={{ margin: 0 }}>Live Intelligence</h2>
-                      <div className="engine-status-badge" style={{ 
-                         
-                        padding: '4px 12px', 
-                        borderRadius: '20px',
-                        fontSize: '0.65rem',
-                        fontWeight: '800',
-                        color: 'var(--color-accent-primary)',
-                        letterSpacing: '1px'
-                      }}>
-                        {status.toUpperCase()}
-                      </div>
-                    </div>
-
-                    <div className="intelligence-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
-                      <div className="intel-item">
-                        <strong>Engine Status</strong>
-                        <p className={status === "loading" ? "pulse-text" : "muted"}>
-                          {status === "loading" ? "Neural analysis in progress..." : "Standing by for input..."}
-                        </p>
-                      </div>
-
-                      {error && (
-                        <div className="intel-item error" style={{ borderLeft: '2px solid var(--color-accent-primary)', paddingLeft: '15px' }}>
-                          <strong style={{ color: 'var(--color-accent-primary)' }}>System Alert</strong>
-                          <p>{error}</p>
-                        </div>
-                      )}
-
-                      {analysis?.simulated && (
-                        <div className="intel-item warn" style={{ borderLeft: '2px solid var(--color-status-warning)', paddingLeft: '15px' }}>
-                          <strong style={{ color: 'var(--color-status-warning)' }}>Simulation Active</strong>
-                          <p>Results are simulated due to offline mode.</p>
-                        </div>
-                      )}
-
-                      {!error && status === "idle" && (
-                        <div className="intel-item">
-                          <strong>Readiness</strong>
-                          <p>Neural core synchronized. Ready for code input.</p>
-                        </div>
-                      )}
-                    </div>
-                  </article>
               </>
             )}
 
