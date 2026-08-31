@@ -967,6 +967,103 @@ function HighlightedCode({ code = "", language = "javascript", status = "neutral
   );
 }
 
+function CodeComparisonHero({ model, onCopyOriginal, onCopyOptimized, copyState }) {
+  const diff = model.diff || {};
+  const alignedRows = diff.alignedRows || [];
+  const isNoChanges = diff.identical || !diff.hasChanges || model.analysis?.hasImprovements === false;
+
+  const origLineCount = (model.originalCode || "").split("\n").length;
+  const optLineCount = (model.optimizedCode || "").split("\n").length;
+
+  const displayRows = React.useMemo(() => {
+    if (alignedRows.length > 0) return alignedRows;
+    const lines = (model.originalCode || "").split("\n");
+    return lines.map((l, i) => ({
+      type: "unchanged",
+      origLineNum: i + 1,
+      imprvLineNum: i + 1,
+      origText: l,
+      imprvText: l
+    }));
+  }, [alignedRows, model.originalCode]);
+
+  return (
+    <section className="code-comparison-hero-card" aria-label="Code Comparison">
+      <div className="comparison-headers-grid">
+        <div className="code-panel-header left">
+          <div className="cph-main">
+            <span className="cph-dot orig-dot">●</span>
+            <span className="cph-title">ORIGINAL CODE</span>
+          </div>
+          <div className="cph-meta">
+            <span className="cph-lang">{model.language}</span>
+            <span className="cph-count">{origLineCount} lines</span>
+          </div>
+        </div>
+
+        <div className="code-panel-header right">
+          <div className="cph-main">
+            <span className="cph-dot imprv-dot">●</span>
+            <span className="cph-title">{isNoChanges ? "CURRENT CODE (ALREADY OPTIMAL)" : "IMPROVED CODE"}</span>
+          </div>
+          <div className="cph-meta">
+            <span className="cph-lang">{model.language}</span>
+            <span className="cph-count">{optLineCount} lines</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="comparison-scroll-viewport">
+        {displayRows.map((row, idx) => {
+          const isMod = row.type === "modified";
+          const isDel = row.type === "removed";
+          const isAdd = row.type === "added";
+          const isIndent = row.isIndentOnly;
+
+          const leftClass = isDel ? "cell-removed" : isMod ? (isIndent ? "cell-indent" : "cell-modified") : "cell-clean";
+          const rightClass = isAdd ? "cell-added" : isMod ? (isIndent ? "cell-indent" : "cell-modified") : "cell-clean";
+
+          return (
+            <div key={`cmp-row-${idx}`} className={`comparison-row ${row.type}`}>
+              {/* Left Column (Original) */}
+              <div className={`comparison-cell left ${leftClass} ${!row.origLineNum ? "cell-empty" : ""}`}>
+                <span className="cell-gutter">
+                  <span className="gutter-num">{row.origLineNum || ""}</span>
+                  <span className="gutter-marker">{isDel ? "-" : isMod ? "●" : ""}</span>
+                </span>
+                <span
+                  className="cell-code"
+                  dangerouslySetInnerHTML={{
+                    __html: row.origLineNum
+                      ? safeSyntaxHighlight(row.origText, model.language, isMod ? row.inline : null, "del")
+                      : ""
+                  }}
+                />
+              </div>
+
+              {/* Right Column (Improved) */}
+              <div className={`comparison-cell right ${rightClass} ${!row.imprvLineNum ? "cell-empty" : ""}`}>
+                <span className="cell-gutter">
+                  <span className="gutter-num">{row.imprvLineNum || ""}</span>
+                  <span className="gutter-marker">{isAdd ? "+" : isMod ? "●" : ""}</span>
+                </span>
+                <span
+                  className="cell-code"
+                  dangerouslySetInnerHTML={{
+                    __html: row.imprvLineNum
+                      ? safeSyntaxHighlight(row.imprvText, model.language, isMod ? row.inline : null, "ins")
+                      : ""
+                  }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function SideBySideDiffView({ alignedRows, language, onCopyOriginal, onCopyOptimized, copyState }) {
   return (
     <div className="diff-full-container">
@@ -1147,10 +1244,8 @@ function KeyFindingsSection({ findings = [], onJumpToHunk }) {
               <div className="finding-card-header">
                 <div className="finding-badge-group">
                   <span className={`finding-sev-tag ${sevClass}`}>[{sev}]</span>
+                  <span className="finding-title">{item.title}</span>
                   {item.lineRange && <span className="finding-lines">{item.lineRange}</span>}
-                  {item.complexityDelta && (
-                    <span className="finding-complexity-badge">{item.complexityDelta}</span>
-                  )}
                 </div>
                 {item.hunkId && (
                   <button
@@ -1163,15 +1258,19 @@ function KeyFindingsSection({ findings = [], onJumpToHunk }) {
                 )}
               </div>
 
-              <h3 className="finding-title">{item.title}</h3>
-              <p className="finding-explanation">{item.why || item.suggestion}</p>
-
-              {item.suggestion && item.why && (
-                <div className="finding-improvement">
-                  <span className="improvement-dot">●</span>
-                  <span>{item.suggestion}</span>
+              <div className="finding-body-compact">
+                <div className="finding-block">
+                  <span className="finding-block-label">Why this change was needed:</span>
+                  <p className="finding-block-text">{item.why || "Identified performance, logic or structural issue in the original code."}</p>
                 </div>
-              )}
+
+                {item.suggestion && (
+                  <div className="finding-block">
+                    <span className="finding-block-label label-better">Why the new approach is better:</span>
+                    <p className="finding-block-text">{item.suggestion}</p>
+                  </div>
+                )}
+              </div>
             </article>
           );
         })}
@@ -1180,59 +1279,92 @@ function KeyFindingsSection({ findings = [], onJumpToHunk }) {
   );
 }
 
-function FullCodeView({ originalCode, optimizedCode, language, onCopyOriginal, onCopyOptimized, copyState }) {
+function FullCodeView({ originalCode, optimizedCode, language, onCopyOriginal, onCopyOptimized, copyState, alignedRows = [] }) {
   const origLines = String(originalCode || "").split("\n");
   const optLines = String(optimizedCode || "").split("\n");
 
+  // Map alignedRows by improved line number for precise changed/added line detection
+  const optRowMap = React.useMemo(() => {
+    const map = new Map();
+    if (Array.isArray(alignedRows)) {
+      alignedRows.forEach((row) => {
+        const lineNum = row?.imprvLineNum ?? row?.optLineNum;
+        if (lineNum != null) {
+          map.set(lineNum, row);
+        }
+      });
+    }
+    return map;
+  }, [alignedRows]);
+
+  const changedLineCount = React.useMemo(() => {
+    let count = 0;
+    for (let i = 1; i <= optLines.length; i++) {
+      const r = optRowMap.get(i);
+      if (r && (r.type === "added" || r.type === "modified")) count++;
+    }
+    return count;
+  }, [optLines, optRowMap]);
+
   return (
     <div className="full-code-container">
-      <div className="full-code-grid">
-        <div className="full-code-pane">
-          <div className="full-code-header">
-            <span>ORIGINAL CODE ({origLines.length} lines)</span>
+      <div className="full-code-single-card">
+        <div className="full-code-header">
+          <div className="full-code-header-left">
+            <span className="full-code-title">
+              <span className="fc-dot">●</span> COMPLETE CORRECTED SOURCE FILE
+            </span>
+            <span className="full-code-meta">
+              {optLines.length} lines {changedLineCount > 0 && <>· <strong style={{ color: "#00E5FF" }}>{changedLineCount} lines updated</strong></>}
+            </span>
+          </div>
+          <div className="full-code-header-right">
+            <button
+              type="button"
+              className={`primary-button ${copyState === "Optimized copied" ? "copied" : ""}`}
+              style={{ fontSize: "0.72rem", padding: "6px 16px" }}
+              onClick={onCopyOptimized}
+              title="Copy the entire corrected file to paste directly into your editor"
+            >
+              {copyState === "Optimized copied" ? "✓ COPIED ENTIRE FILE" : "COPY IMPROVED CODE"}
+            </button>
             <button
               type="button"
               className={`ghost-button ${copyState === "Original copied" ? "copied" : ""}`}
+              style={{ fontSize: "0.72rem", padding: "6px 14px" }}
               onClick={onCopyOriginal}
+              title="Copy original code for reference"
             >
               {copyState === "Original copied" ? "✓ Copied" : "Copy Original"}
             </button>
           </div>
-          <div className="full-code-body">
-            {origLines.map((line, i) => (
-              <div key={`fc-orig-${i}`} className="code-row">
-                <span className="code-line-number">{i + 1}</span>
-                <span
-                  className="code-line-content"
-                  dangerouslySetInnerHTML={{ __html: safeSyntaxHighlight(line, language) }}
-                />
-              </div>
-            ))}
-          </div>
         </div>
 
-        <div className="full-code-pane">
-          <div className="full-code-header">
-            <span>IMPROVED CODE ({optLines.length} lines)</span>
-            <button
-              type="button"
-              className={`ghost-button ${copyState === "Optimized copied" ? "copied" : ""}`}
-              onClick={onCopyOptimized}
-            >
-              {copyState === "Optimized copied" ? "✓ Copied" : "Copy Improved"}
-            </button>
-          </div>
-          <div className="full-code-body">
-            {optLines.map((line, i) => (
-              <div key={`fc-opt-${i}`} className="code-row code-row-optimized">
-                <span className="code-line-number">{i + 1}</span>
+        <div className="full-code-body">
+          {optLines.map((line, i) => {
+            const lineNum = i + 1;
+            const rowInfo = optRowMap.get(lineNum);
+            const isAdded = rowInfo?.type === "added";
+            const isModified = rowInfo?.type === "modified";
+            const isChanged = isAdded || isModified;
+            const lineClass = isAdded ? "code-row-added" : isModified ? "code-row-modified" : "code-row-clean";
+            const gutterMarker = isAdded ? "+" : isModified ? "●" : "";
+
+            return (
+              <div key={`fc-line-${i}`} className={`code-row ${lineClass}`}>
+                <span className="code-line-gutter">
+                  <span className="code-line-number">{lineNum}</span>
+                  <span className="code-gutter-marker">{gutterMarker}</span>
+                </span>
                 <span
                   className="code-line-content"
-                  dangerouslySetInnerHTML={{ __html: safeSyntaxHighlight(line, language) }}
+                  dangerouslySetInnerHTML={{
+                    __html: safeSyntaxHighlight(line, language, isChanged ? rowInfo?.inline : null, "ins")
+                  }}
                 />
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -1240,7 +1372,7 @@ function FullCodeView({ originalCode, optimizedCode, language, onCopyOriginal, o
 }
 
 function CodeDiffViewer({ model, onCopyOriginal, onCopyOptimized, copyState }) {
-  const [viewMode, setViewMode] = React.useState("focused");
+  const [viewMode, setViewMode] = React.useState("fullcode");
   const [copiedHunk, setCopiedHunk] = React.useState(null);
   const copyTimerRef = React.useRef(null);
 
@@ -1310,6 +1442,7 @@ function CodeDiffViewer({ model, onCopyOriginal, onCopyOptimized, copyState }) {
                 onCopyOriginal={onCopyOriginal}
                 onCopyOptimized={onCopyOptimized}
                 copyState={copyState}
+                alignedRows={alignedRows}
               />
             </div>
           )}
@@ -1319,6 +1452,13 @@ function CodeDiffViewer({ model, onCopyOriginal, onCopyOptimized, copyState }) {
           {/* Toolbar with View Mode Switcher and Global Copy Actions */}
           <div className="diff-toolbar">
             <div className="diff-mode-switcher">
+              <button
+                type="button"
+                className={`diff-mode-btn ${viewMode === "fullcode" ? "active" : ""}`}
+                onClick={() => setViewMode("fullcode")}
+              >
+                📄 Full Code
+              </button>
               <button
                 type="button"
                 className={`diff-mode-btn ${viewMode === "focused" ? "active" : ""}`}
@@ -1339,13 +1479,6 @@ function CodeDiffViewer({ model, onCopyOriginal, onCopyOptimized, copyState }) {
                 onClick={() => setViewMode("unified")}
               >
                 ☰ Unified Diff
-              </button>
-              <button
-                type="button"
-                className={`diff-mode-btn ${viewMode === "fullcode" ? "active" : ""}`}
-                onClick={() => setViewMode("fullcode")}
-              >
-                📄 Full Code
               </button>
             </div>
 
@@ -1490,6 +1623,7 @@ function CodeDiffViewer({ model, onCopyOriginal, onCopyOptimized, copyState }) {
               onCopyOriginal={onCopyOriginal}
               onCopyOptimized={onCopyOptimized}
               copyState={copyState}
+              alignedRows={alignedRows}
             />
           )}
         </>
@@ -1907,6 +2041,7 @@ export {
   KeyFindingsSection,
   CodeDiffViewer,
   FullCodeView,
+  CodeComparisonHero,
   ApproachTabs,
   ExplanationTabs,
   FeedbackPanel,
@@ -1917,5 +2052,6 @@ export {
   ReanalyzePanel,
   detectLanguage,
   detectPattern,
-  syntaxHighlight
+  syntaxHighlight,
+  safeSyntaxHighlight
 };
