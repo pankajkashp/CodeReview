@@ -171,24 +171,27 @@ function parseGeminiError(err) {
   let status = 500;
   let cleanMessage = "Gemini analysis failed.";
 
-  if (msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED") || msg.includes("quota")) {
+  if (err?.status === 504 || msg.includes("too long") || msg.includes("timeout") || msg.includes("504")) {
+    status = 504;
+    cleanMessage = "The review took too long to complete. Try a smaller code sample.";
+  } else if (msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED") || msg.includes("quota")) {
     status = 429;
-    cleanMessage = "Gemini API rate limit exceeded (429). Please wait a moment and try again.";
+    cleanMessage = "AI review quota is temporarily unavailable. Please try again later.";
   } else if (msg.includes("503") || msg.includes("UNAVAILABLE") || msg.includes("high demand") || msg.includes("overloaded")) {
     status = 503;
-    cleanMessage = "Gemini service temporarily unavailable (503). Please try again shortly.";
+    cleanMessage = "The review service is temporarily unavailable. Please try again shortly.";
   } else if (msg.includes("500") || msg.includes("502") || msg.includes("fetch failed")) {
     status = 502;
-    cleanMessage = "Temporary network error communicating with Gemini API. Please retry.";
+    cleanMessage = "Temporary network error communicating with review service. Please try again.";
   } else if (msg.includes("401") || msg.includes("API_KEY_INVALID") || msg.includes("not found")) {
     status = 401;
-    cleanMessage = "Invalid or unconfigured GEMINI_API_KEY.";
+    cleanMessage = "Invalid or unconfigured AI service credentials.";
   } else if (msg.includes("403") || msg.includes("PERMISSION_DENIED")) {
     status = 403;
-    cleanMessage = "Permission denied for Gemini API key.";
+    cleanMessage = "Permission denied for AI service.";
   } else if (msg.includes("400") || msg.includes("INVALID_ARGUMENT")) {
     status = 400;
-    cleanMessage = "Invalid input or code format for Gemini analysis.";
+    cleanMessage = "Invalid input or code format for review.";
   } else {
     cleanMessage = msg.replace(/\[GoogleGenerativeAI Error\]:\s*/g, "").slice(0, 200);
   }
@@ -201,43 +204,32 @@ function parseGeminiError(err) {
 
 function isTransientError(err) {
   const msg = err?.message || String(err);
+  const status = err?.status;
   return (
+    status === 504 ||
+    status === 429 ||
+    status === 500 ||
+    status === 502 ||
+    status === 503 ||
     msg.includes("429") ||
     msg.includes("500") ||
     msg.includes("502") ||
     msg.includes("503") ||
+    msg.includes("504") ||
+    msg.includes("timeout") ||
+    msg.includes("too long") ||
     msg.includes("fetch failed") ||
     msg.includes("high demand") ||
     msg.includes("overloaded") ||
     msg.includes("UNAVAILABLE") ||
-    msg.includes("RESOURCE_EXHAUSTED")
+    msg.includes("RESOURCE_EXHAUSTED") ||
+    msg.includes("JSON") ||
+    msg.includes("Unterminated") ||
+    msg.includes("SyntaxError")
   );
 }
 
-export async function analyzeCodeWithGemini(code) {
-  const reqStart = Date.now();
-  const apiKey = process.env.GEMINI_API_KEY;
-
-  if (!apiKey) {
-    const err = new Error("GEMINI_API_KEY is not configured on the server.");
-    err.status = 401;
-    throw err;
-  }
-
-  const PRIMARY_MODEL = "gemini-2.5-flash";
-  const genAI = new GoogleGenerativeAI(apiKey);
-
-  console.log(`\n[API REVIEW] ⏱️ Request started at ${new Date(reqStart).toISOString()}`);
-  console.log(`[API REVIEW] Initializing model: ${PRIMARY_MODEL}`);
-
-  const model = genAI.getGenerativeModel({
-    model: PRIMARY_MODEL,
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: REVIEW_SCHEMA,
-      temperature: 0.1
-    },
-    systemInstruction: `You are a senior software architect doing a pragmatic, focused code review.
+const SYSTEM_INSTRUCTION = `You are a senior software architect doing a pragmatic, focused code review.
 CORE PHILOSOPHY: Make the SMALLEST MEANINGFUL improvement. Never rewrite good code.
 
 SCORING (0 to 100):
@@ -268,54 +260,101 @@ CONDITIONAL IMPROVED CODE:
 CONCISENESS:
 - Write natural, concise explanations (1-2 clear sentences). Avoid academic jargon, fluff, and robotic filler.
 - Each issue must identify exact lineRange, what is wrong, why it matters, and a concrete suggestion. Provide exact before/after snippets when applicable.
+- Strengths: maximum 1-3 concise points.
+- MissedEdgeCases: only realistic, relevant edge cases.
 
 CRITICAL CODE PRESERVATION:
-- Never run destructive formatting on code. Preserve multiline formatting, newlines, and original indentation depth.`
+- Never run destructive formatting on code. Preserve multiline formatting, newlines, and original indentation depth.`;
+
+export async function analyzeCodeWithGemini(code) {
+  const reqStart = Date.now();
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    const err = new Error("GEMINI_API_KEY is not configured on the server.");
+    err.status = 401;
+    throw err;
+  }
+
+  // Verified candidate models (Part 2 & Part 5-6)
+  const PRIMARY_MODEL = "gemini-3.5-flash-lite";
+  const FALLBACK_MODEL = "gemini-3.6-flash";
+  const genAI = new GoogleGenerativeAI(apiKey);
+
+  const getModelInstance = (modelName) => genAI.getGenerativeModel({
+    model: modelName,
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: REVIEW_SCHEMA,
+      temperature: 0.1,
+      maxOutputTokens: 6000
+    },
+    systemInstruction: SYSTEM_INSTRUCTION
   });
 
-  const tPromptStart = Date.now();
   const prompt = `Review the following code:\n\n${code}`;
-  const tPrompt = Date.now() - tPromptStart;
 
-  const maxAttempts = 2; // 1 standard attempt + at most 1 controlled retry for transient errors
+  // Maximum 2 models: Primary attempt + at most 1 Fallback attempt for transient/quota failures (Part 4 & 6)
+  const candidateModels = [
+    { name: PRIMARY_MODEL, timeoutMs: 25000 },
+    { name: FALLBACK_MODEL, timeoutMs: 35000 }
+  ];
   let lastError = null;
 
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    const geminiStart = Date.now();
-    console.log(`[API REVIEW] 🚀 Gemini request started (Model: ${PRIMARY_MODEL}, Attempt: ${attempt}/${maxAttempts})`);
+  for (let attempt = 0; attempt < candidateModels.length; attempt++) {
+    const { name: currentModel, timeoutMs } = candidateModels[attempt];
+    const isFallback = attempt > 0;
+    const modelStart = Date.now();
+
+    console.log(`\n[API REVIEW] 🚀 Dispatching AI request to ${currentModel} (${isFallback ? "Fallback" : "Primary"}, max ${timeoutMs / 1000}s)`);
 
     try {
-      const completion = await model.generateContent(prompt);
-      const geminiDuration = Date.now() - geminiStart;
+      const model = getModelInstance(currentModel);
 
-      const tParseStart = Date.now();
+      let timeoutHandle;
+      const timeoutPromise = new Promise((_, reject) => {
+        timeoutHandle = setTimeout(() => {
+          const timeoutErr = new Error("The review took too long to complete. Try a smaller code sample.");
+          timeoutErr.status = 504;
+          reject(timeoutErr);
+        }, timeoutMs);
+      });
+
+      const completion = await Promise.race([
+        model.generateContent(prompt),
+        timeoutPromise
+      ]).finally(() => {
+        clearTimeout(timeoutHandle);
+      });
+
+      const geminiDuration = Date.now() - modelStart;
       const raw = completion.response.text();
       const parsed = extractJson(raw);
-      const tParse = Date.now() - tParseStart;
-
-      const tNormStart = Date.now();
       const normalized = normalizeReviewResult(parsed, code);
-      const tNorm = Date.now() - tNormStart;
-
       const totalDuration = Date.now() - reqStart;
 
       console.log(
-        `[API TIMINGS] ⏱️ Prompt: ${tPrompt}ms | Gemini: ${geminiDuration}ms | JSON Parse: ${tParse}ms | Normalization: ${tNorm}ms | Total Server: ${totalDuration}ms | Payload: ${raw.length} bytes (Attempts: ${attempt})`
+        `[API TIMINGS] ⏱️ Model: ${currentModel} | Gemini: ${geminiDuration}ms | Total Server: ${totalDuration}ms | Payload: ${raw.length} bytes (Attempt ${attempt + 1})`
       );
 
       return normalized;
     } catch (err) {
-      const geminiDuration = Date.now() - geminiStart;
+      const geminiDuration = Date.now() - modelStart;
       const parsedError = parseGeminiError(err);
       lastError = parsedError;
 
       console.warn(
-        `[API REVIEW] ⚠️ Attempt ${attempt} failed in ${geminiDuration}ms. Status: ${parsedError.status}, Reason: ${parsedError.message}`
+        `[API REVIEW] ⚠️ ${currentModel} failed in ${geminiDuration}ms (Status: ${parsedError.status}): ${parsedError.message}`
       );
 
-      if (attempt < maxAttempts && isTransientError(err)) {
-        console.log(`[API REVIEW] 🔄 Transient failure detected (${parsedError.status}). Retrying once after 1000ms...`);
-        await new Promise((r) => setTimeout(r, 1000));
+      // Non-retryable errors (400, 401, 403) abort immediately without calling fallback
+      if (parsedError.status === 400 || parsedError.status === 401 || parsedError.status === 403) {
+        break;
+      }
+
+      // If primary encountered a transient failure or 429 quota exhaustion, immediately invoke single fallback
+      if (!isFallback && isTransientError(err)) {
+        console.log(`[API REVIEW] 🔄 Transient failure or quota limit on ${PRIMARY_MODEL}. Immediately invoking single fallback: ${FALLBACK_MODEL}...`);
         continue;
       }
 
@@ -324,7 +363,7 @@ CRITICAL CODE PRESERVATION:
   }
 
   const totalDuration = Date.now() - reqStart;
-  console.error(`[API REVIEW] ❌ All attempts failed after ${totalDuration}ms. Throwing clean error:`, lastError.message);
+  console.error(`[API REVIEW] ❌ All review attempts failed after ${totalDuration}ms:`, lastError.message);
   throw lastError;
 }
 

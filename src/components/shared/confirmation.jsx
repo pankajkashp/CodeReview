@@ -9,14 +9,15 @@ export default function Confirm() {
     const handleConfirm = async () => {
       const { data } = await supabase.auth.getSession();
 
-      // Increased delay to 3.5 seconds so user can read the success message
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         if (data.session) {
-          navigate("/");
+          navigate("/dashboard");
         } else {
           navigate("/login");
         }
-      }, 3500);
+      }, 1000);
+
+      return () => clearTimeout(timer);
     };
 
     handleConfirm();
@@ -31,10 +32,10 @@ export default function Confirm() {
       alignItems: 'center',
       justifyContent: 'center',
       color: 'var(--color-text-primary)',
-      textAlign: 'center'
+      textAlign: 'center',
+      padding: '24px'
     }}>
       <div style={{
-        
         borderRadius: '50%',
         width: '80px',
         height: '80px',
@@ -42,6 +43,7 @@ export default function Confirm() {
         alignItems: 'center',
         justifyContent: 'center',
         border: '1px solid var(--color-accent-primary)',
+        background: 'rgba(0, 229, 255, 0.08)',
         marginBottom: '24px',
         animation: 'pulse 2s infinite'
       }}>
@@ -50,9 +52,18 @@ export default function Confirm() {
         </svg>
       </div>
       <h1 style={{ fontSize: '2.4rem', fontWeight: '900', marginBottom: '8px' }}>Identity Verified</h1>
-      <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem' }}>Your account is now fully secured. Redirecting to terminal...</p>
+      <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem', maxWidth: '440px' }}>
+        Your account is now fully secured. Redirecting to engine terminal...
+      </p>
 
-      <div style={{ marginTop: '40px' }} className="tire-loader"></div>
+      <button
+        type="button"
+        className="primary-button"
+        style={{ marginTop: '32px', padding: '10px 28px', fontSize: '0.85rem' }}
+        onClick={() => navigate("/dashboard")}
+      >
+        CONTINUE TO DASHBOARD
+      </button>
     </div>
   );
 }

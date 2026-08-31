@@ -1,12 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import supabase from "./lib/supabaseClient.js";
 
-import { CodeIntegrityEngine } from "./components/dashboard/CodeIntegrityEngine.jsx";
 import { Hero } from "./components/layout/Hero.jsx";
 import { TopNavigation } from "./components/layout/TopNavigation.jsx";
 import { Preloader } from "./components/layout/Preloader.jsx";
 import { About } from "./pages/About.jsx";
+
+const CodeIntegrityEngine = lazy(() =>
+  import("./components/dashboard/CodeIntegrityEngine.jsx").then((m) => ({ default: m.CodeIntegrityEngine }))
+);
 
 export default function App() {
   const navigate = useNavigate();
@@ -108,11 +111,38 @@ export default function App() {
         <div className="app-root-animate">
 
           {location.pathname === "/dashboard" && user ? (
-            <CodeIntegrityEngine
-              user={user}
-              onBack={() => navigate("/")}
-              onLogout={() => navigate("/logout")}
-            />
+            <Suspense fallback={
+              <div style={{
+                minHeight: "100vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "#080c14",
+                color: "#00E5FF",
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: "0.82rem",
+                letterSpacing: "0.1em"
+              }}>
+                <div style={{ textAlign: "center" }}>
+                  <div style={{
+                    width: "32px",
+                    height: "32px",
+                    border: "2px solid rgba(0, 229, 255, 0.2)",
+                    borderTop: "2px solid #00E5FF",
+                    borderRadius: "50%",
+                    animation: "spin 0.8s linear infinite",
+                    margin: "0 auto 16px"
+                  }} />
+                  <span>INITIALIZING CODE ENGINE...</span>
+                </div>
+              </div>
+            }>
+              <CodeIntegrityEngine
+                user={user}
+                onBack={() => navigate("/")}
+                onLogout={() => navigate("/logout")}
+              />
+            </Suspense>
           ) : (
             <div className="site-shell" style={{ 
               minHeight: "100vh", 

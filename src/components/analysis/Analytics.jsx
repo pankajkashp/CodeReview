@@ -210,7 +210,7 @@ export function Analytics({
               </div>
 
               <div className="hero-actions">
-                {model.diff?.hasChanges && (
+                {model.diff?.hasChanges && model.optimizedCode?.trim() ? (
                   <>
                     <button 
                       type="button" 
@@ -226,6 +226,31 @@ export function Analytics({
                       onClick={handleScrollToChanges}
                     >
                       VIEW CHANGES ↓
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      color: "var(--semantic-success, #00e676)",
+                      fontSize: "0.82rem",
+                      fontWeight: "800",
+                      letterSpacing: "0.08em",
+                      padding: "8px 14px",
+                      background: "rgba(0, 230, 118, 0.08)",
+                      border: "1px solid rgba(0, 230, 118, 0.25)",
+                      borderRadius: "8px"
+                    }}>
+                      ✓ CODE LOOKS GOOD
+                    </div>
+                    <button 
+                      type="button" 
+                      className={`primary-button ${copyState === "Original copied" ? "copied" : ""}`} 
+                      onClick={() => copyToClipboard(originalCode || "", "Original copied")}
+                    >
+                      {copyState === "Original copied" ? "✓ COPIED" : "COPY CURRENT CODE"}
                     </button>
                   </>
                 )}

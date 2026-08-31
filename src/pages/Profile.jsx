@@ -4,6 +4,40 @@ import { useNavigate } from "react-router-dom";
 import "../styles/profile.css";
 import "../styles/login.css"; // Reuse form styles
 
+function getRecordDetails(record) {
+  const result = record.result || {};
+  const findingsCount = Array.isArray(result.issues) ? result.issues.length : (result.findings?.length || 0);
+  const score = Number.isFinite(Number(result.score)) ? Number(result.score) : 80;
+
+  let lang = "JavaScript";
+  let fileName = "code_review.js";
+  const codeSnippet = String(record.code || "");
+  if (codeSnippet.includes("#include") || codeSnippet.includes("std::")) {
+    lang = "C++";
+    fileName = "inventory_manager.cpp";
+  } else if (codeSnippet.includes("def ") || (codeSnippet.includes("import ") && codeSnippet.includes(":"))) {
+    lang = "Python";
+    fileName = "metrics_processor.py";
+  } else if (codeSnippet.includes("public class ") || codeSnippet.includes("System.out.")) {
+    lang = "Java";
+    fileName = "UserService.java";
+  } else if (codeSnippet.includes("#include <stdio.h>") || codeSnippet.includes("char*")) {
+    lang = "C";
+    fileName = "config_parser.c";
+  } else if (codeSnippet.includes("calculateCartTotal") || codeSnippet.includes("cartItems")) {
+    lang = "JavaScript";
+    fileName = "cartService.js";
+  }
+
+  const dateStr = new Date(record.created_at).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
+
+  return { findingsCount, score, lang, fileName, dateStr };
+}
+
 export default function Profile() {
   const [user, setUser] = useState(null);
   const [history, setHistory] = useState([]);
@@ -20,6 +54,20 @@ export default function Profile() {
   const fileInputRef = useRef(null);
 
   const navigate = useNavigate();
+
+  const openHistoricalReview = (record) => {
+    const { fileName, lang } = getRecordDetails(record);
+    navigate("/dashboard", {
+      state: {
+        fromHistory: true,
+        reviewId: record.id,
+        reviewCode: record.code,
+        reviewResult: record.result,
+        reviewFileName: fileName,
+        reviewLanguage: lang
+      }
+    });
+  };
 
   useEffect(() => {
     async function getProfile() {
@@ -147,12 +195,30 @@ export default function Profile() {
 
   return (
     <div className="profile-shell">
-      <div className="back-link" onClick={() => navigate("/")}>
+      <button 
+        type="button"
+        className="back-link" 
+        onClick={() => navigate("/dashboard")}
+        style={{
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "8px",
+          color: "rgba(220, 235, 255, 0.8)",
+          fontSize: "0.85rem",
+          fontWeight: "700",
+          letterSpacing: "0.06em",
+          marginBottom: "24px",
+          padding: 0
+        }}
+      >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
-        Return to Intelligence Home
-      </div>
+        Return to Engine Dashboard
+      </button>
 
       <div className="profile-container">
         <aside className="profile-sidebar">
@@ -179,16 +245,43 @@ export default function Profile() {
 
           <nav className="profile-nav">
             <button
+              type="button"
               className={activeTab === "history" ? "active" : ""}
               onClick={() => setActiveTab("history")}
             >
               Analysis History
             </button>
             <button
+              type="button"
               className={activeTab === "settings" ? "active" : ""}
               onClick={() => setActiveTab("settings")}
             >
               Account Settings
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/logout")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                background: "transparent",
+                border: "1px solid rgba(255, 23, 68, 0.3)",
+                color: "#ff8a80",
+                padding: "8px 16px",
+                borderRadius: "8px",
+                fontSize: "0.78rem",
+                fontWeight: "700",
+                cursor: "pointer",
+                marginTop: "16px",
+                transition: "all 0.2s ease"
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                <line x1="12" y1="2" x2="12" y2="12"></line>
+              </svg>
+              Sign Out
             </button>
           </nav>
         </aside>
@@ -202,28 +295,86 @@ export default function Profile() {
               </header>
 
               <div className="history-list">
-                {history.length > 0 ? history.map((record) => (
-                  <div key={record.id} className="history-item" style={{ position: 'relative' }}>
-                    <div className="history-info">
-                      <h3>Analytic Pulse #{record.id.slice(0, 6)}</h3>
-                      <span>{new Date(record.created_at).toLocaleString()}</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                      <div className="history-score" style={{  color: 'var(--color-accent-primary)',  }}>
-                        {record.result?.score || 85}
-                      </div>
-                      <button
-                        onClick={(e) => deleteHistoryRecord(e, record.id)}
-                        style={{ background: 'transparent', border: 'none', color: '#666', cursor: 'pointer', fontSize: '1.2rem' }}
-                        title="Delete record"
+                {history.length > 0 ? (
+                  history.map((record) => {
+                    const { findingsCount, score, lang, fileName, dateStr } = getRecordDetails(record);
+                    return (
+                      <div 
+                        key={record.id} 
+                        className="history-item interactive-history-item"
+                        onClick={() => openHistoricalReview(record)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") openHistoricalReview(record); }}
+                        style={{ cursor: 'pointer' }}
                       >
-                        ✕
-                      </button>
+                        <div className="history-info">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                            <span style={{ color: 'var(--color-accent-primary, #00E5FF)', fontSize: '0.75rem' }}>●</span>
+                            <strong style={{ color: '#FFFFFF', fontSize: '0.92rem', fontFamily: "'JetBrains Mono', monospace" }}>
+                              {fileName.toUpperCase()}
+                            </strong>
+                          </div>
+                          <div style={{ fontSize: '0.8rem', color: 'rgba(220, 235, 255, 0.65)', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            <span>{lang}</span>
+                            <span>·</span>
+                            <span>Score {score}</span>
+                            <span>·</span>
+                            <span>{findingsCount} {findingsCount === 1 ? 'finding' : 'findings'}</span>
+                            <span>·</span>
+                            <span>{dateStr}</span>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                          <span className="history-view-btn" style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            color: 'var(--color-accent-primary, #00E5FF)',
+                            fontSize: '0.78rem',
+                            fontWeight: '700',
+                            letterSpacing: '0.06em'
+                          }}>
+                            VIEW →
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => deleteHistoryRecord(e, record.id)}
+                            style={{
+                              background: 'transparent',
+                              border: 'none',
+                              color: 'rgba(255, 23, 68, 0.6)',
+                              cursor: 'pointer',
+                              fontSize: '1.1rem',
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              transition: 'all 0.2s ease'
+                            }}
+                            title="Delete record"
+                            aria-label="Delete review record"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="history-empty" style={{ textAlign: 'center', padding: '40px 20px' }}>
+                    <div style={{ color: 'var(--color-accent-primary, #00E5FF)', fontSize: '0.8rem', fontWeight: '800', letterSpacing: '0.1em', marginBottom: '8px' }}>
+                      NO REVIEWS YET
                     </div>
-                  </div>
-                )) : (
-                  <div className="history-empty">
-                    <p>Terminal empty. Start an analysis to generate records.</p>
+                    <p style={{ color: 'rgba(220, 235, 255, 0.65)', fontSize: '0.9rem', marginBottom: '16px' }}>
+                      Your completed CodeSage reviews will appear here.
+                    </p>
+                    <button
+                      type="button"
+                      className="primary-button"
+                      style={{ padding: '8px 20px', fontSize: '0.8rem' }}
+                      onClick={() => navigate("/dashboard")}
+                    >
+                      ANALYZE CODE
+                    </button>
                   </div>
                 )}
               </div>

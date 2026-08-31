@@ -20,40 +20,6 @@ const supabaseServer = (supabaseUrl && supabaseAnonKey)
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
 
-// In-Memory Sliding Window Rate Limiter (Part 10)
-// Suitable for developer/portfolio app: 10 reviews / 15 minutes per user/identity
-const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
-const RATE_LIMIT_MAX_REQUESTS = 10;
-const requestHistory = new Map(); // identity -> number[]
-
-function isRateLimited(identity) {
-  const now = Date.now();
-  const timestamps = requestHistory.get(identity) || [];
-  const validTimestamps = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-
-  if (validTimestamps.length >= RATE_LIMIT_MAX_REQUESTS) {
-    requestHistory.set(identity, validTimestamps);
-    return true;
-  }
-
-  validTimestamps.push(now);
-  requestHistory.set(identity, validTimestamps);
-  return false;
-}
-
-// Cleanup stale rate limit records periodically
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, timestamps] of requestHistory.entries()) {
-    const valid = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-    if (valid.length === 0) {
-      requestHistory.delete(key);
-    } else {
-      requestHistory.set(key, valid);
-    }
-  }
-}, 5 * 60 * 1000).unref?.();
-
 // Part 17: Fast Health Check Endpoints (Quick diagnostic without Gemini)
 app.get(["/api/health", "/api/review", "/"], (req, res) => {
   res.json({
@@ -65,7 +31,7 @@ app.get(["/api/health", "/api/review", "/"], (req, res) => {
   });
 });
 
-// Part 8 - 12: Review Endpoint
+// Part 8 - 12: Review Endpoint (Zero rate-limiting restriction)
 app.post(["/api/review", "/"], async (req, res) => {
   const reqStart = Date.now();
 
@@ -124,21 +90,8 @@ app.post(["/api/review", "/"], async (req, res) => {
     }
 
     const user = authData.user;
-    const clientId = user.id;
 
-    // 2. Rate Limiting Check (Part 10)
-    if (isRateLimited(clientId)) {
-      return res.status(429).json({
-        success: false,
-        error: {
-          code: "RATE_LIMIT_EXCEEDED",
-          message: "You're reviewing code too quickly. Please wait a moment.",
-          retryable: true
-        }
-      });
-    }
-
-    // 3. Request Size & Input Validation (Part 11)
+    // 2. Request Size & Input Validation
     const { code } = req.body || {};
     if (!code || typeof code !== "string" || !code.trim()) {
       return res.status(400).json({
@@ -163,7 +116,7 @@ app.post(["/api/review", "/"], async (req, res) => {
       });
     }
 
-    // 4. Verify Gemini Configuration
+    // 3. Verify Gemini Configuration
     if (!process.env.GEMINI_API_KEY) {
       console.error("[API REVIEW] GEMINI_API_KEY is not configured.");
       return res.status(500).json({
@@ -176,7 +129,7 @@ app.post(["/api/review", "/"], async (req, res) => {
       });
     }
 
-    // 5. Run AI Analysis
+    // 4. Run AI Analysis (Immediate dispatch to Gemini, no rate limiting)
     const result = await analyzeCodeWithGemini(code);
     const duration = Date.now() - reqStart;
     console.log(`[API REVIEW] ✅ Review completed for user ${user.id} (${duration}ms)`);
@@ -189,17 +142,21 @@ app.post(["/api/review", "/"], async (req, res) => {
   } catch (err) {
     const duration = Date.now() - reqStart;
     const status = err.status && Number.isInteger(err.status) ? err.status : 500;
+    const isQuota = status === 429;
     const isTransient = status === 429 || status === 502 || status === 503 || status === 504;
 
     console.error(`[API REVIEW] ❌ Error (${status}, ${duration}ms):`, err.message || err);
 
+    let errorCode = "ANALYSIS_FAILED";
+    if (isQuota) errorCode = "QUOTA_EXCEEDED";
+    else if (status === 502 || status === 503) errorCode = "SERVICE_UNAVAILABLE";
+    else if (status === 504) errorCode = "TIMEOUT";
+
     return res.status(status).json({
       success: false,
       error: {
-        code: isTransient ? "SERVICE_UNAVAILABLE" : "ANALYSIS_FAILED",
-        message: isTransient
-          ? "The analysis service is temporarily unavailable. Please try again."
-          : (err.message || "Failed to analyze code."),
+        code: errorCode,
+        message: err.message || "Failed to analyze code.",
         retryable: isTransient
       }
     });

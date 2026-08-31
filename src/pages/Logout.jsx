@@ -15,21 +15,16 @@ export default function Logout() {
 
     const timer = setTimeout(() => {
       navigate("/");
-    }, 3000);
+    }, 800);
 
     return () => clearTimeout(timer);
   }, [navigate]);
 
-
   return (
     <div className="login-shell" style={{ position: 'relative' }}>
-      {/* 🌌 BACKGROUND */}
-            
       <div className="login-card">
-
         <header className="login-header">
           <div style={{ 
-             
             borderRadius: '50%', 
             width: '64px', 
             height: '64px', 
@@ -37,7 +32,8 @@ export default function Logout() {
             alignItems: 'center', 
             justifyContent: 'center',
             margin: '0 auto 24px',
-            
+            background: 'rgba(0, 229, 255, 0.08)',
+            border: '1px solid rgba(0, 229, 255, 0.25)'
           }}>
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-primary)" strokeWidth="2">
               <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" />
@@ -50,9 +46,10 @@ export default function Logout() {
 
         <div style={{ textAlign: 'center', marginTop: '24px' }}>
           <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
-            Redirecting to home in 3 seconds...
+            Session cleared. Returning to home...
           </p>
           <button 
+            type="button"
             className="login-submit" 
             style={{ marginTop: '20px' }}
             onClick={() => navigate("/")}
