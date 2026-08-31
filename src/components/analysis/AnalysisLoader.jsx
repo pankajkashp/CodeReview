@@ -17,13 +17,11 @@ export function AnalysisLoader({ filename = "analysis.js" }) {
 
   useEffect(() => {
     const sequence = [
-      { text: `codesage analyze --target=${filename}`, type: 'command', typeSpeed: 30 },
-      { text: `> reading source file... `, delay: 300, appendDone: true, doneDelay: 250 },
-      { text: `> tokenizing input... `, delay: 200, appendDone: true, doneDelay: 250 },
-      { text: `> building AST... `, delay: 300, appendDone: true, doneDelay: 400 },
-      { text: `> detecting algorithmic pattern... `, delay: 350 },
-      { text: `> running complexity analysis... `, delay: 400 },
-      { text: `> generating review... `, delay: 500 }
+      { text: `codesage review --file=${filename}`, type: 'command', typeSpeed: 20 },
+      { text: `[1/4] READING CODE... `, delay: 100, appendDone: true, doneDelay: 200 },
+      { text: `[2/4] CHECKING LOGIC & BOUNDARIES... `, delay: 200, appendDone: true, doneDelay: 350 },
+      { text: `[3/4] EVALUATING COMPLEXITY & RESOURCES... `, delay: 250, appendDone: true, doneDelay: 400 },
+      { text: `[4/4] PREPARING REVIEW & CODE COMPARISON... `, delay: 300 }
     ];
 
     const runSequence = async () => {

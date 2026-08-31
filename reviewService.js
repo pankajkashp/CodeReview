@@ -4,118 +4,148 @@ import process from "node:process";
 const REVIEW_SCHEMA = {
   type: SchemaType.OBJECT,
   properties: {
-    isAnalyzable: { type: SchemaType.BOOLEAN },
-    triageNote: { type: SchemaType.STRING },
-
-    patternDetected: { type: SchemaType.STRING },
-    readabilityScore: { type: SchemaType.INTEGER },
-    maintainabilityScore: { type: SchemaType.INTEGER },
-
-    whyItWorks: { type: SchemaType.STRING },
-    patternExplanation: { type: SchemaType.STRING },
-    interviewIntuition: { type: SchemaType.STRING },
-    beginnerFriendlyNote: { type: SchemaType.STRING },
-
-    codingMistakes: { type: SchemaType.STRING },
-    namingIssues: { type: SchemaType.STRING },
-    missedEdgeCases: {
-      type: SchemaType.ARRAY,
-      items: { type: SchemaType.STRING }
+    score: {
+      type: SchemaType.INTEGER,
+      description: "Code quality score between 0 and 100. Optimal, clean code scores 90-100."
     },
-    scalabilityNotes: { type: SchemaType.STRING },
-
-    errors: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-    optimization: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-
+    summary: {
+      type: SchemaType.STRING,
+      description: "Concise summary of code quality and key findings in 1-2 natural sentences."
+    },
+    hasImprovements: {
+      type: SchemaType.BOOLEAN,
+      description: "True ONLY if meaningful improvements or bug fixes exist. False if code is already correct and reasonably efficient."
+    },
+    patternDetected: {
+      type: SchemaType.STRING,
+      description: "Algorithmic pattern or structure identified (e.g. 'Hash Map / Single Pass', 'Two Pointers')."
+    },
+    whyBetter: {
+      type: SchemaType.STRING,
+      description: "Concise 1-2 sentences explaining why the change improves performance/correctness, or why the current solution is already optimal."
+    },
     oldTimeComplexity: { type: SchemaType.STRING },
     newTimeComplexity: { type: SchemaType.STRING },
     oldSpaceComplexity: { type: SchemaType.STRING },
     newSpaceComplexity: { type: SchemaType.STRING },
-
-    improvedCode: { type: SchemaType.STRING },
-    score: { type: SchemaType.INTEGER }
+    strengths: {
+      type: SchemaType.ARRAY,
+      items: { type: SchemaType.STRING },
+      description: "1-3 concise strengths of the submitted code."
+    },
+    issues: {
+      type: SchemaType.ARRAY,
+      items: {
+        type: SchemaType.OBJECT,
+        properties: {
+          title: { type: SchemaType.STRING },
+          lineRange: { type: SchemaType.STRING, description: "Relevant line numbers, e.g. 'lines 2-4' or 'line 5'." },
+          why: { type: SchemaType.STRING, description: "Why this is an issue (1 concise sentence)." },
+          suggestion: { type: SchemaType.STRING, description: "Specific actionable fix (1-2 sentences)." },
+          before: { type: SchemaType.STRING, description: "Exact snippet from original code." },
+          after: { type: SchemaType.STRING, description: "Exact replacement snippet." }
+        },
+        required: ["title", "lineRange", "why", "suggestion"]
+      },
+      description: "Meaningful issues found, ordered by priority (bugs > security > performance > edge cases > clarity). Empty array if none."
+    },
+    missedEdgeCases: {
+      type: SchemaType.ARRAY,
+      items: { type: SchemaType.STRING },
+      description: "Specific realistic edge cases not handled. Empty array if none."
+    },
+    improvedCode: {
+      type: SchemaType.STRING,
+      description: "Full optimized code ONLY when hasImprovements is true. If hasImprovements is false, return empty string ''."
+    }
   },
   required: [
-    "isAnalyzable",
-    "triageNote",
+    "score",
+    "summary",
+    "hasImprovements",
     "patternDetected",
-    "readabilityScore",
-    "maintainabilityScore",
-    "whyItWorks",
-    "patternExplanation",
-    "interviewIntuition",
-    "beginnerFriendlyNote",
-    "codingMistakes",
-    "namingIssues",
-    "missedEdgeCases",
-    "scalabilityNotes",
-    "errors",
-    "optimization",
+    "whyBetter",
     "oldTimeComplexity",
     "newTimeComplexity",
     "oldSpaceComplexity",
     "newSpaceComplexity",
-    "improvedCode",
-    "score"
+    "strengths",
+    "issues",
+    "missedEdgeCases",
+    "improvedCode"
   ]
 };
 
-function normalizeReviewResult(result) {
+function normalizeReviewResult(result, originalCode = "") {
+  const score = Number.isFinite(Number(result.score))
+    ? Math.max(0, Math.min(100, Math.round(Number(result.score))))
+    : 0;
+
+  const hasImprovements = Boolean(result.hasImprovements);
+  const summary = typeof result.summary === "string" ? result.summary.trim() : "";
+  const patternDetected = typeof result.patternDetected === "string" && result.patternDetected.trim()
+    ? result.patternDetected.trim()
+    : "Linear / Direct";
+  const whyBetter = typeof result.whyBetter === "string" ? result.whyBetter.trim() : "";
+
+  const oldTimeComplexity = typeof result.oldTimeComplexity === "string" ? result.oldTimeComplexity : "Unknown";
+  const newTimeComplexity = typeof result.newTimeComplexity === "string" ? result.newTimeComplexity : oldTimeComplexity;
+  const oldSpaceComplexity = typeof result.oldSpaceComplexity === "string" ? result.oldSpaceComplexity : "Unknown";
+  const newSpaceComplexity = typeof result.newSpaceComplexity === "string" ? result.newSpaceComplexity : oldSpaceComplexity;
+
+  const strengths = Array.isArray(result.strengths) ? result.strengths.map(String) : [];
+  const missedEdgeCases = Array.isArray(result.missedEdgeCases) ? result.missedEdgeCases.map(String) : [];
+
+  const rawIssues = Array.isArray(result.issues) ? result.issues : [];
+  const issues = rawIssues.map((issue) => ({
+    title: typeof issue.title === "string" ? issue.title : "Observation",
+    lineRange: typeof issue.lineRange === "string" ? issue.lineRange : "",
+    why: typeof issue.why === "string" ? issue.why : "",
+    suggestion: typeof issue.suggestion === "string" ? issue.suggestion : "",
+    before: typeof issue.before === "string" ? issue.before : "",
+    after: typeof issue.after === "string" ? issue.after : ""
+  }));
+
+  // Conditional improvedCode: if no improvements exist or string is empty, preserve originalCode exactly
+  const rawImproved = typeof result.improvedCode === "string" ? result.improvedCode.trim() : "";
+  const improvedCode = (hasImprovements && rawImproved) ? result.improvedCode : originalCode;
+
+  // Backward compatibility mappings for existing frontend components
+  const errors = issues.map((i) => (i.lineRange ? `[${i.lineRange}] ` : "") + `${i.title}: ${i.why}`);
+  const optimization = issues.length > 0
+    ? issues.map((i) => `${i.title}: ${i.suggestion}`)
+    : (whyBetter ? [whyBetter] : []);
+
   return {
-    isAnalyzable: typeof result.isAnalyzable === "boolean" ? result.isAnalyzable : true,
-    triageNote: typeof result.triageNote === "string" ? result.triageNote : "",
+    score,
+    summary,
+    hasImprovements,
+    patternDetected,
+    whyBetter,
+    strengths,
+    issues,
+    missedEdgeCases,
+    improvedCode,
 
-    patternDetected: typeof result.patternDetected === "string" ? result.patternDetected : "Unknown",
-    readabilityScore: Number.isFinite(Number(result.readabilityScore)) ? Math.max(0, Math.min(100, Math.round(Number(result.readabilityScore)))) : 0,
-    maintainabilityScore: Number.isFinite(Number(result.maintainabilityScore)) ? Math.max(0, Math.min(100, Math.round(Number(result.maintainabilityScore)))) : 0,
+    oldTimeComplexity,
+    newTimeComplexity,
+    oldSpaceComplexity,
+    newSpaceComplexity,
 
-    whyItWorks: typeof result.whyItWorks === "string" ? result.whyItWorks : "",
-    patternExplanation: typeof result.patternExplanation === "string" ? result.patternExplanation : "",
-    interviewIntuition: typeof result.interviewIntuition === "string" ? result.interviewIntuition : "",
-    beginnerFriendlyNote: typeof result.beginnerFriendlyNote === "string" ? result.beginnerFriendlyNote : "",
-
-    codingMistakes: typeof result.codingMistakes === "string" ? result.codingMistakes : "",
-    namingIssues: typeof result.namingIssues === "string" ? result.namingIssues : "",
-    missedEdgeCases: Array.isArray(result.missedEdgeCases) ? result.missedEdgeCases.map(String) : [],
-    scalabilityNotes: typeof result.scalabilityNotes === "string" ? result.scalabilityNotes : "",
-
-    errors: Array.isArray(result.errors) ? result.errors.map(String) : [],
-    optimization: Array.isArray(result.optimization) ? result.optimization.map(String) : [],
-
-    oldTimeComplexity: typeof result.oldTimeComplexity === "string" ? result.oldTimeComplexity : "Unknown",
-    newTimeComplexity: typeof result.newTimeComplexity === "string" ? result.newTimeComplexity : "Unknown",
-    oldSpaceComplexity: typeof result.oldSpaceComplexity === "string" ? result.oldSpaceComplexity : "Unknown",
-    newSpaceComplexity: typeof result.newSpaceComplexity === "string" ? result.newSpaceComplexity : "Unknown",
-
-    improvedCode: typeof result.improvedCode === "string" ? result.improvedCode : "",
-    score: Number.isFinite(Number(result.score)) ? Math.max(0, Math.min(100, Math.round(Number(result.score)))) : 0
-  };
-}
-
-function createSimulatedReview(reason) {
-  return {
+    // Legacy fields mapped seamlessly:
+    errors,
+    optimization,
+    whyItWorks: whyBetter || summary,
+    patternExplanation: patternDetected,
+    interviewIntuition: summary,
+    beginnerFriendlyNote: whyBetter || summary,
+    codingMistakes: issues.length > 0 ? issues[0].title : "No critical mistakes found.",
+    namingIssues: issues.find((i) => /naming|identifier|variable name/i.test(i.title))?.title || "",
+    scalabilityNotes: whyBetter || "",
+    readabilityScore: Math.max(40, Math.min(100, Math.round(score * 0.95))),
+    maintainabilityScore: Math.max(40, Math.min(100, Math.round(score * 0.92))),
     isAnalyzable: true,
-    triageNote: "",
-    patternDetected: "Simulated Pattern",
-    readabilityScore: 70,
-    maintainabilityScore: 70,
-    whyItWorks: "[Simulated] Configure GEMINI_API_KEY for a real explanation.",
-    patternExplanation: "[Simulated] Pattern explanation unavailable offline.",
-    interviewIntuition: "[Simulated] Interview intuition unavailable offline.",
-    beginnerFriendlyNote: "[Simulated] Beginner note unavailable offline.",
-    codingMistakes: "[Simulated] No live analysis performed.",
-    namingIssues: "[Simulated] No live analysis performed.",
-    missedEdgeCases: ["[Simulated] Configure GEMINI_API_KEY to check real edge cases."],
-    scalabilityNotes: "[Simulated] Scalability notes unavailable offline.",
-    errors: [`[Simulated] ${reason}`],
-    optimization: ["[Simulated] Configure GEMINI_API_KEY to get a real review."],
-    oldTimeComplexity: "O(n²)",
-    newTimeComplexity: "O(n)",
-    oldSpaceComplexity: "O(n)",
-    newSpaceComplexity: "O(1)",
-    improvedCode: "// Simulation response — configure GEMINI_API_KEY to get a real review.",
-    score: 75,
-    simulated: true
+    triageNote: ""
   };
 }
 
@@ -136,119 +166,165 @@ function extractJson(text) {
   }
 }
 
-export function simulatedReview(reason) {
-  return createSimulatedReview(reason);
+function parseGeminiError(err) {
+  const msg = err?.message || String(err);
+  let status = 500;
+  let cleanMessage = "Gemini analysis failed.";
+
+  if (msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED") || msg.includes("quota")) {
+    status = 429;
+    cleanMessage = "Gemini API rate limit exceeded (429). Please wait a moment and try again.";
+  } else if (msg.includes("503") || msg.includes("UNAVAILABLE") || msg.includes("high demand") || msg.includes("overloaded")) {
+    status = 503;
+    cleanMessage = "Gemini service temporarily unavailable (503). Please try again shortly.";
+  } else if (msg.includes("500") || msg.includes("502") || msg.includes("fetch failed")) {
+    status = 502;
+    cleanMessage = "Temporary network error communicating with Gemini API. Please retry.";
+  } else if (msg.includes("401") || msg.includes("API_KEY_INVALID") || msg.includes("not found")) {
+    status = 401;
+    cleanMessage = "Invalid or unconfigured GEMINI_API_KEY.";
+  } else if (msg.includes("403") || msg.includes("PERMISSION_DENIED")) {
+    status = 403;
+    cleanMessage = "Permission denied for Gemini API key.";
+  } else if (msg.includes("400") || msg.includes("INVALID_ARGUMENT")) {
+    status = 400;
+    cleanMessage = "Invalid input or code format for Gemini analysis.";
+  } else {
+    cleanMessage = msg.replace(/\[GoogleGenerativeAI Error\]:\s*/g, "").slice(0, 200);
+  }
+
+  const error = new Error(cleanMessage);
+  error.status = status;
+  error.originalMessage = msg;
+  return error;
+}
+
+function isTransientError(err) {
+  const msg = err?.message || String(err);
+  return (
+    msg.includes("429") ||
+    msg.includes("500") ||
+    msg.includes("502") ||
+    msg.includes("503") ||
+    msg.includes("fetch failed") ||
+    msg.includes("high demand") ||
+    msg.includes("overloaded") ||
+    msg.includes("UNAVAILABLE") ||
+    msg.includes("RESOURCE_EXHAUSTED")
+  );
 }
 
 export async function analyzeCodeWithGemini(code) {
+  const reqStart = Date.now();
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    return createSimulatedReview("GEMINI_API_KEY not configured.");
+    const err = new Error("GEMINI_API_KEY is not configured on the server.");
+    err.status = 401;
+    throw err;
   }
 
-  // Define preferred models in order of priority
-  const modelsToTry = ["gemini-3-flash-preview", "gemini-2.0-flash", "gemini-flash-lite-latest"];
+  const PRIMARY_MODEL = "gemini-2.5-flash";
   const genAI = new GoogleGenerativeAI(apiKey);
 
-  for (const modelName of modelsToTry) {
-    console.log(`🤖 INITIALIZING ANALYSIS WITH MODEL: ${modelName}`);
-    
-    const model = genAI.getGenerativeModel({
-      model: modelName,
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: REVIEW_SCHEMA,
-        temperature: 0.1
-      },
-      systemInstruction: `You are a senior software engineer doing a code review, the way a human reviewer on GitHub or in an interview would — not a code generator rewriting from scratch.
+  console.log(`\n[API REVIEW] ⏱️ Request started at ${new Date(reqStart).toISOString()}`);
+  console.log(`[API REVIEW] Initializing model: ${PRIMARY_MODEL}`);
 
-CORE RULE: Evaluate the code AS WRITTEN. Do not silently replace the user's approach with a different algorithm/structure unless the complexity analysis genuinely calls for it.
+  const model = genAI.getGenerativeModel({
+    model: PRIMARY_MODEL,
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: REVIEW_SCHEMA,
+      temperature: 0.1
+    },
+    systemInstruction: `You are a senior software architect doing a pragmatic, focused code review.
+CORE PHILOSOPHY: Make the SMALLEST MEANINGFUL improvement. Never rewrite good code.
 
-TRIAGE — determine which case applies before analyzing:
+SCORING (0 to 100):
+- 90 to 100: Code is already correct and reasonably efficient.
+- 60 to 85: Code has a meaningful algorithmic bottleneck or noticeable edge-case gap.
+- Below 60: Code has a breaking bug, crash, syntax error, or severe security flaw.
 
-CASE 1 — SYNTAX/TYPO ERRORS (missing semicolon, misspelled keyword, unmatched bracket, wrong operator, etc.):
-- Do NOT generate a full rewritten version.
-- Set errors to describe the EXACT issue and its line/location (e.g. 'Missing semicolon on line 4 after result.push(...)', 'Typo: \\\`retrun\\\` should be \\\`return\\\` on line 9').
-- Set improvedCode to the user's ORIGINAL code with ONLY that specific fix applied — same structure, same variable names, same approach, minimally changed.
-- Set optimization to an empty array or a note that the logic itself is sound, only the syntax needed fixing.
-- Set score based on how close to correct the code was (a single typo should score high, e.g. 85-95, not be penalized as if the logic was wrong).
+REVIEW PRIORITIES (Order of importance):
+1. Correctness bugs, off-by-one errors, and runtime crashes.
+2. Security vulnerabilities and unsafe handling.
+3. Genuine algorithmic bottlenecks (e.g. O(n²) where O(n) is achievable).
+4. Critical, realistic edge cases.
+5. Code clarity and maintainability.
+Do NOT report trivial stylistic preferences, semicolon choices, or micro-optimizations.
 
-CASE 2 — CODE IS ALREADY CORRECT AND REASONABLY EFFICIENT for the problem it solves:
-- Set improvedCode to the SAME code as the input (or with only trivial style cleanup, not a rewrite).
-- Set optimization to state clearly that the approach is already appropriate/efficient for this problem, explaining briefly why (e.g. 'This is already O(n) using a single pass with a hashmap — no further optimization needed for this problem size.').
-- Do not invent a 'better' approach that isn't actually better, or introduce unnecessary complexity to seem more thorough.
-- Score should reflect genuine quality (80-100 range) rather than being artificially lowered to justify generating changes.
+CONDITIONAL IMPROVED CODE:
+- If the code is already correct and reasonably efficient:
+  * set hasImprovements to false
+  * set improvedCode to empty string ""
+  * set newTimeComplexity and newSpaceComplexity identical to old complexities
+  * Do NOT rewrite the code.
+- If a genuine algorithmic improvement or bug fix exists:
+  * set hasImprovements to true
+  * set improvedCode to the user's ORIGINAL code with ONLY the necessary fix applied
+  * Preserve original indentation, structure, and variable names where reasonable
+  * NEVER claim a complexity improvement (e.g. O(n²) -> O(n)) unless the code change genuinely causes that improvement. Never manufacture complexity claims.
 
-CASE 3 — CODE HAS A GENUINE COMPLEXITY/EFFICIENCY PROBLEM (e.g. O(n²) where O(n) is achievable):
-- Only in this case, generate a meaningfully improved version.
-- The improvedCode should preserve the user's naming conventions and code style where reasonable, changing only what's needed to fix the complexity issue — don't restructure unrelated parts of the code, add unrelated features, or change variable names without reason.
-- Clearly explain in optimization WHY the change improves things, referencing the actual complexity difference.
+CONCISENESS:
+- Write natural, concise explanations (1-2 clear sentences). Avoid academic jargon, fluff, and robotic filler.
+- Each issue must identify exact lineRange, what is wrong, why it matters, and a concrete suggestion. Provide exact before/after snippets when applicable.
 
-CASE 4 — CODE HAS A LOGIC BUG (produces wrong output, not just a typo):
-- Identify the specific logical error precisely (e.g. 'Off-by-one: loop condition should be j < arr.length, not j <= arr.length, causing an out-of-bounds access').
-- improvedCode should fix ONLY that bug, preserving the user's original approach and structure — do not rewrite the whole solution unless the bug is unfixable within the original structure.
+CRITICAL CODE PRESERVATION:
+- Never run destructive formatting on code. Preserve multiline formatting, newlines, and original indentation depth.`
+  });
 
-GENERAL RULES:
-- Never generate a completely different algorithmic approach than what the user wrote unless CASE 3 applies (genuine complexity problem) — respect the user's chosen approach as the baseline.
-- Never fabricate issues to make the review seem more thorough than the code warrants.
-- The goal is to help the user understand THEIR code, not to show off a different implementation.
+  const tPromptStart = Date.now();
+  const prompt = `Review the following code:\n\n${code}`;
+  const tPrompt = Date.now() - tPromptStart;
 
-TRIVIAL CODE TRIAGE:
-- If the code has no meaningful algorithmic structure — a single print/log/console statement, an empty function, boilerplate with no loops/conditionals/data structures — set isAnalyzable to false, explain why in triageNote (one sentence), set score to 0, patternDetected to "None", readabilityScore and maintainabilityScore to 0, and return empty strings/arrays for every other analytical field. Do NOT invent a pattern, complexity, or edge cases for trivial code.
-- Otherwise set isAnalyzable to true and triageNote to an empty string, then perform the full analysis below.
+  const maxAttempts = 2; // 1 standard attempt + at most 1 controlled retry for transient errors
+  let lastError = null;
 
-FIELD RULES (each field must contain DISTINCT content — never repeat the same sentence across two fields):
-- whyItWorks: explain the reasoning behind the pattern/approach used (1-2 sentences). This is about WHY the technique is correct.
-- patternExplanation: name the algorithmic pattern and why THIS code matches it specifically (different angle from whyItWorks — focus on pattern recognition, not correctness proof).
-- interviewIntuition: how an interviewer would expect the candidate to arrive at this approach out loud.
-- beginnerFriendlyNote: a plain-language one-liner a beginner could understand, avoiding jargon.
-- codingMistakes: concrete mistakes found in THIS code (not generic advice). If none, say "No significant coding mistakes found."
-- namingIssues: comment specifically on variable/function names in THIS code. If names are fine, say so explicitly.
-- missedEdgeCases: array of SPECIFIC edge cases this code fails to handle (empty input, nulls, duplicates, overflow, etc.) — only list ones that actually apply.
-- scalabilityNotes: how this code behaves as input size grows, referencing the actual complexity found.
-- errors: array of concrete bugs, if any.
-- optimization: array of concrete optimization suggestions, if any.
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const geminiStart = Date.now();
+    console.log(`[API REVIEW] 🚀 Gemini request started (Model: ${PRIMARY_MODEL}, Attempt: ${attempt}/${maxAttempts})`);
 
-Every field above must contain UNIQUE text — do not copy the same sentence into multiple fields.
+    try {
+      const completion = await model.generateContent(prompt);
+      const geminiDuration = Date.now() - geminiStart;
 
-CRITICAL FORMATTING REQUIREMENT for improvedCode: this field MUST be a properly formatted, multi-line code string using actual newline characters (\\n) between every statement and block, with consistent indentation (2 or 4 spaces per nesting level, matching the original code's indentation style). NEVER return code as a single-line or minimally-spaced string. Format it exactly as it would appear in a real code editor — each statement, each brace, each control structure on its own line, properly indented to reflect nesting depth. This is not optional stylistic preference; malformed single-line output is treated as an invalid response.
+      const tParseStart = Date.now();
+      const raw = completion.response.text();
+      const parsed = extractJson(raw);
+      const tParse = Date.now() - tParseStart;
 
-WRONG: \`function foo(x) { if (x) { return 1; } return 0; }\`
-CORRECT:
-\`function foo(x) {\\n  if (x) {\\n    return 1;\\n  }\\n  return 0;\\n}\`
+      const tNormStart = Date.now();
+      const normalized = normalizeReviewResult(parsed, code);
+      const tNorm = Date.now() - tNormStart;
 
-For C++, include 'using namespace std;' and use cout/cin/endl without std:: prefix unless necessary. Avoid competitive-programming-style micro-optimizations unless essential.
+      const totalDuration = Date.now() - reqStart;
 
-Respond ONLY with valid JSON matching the schema. No markdown, no commentary outside the JSON.`
-    });
+      console.log(
+        `[API TIMINGS] ⏱️ Prompt: ${tPrompt}ms | Gemini: ${geminiDuration}ms | JSON Parse: ${tParse}ms | Normalization: ${tNorm}ms | Total Server: ${totalDuration}ms | Payload: ${raw.length} bytes (Attempts: ${attempt})`
+      );
 
-    const prompt = `Review the following code. First determine if it is substantial enough to analyze (see TRIAGE rules). If yes, provide a full DSA-focused review: pattern detection, complexity (before/after), readability and maintainability scoring, concrete mistakes, edge cases, and an optimized version.\n\nCode:\n${code}`;
+      return normalized;
+    } catch (err) {
+      const geminiDuration = Date.now() - geminiStart;
+      const parsedError = parseGeminiError(err);
+      lastError = parsedError;
 
-    // Try up to 2 times for each model
-    for (let i = 0; i < 2; i++) {
-      try {
-        const completion = await model.generateContent(prompt);
-        const raw = completion.response.text();
-        const parsed = extractJson(raw);
-        console.log(`✅ SUCCESS WITH ${modelName} ON ATTEMPT ${i + 1}`);
-        return normalizeReviewResult(parsed);
-      } catch (err) {
-        console.warn(`⚠️ MODEL ${modelName} ATTEMPT ${i + 1} FAILED:`, err.message);
-        
-        // Wait a bit if it's a rate limit or server issue
-        if (err.message?.includes("fetch failed") || err.message?.includes("503") || err.message?.includes("429")) {
-          await new Promise(r => setTimeout(r, 1000));
-          continue;
-        }
-        
-        // If it's a 404 or other permanent error for this model, break and try next model
-        break;
+      console.warn(
+        `[API REVIEW] ⚠️ Attempt ${attempt} failed in ${geminiDuration}ms. Status: ${parsedError.status}, Reason: ${parsedError.message}`
+      );
+
+      if (attempt < maxAttempts && isTransientError(err)) {
+        console.log(`[API REVIEW] 🔄 Transient failure detected (${parsedError.status}). Retrying once after 1000ms...`);
+        await new Promise((r) => setTimeout(r, 1000));
+        continue;
       }
+
+      break;
     }
   }
 
-  // If even model redundancy fails, return a simulated results as a last resort to "guarantee" no error UI
-  console.error("❌ ALL MODELS FAILED. RETURNING SAFE SIMULATED RESPONSE.");
-  return createSimulatedReview("API Temporarily Unavailable. Analysis results are estimated.");
+  const totalDuration = Date.now() - reqStart;
+  console.error(`[API REVIEW] ❌ All attempts failed after ${totalDuration}ms. Throwing clean error:`, lastError.message);
+  throw lastError;
 }
+

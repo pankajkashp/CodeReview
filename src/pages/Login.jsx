@@ -1,5 +1,6 @@
 import { useState } from "react";
 import supabase from "../lib/supabaseClient.js";
+import { getFriendlyAuthErrorMessage } from "../lib/authErrors.js";
 import { useNavigate } from "react-router-dom";
 import "../styles/login.css";
 
@@ -36,16 +37,14 @@ export default function Login() {
         });
 
         if (signInError) {
-          if (signInError.message.includes("Invalid login credentials")) {
-            throw new Error("Password is not correct or account not found.");
-          }
           throw signInError;
         }
 
-        navigate("/");
+        // Direct navigation to Dashboard without bouncing through home (Part 5)
+        navigate("/dashboard");
       }
     } catch (err) {
-      setError(err.message);
+      setError(getFriendlyAuthErrorMessage(err));
     } finally {
       setLoading(false);
     }

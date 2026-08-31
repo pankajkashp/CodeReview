@@ -12,27 +12,51 @@ export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
-  // ✅ AUTH LISTENER
+  // ✅ AUTH INITIALIZATION & SINGLE LISTENER (Part 3 & Part 4)
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
+    let isMounted = true;
+
+    // 1. Initial session restoration
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (error && typeof window !== "undefined" && window.location.hostname === "localhost") {
+        console.warn("[App] Session restoration error:", error);
+      }
+      if (isMounted) {
+        setUser(data?.session?.user || null);
+        setAuthLoading(false);
+      }
+    }).catch((err) => {
+      console.error("[App] Failed to restore auth session:", err);
+      if (isMounted) {
+        setUser(null);
+        setAuthLoading(false);
+      }
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange(
+    // 2. Auth state change listener (single subscription)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        setUser(session?.user || null);
-
-        if (!session?.user && location.pathname === "/dashboard") {
-          navigate("/");
+        if (isMounted) {
+          setUser(session?.user || null);
+          setAuthLoading(false);
         }
       }
     );
 
     return () => {
-      listener.subscription.unsubscribe();
+      isMounted = false;
+      subscription?.unsubscribe();
     };
-  }, [location.pathname, navigate]);
+  }, []); // Run ONCE on mount! NOT on location changes.
+
+  // ✅ PROTECTED ROUTE REDIRECTION (Only when authLoading is completely done!)
+  useEffect(() => {
+    if (!authLoading && !user && location.pathname === "/dashboard") {
+      navigate("/login", { replace: true });
+    }
+  }, [authLoading, user, location.pathname, navigate]);
 
   // 🔐 LOGIN → REDIRECT
   const handleLogin = () => {
@@ -47,6 +71,36 @@ export default function App() {
       navigate("/login");
     }
   };
+
+  // If on /dashboard and session is still resolving, show clean loading state instead of bouncing to landing
+  if (authLoading && location.pathname === "/dashboard") {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#080c14",
+        color: "#00E5FF",
+        fontFamily: "'JetBrains Mono', monospace",
+        fontSize: "0.85rem",
+        letterSpacing: "0.1em"
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{
+            width: "32px",
+            height: "32px",
+            border: "2px solid rgba(0, 229, 255, 0.2)",
+            borderTop: "2px solid #00E5FF",
+            borderRadius: "50%",
+            animation: "spin 0.8s linear infinite",
+            margin: "0 auto 16px"
+          }} />
+          <span>RESTORING SECURITY SESSION...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

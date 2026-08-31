@@ -59,3 +59,19 @@ CREATE POLICY "Authenticated users can upload codereview files" ON storage.objec
 DROP POLICY IF EXISTS "Public read access for codereview files" ON storage.objects;
 CREATE POLICY "Public read access for codereview files" ON storage.objects
   FOR SELECT USING (bucket_id = 'codereview');
+
+-- 9. Storage policy: authenticated users can update their uploaded avatars (Required for upsert: true)
+DROP POLICY IF EXISTS "Authenticated users can update codereview files" ON storage.objects;
+CREATE POLICY "Authenticated users can update codereview files" ON storage.objects
+  FOR UPDATE USING (
+    bucket_id = 'codereview'
+    AND auth.role() = 'authenticated'
+  );
+
+-- 10. Storage policy: authenticated users can delete their avatar files
+DROP POLICY IF EXISTS "Authenticated users can delete codereview files" ON storage.objects;
+CREATE POLICY "Authenticated users can delete codereview files" ON storage.objects
+  FOR DELETE USING (
+    bucket_id = 'codereview'
+    AND auth.role() = 'authenticated'
+  );

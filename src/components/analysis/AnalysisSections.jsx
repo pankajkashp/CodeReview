@@ -424,164 +424,358 @@ function createSuggestions({ language, pattern }) {
   ];
 }
 
-function buildDiffMap(originalCode = "", improvedCode = "") {
-  const originalLines = String(originalCode || "").split("\n");
-  const improvedLines = String(improvedCode || "").split("\n");
-  const n = originalLines.length;
-  const m = improvedLines.length;
+function cleanSourceCode(rawCode) {
+  let text = String(rawCode || "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n");
 
-  const dp = Array.from({ length: n + 1 }, () => Array(m + 1).fill(0));
-  for (let i = n - 1; i >= 0; i -= 1) {
-    for (let j = m - 1; j >= 0; j -= 1) {
-      dp[i][j] = originalLines[i] === improvedLines[j]
-        ? dp[i + 1][j + 1] + 1
-        : Math.max(dp[i + 1][j], dp[i][j + 1]);
-    }
+  // Only strip surrounding markdown code fences if Gemini returned ```lang ... ```
+  const fenceMatch = text.match(/^```[a-zA-Z0-9_-]*\n([\s\S]*?)\n```$/);
+  if (fenceMatch) {
+    return fenceMatch[1];
   }
+  return text;
+}
 
-  const matches = [];
-  let i = 0;
-  let j = 0;
-  while (i < n && j < m) {
-    if (originalLines[i] === improvedLines[j]) {
-      matches.push([i, j]);
-      i += 1;
-      j += 1;
-      continue;
-    }
-
-    if (dp[i + 1][j] >= dp[i][j + 1]) {
-      i += 1;
-    } else {
-      j += 1;
-    }
+function inlineDiff(before, after) {
+  if (before === after) return null;
+  let start = 0;
+  while (start < before.length && start < after.length && before[start] === after[start]) {
+    start++;
   }
-
-  const originalStatus = Array(n).fill("removed");
-  const improvedStatus = Array(m).fill("added");
-
-  matches.forEach(([originalIndex, improvedIndex]) => {
-    originalStatus[originalIndex] = "match";
-    improvedStatus[improvedIndex] = "match";
-  });
-
+  let endB = before.length - 1;
+  let endA = after.length - 1;
+  while (endB >= start && endA >= start && before[endB] === after[endA]) {
+    endB--;
+    endA--;
+  }
   return {
-    originalLines,
-    improvedLines,
-    originalStatus,
-    improvedStatus,
-    changedCount: originalStatus.filter((status) => status !== "match").length + improvedStatus.filter((status) => status !== "match").length
+    prefix: before.slice(0, start),
+    del: before.slice(start, endB + 1),
+    ins: after.slice(start, endA + 1),
+    suffix: before.slice(endB + 1)
   };
 }
 
-function syntaxHighlight(line, language = "javascript") {
-  const rules = syntaxRules[language] || syntaxRules.plain;
-  const escapedLine = escapeHtml(line);
-  
-  const tokenPatterns = [
-    { type: 'comment', regex: rules.comment.source },
-    { type: 'string', regex: rules.string.source },
-    { type: 'number', regex: rules.number.source },
-    { type: 'keyword', regex: rules.keyword.source }
-  ];
+function computeRealDiff(originalCode, improvedCode, issues = []) {
+  const origText = cleanSourceCode(originalCode);
+  const imprvText = cleanSourceCode(improvedCode);
 
-  const combinedRegex = new RegExp(
-    tokenPatterns.map(p => `(${p.regex})`).join('|'),
-    'g'
-  );
+  const origLines = origText.split("\n");
+  const imprvLines = imprvText.split("\n");
+  const n = origLines.length;
+  const m = imprvLines.length;
 
-  return escapedLine.replace(combinedRegex, (...args) => {
-    const match = args[0];
-    const index = tokenPatterns.findIndex((_, i) => args[i + 1] !== undefined);
-    if (index === -1) return match;
-    const type = tokenPatterns[index].type;
-    return `<span class="token token-${type}">${match}</span>`;
+  const isIdentical = origText.trim() === imprvText.trim();
+  if (isIdentical) {
+    const alignedRows = origLines.map((line, idx) => ({
+      type: "unchanged",
+      isIndentOnly: false,
+      origLineNum: idx + 1,
+      imprvLineNum: idx + 1,
+      origText: line,
+      imprvText: line
+    }));
+
+    return {
+      identical: true,
+      hasChanges: false,
+      origLines,
+      imprvLines,
+      alignedRows,
+      hunks: [],
+      stats: {
+        totalChanged: 0,
+        modified: 0,
+        added: 0,
+        removed: 0,
+        originalLines: n,
+        optimizedLines: m,
+        summaryText: "0 lines changed (Identical)"
+      }
+    };
+  }
+
+  // DP LCS with trimmed comparison for matching
+  const dp = Array.from({ length: n + 1 }, () => Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = m - 1; j >= 0; j--) {
+      const match = origLines[i].trimEnd() === imprvLines[j].trimEnd();
+      dp[i][j] = match ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    }
+  }
+
+  let i = 0, j = 0;
+  const matches = [];
+  while (i < n && j < m) {
+    if (origLines[i].trimEnd() === imprvLines[j].trimEnd()) {
+      matches.push({ origIdx: i, imprvIdx: j });
+      i++;
+      j++;
+    } else if (dp[i + 1][j] >= dp[i][j + 1]) {
+      i++;
+    } else {
+      j++;
+    }
+  }
+
+  const alignedRows = [];
+  let lastOrig = 0, lastImprv = 0;
+  let modifiedCount = 0, addedCount = 0, removedCount = 0;
+
+  function processGap(origStart, origEnd, imprvStart, imprvEnd) {
+    const oCount = origEnd - origStart;
+    const iCount = imprvEnd - imprvStart;
+    const minCount = Math.min(oCount, iCount);
+
+    for (let k = 0; k < minCount; k++) {
+      const oIdx = origStart + k;
+      const iIdx = imprvStart + k;
+      const oText = origLines[oIdx];
+      const iText = imprvLines[iIdx];
+      const isIndentOnly = oText.trim() === iText.trim() && oText !== iText;
+      const inline = inlineDiff(oText, iText);
+
+      alignedRows.push({
+        type: "modified",
+        isIndentOnly,
+        origLineNum: oIdx + 1,
+        imprvLineNum: iIdx + 1,
+        origText: oText,
+        imprvText: iText,
+        inline
+      });
+      modifiedCount++;
+    }
+
+    if (oCount > iCount) {
+      for (let k = minCount; k < oCount; k++) {
+        const oIdx = origStart + k;
+        alignedRows.push({
+          type: "removed",
+          isIndentOnly: false,
+          origLineNum: oIdx + 1,
+          imprvLineNum: null,
+          origText: origLines[oIdx],
+          imprvText: ""
+        });
+        removedCount++;
+      }
+    } else if (iCount > oCount) {
+      for (let k = minCount; k < iCount; k++) {
+        const iIdx = imprvStart + k;
+        alignedRows.push({
+          type: "added",
+          isIndentOnly: false,
+          origLineNum: null,
+          imprvLineNum: iIdx + 1,
+          origText: "",
+          imprvText: imprvLines[iIdx]
+        });
+        addedCount++;
+      }
+    }
+  }
+
+  for (const mItem of matches) {
+    processGap(lastOrig, mItem.origIdx, lastImprv, mItem.imprvIdx);
+    alignedRows.push({
+      type: "unchanged",
+      isIndentOnly: false,
+      origLineNum: mItem.origIdx + 1,
+      imprvLineNum: mItem.imprvIdx + 1,
+      origText: origLines[mItem.origIdx],
+      imprvText: imprvLines[mItem.imprvIdx]
+    });
+    lastOrig = mItem.origIdx + 1;
+    lastImprv = mItem.imprvIdx + 1;
+  }
+  processGap(lastOrig, n, lastImprv, m);
+
+  // Group into discrete change hunks for Focused Changes View (Task 10)
+  const hunks = [];
+  let currentHunk = null;
+  const CONTEXT_LINES = 2;
+
+  alignedRows.forEach((row, rowIndex) => {
+    if (row.type !== "unchanged") {
+      if (!currentHunk) {
+        const startCtx = Math.max(0, rowIndex - CONTEXT_LINES);
+        const precedingRows = alignedRows.slice(startCtx, rowIndex).filter(r => r.type === "unchanged");
+        currentHunk = {
+          startRowIndex: startCtx,
+          rows: [...precedingRows, row],
+          changedRowsCount: 1,
+          origStartLine: row.origLineNum,
+          origEndLine: row.origLineNum,
+          imprvStartLine: row.imprvLineNum,
+          imprvEndLine: row.imprvLineNum
+        };
+      } else {
+        currentHunk.rows.push(row);
+        currentHunk.changedRowsCount++;
+        if (row.origLineNum) {
+          if (!currentHunk.origStartLine) currentHunk.origStartLine = row.origLineNum;
+          currentHunk.origEndLine = row.origLineNum;
+        }
+        if (row.imprvLineNum) {
+          if (!currentHunk.imprvStartLine) currentHunk.imprvStartLine = row.imprvLineNum;
+          currentHunk.imprvEndLine = row.imprvLineNum;
+        }
+      }
+    } else if (currentHunk) {
+      const trailingCount = currentHunk.rows.filter(r => r.type === "unchanged" && r.origLineNum > currentHunk.origEndLine).length;
+      if (trailingCount < CONTEXT_LINES) {
+        currentHunk.rows.push(row);
+      } else {
+        hunks.push(currentHunk);
+        currentHunk = null;
+      }
+    }
   });
+  if (currentHunk) {
+    hunks.push(currentHunk);
+  }
+
+  // Correlate hunks with AI issues (Task 9 & Task 10)
+  const correlatedHunks = hunks.map((hunk, index) => {
+    const matchedIssue = issues.find(issue => {
+      if (!issue.lineRange) return false;
+      const numMatch = String(issue.lineRange).match(/\d+/g);
+      if (!numMatch) return false;
+      const start = parseInt(numMatch[0], 10);
+      const end = numMatch[1] ? parseInt(numMatch[1], 10) : start;
+      return (
+        (hunk.origStartLine <= end && hunk.origEndLine >= start) ||
+        Math.abs((hunk.origStartLine || 0) - start) <= 2
+      );
+    });
+
+    const title = matchedIssue?.title || `Optimization / Refactor`;
+    const lineLabel = hunk.origStartLine
+      ? (hunk.origStartLine === hunk.origEndLine ? `Line ${hunk.origStartLine}` : `Lines ${hunk.origStartLine}–${hunk.origEndLine}`)
+      : (hunk.imprvStartLine === hunk.imprvEndLine ? `Line ${hunk.imprvStartLine}` : `Lines ${hunk.imprvStartLine}–${hunk.imprvEndLine}`);
+
+    const beforeSnippet = hunk.rows
+      .filter(r => r.type === "removed" || r.type === "modified")
+      .map(r => r.origText)
+      .join("\n");
+
+    const afterSnippet = hunk.rows
+      .filter(r => r.type === "added" || r.type === "modified")
+      .map(r => r.imprvText)
+      .join("\n");
+
+    return {
+      hunkId: `change-${index + 1}`,
+      changeNumber: index + 1,
+      title,
+      lineLabel,
+      origStartLine: hunk.origStartLine,
+      origEndLine: hunk.origEndLine,
+      whyChange: matchedIssue?.why || "Improves execution efficiency and algorithmic structure.",
+      whyBetter: matchedIssue?.suggestion || "Optimizes resource utilization and avoids redundant iterations.",
+      rows: hunk.rows,
+      beforeSnippet,
+      afterSnippet,
+      issue: matchedIssue
+    };
+  });
+
+  const totalChanged = modifiedCount + addedCount + removedCount;
+  const summaryParts = [];
+  if (modifiedCount > 0) summaryParts.push(`${modifiedCount} modified`);
+  if (addedCount > 0) summaryParts.push(`+${addedCount} added`);
+  if (removedCount > 0) summaryParts.push(`-${removedCount} removed`);
+
+  return {
+    identical: totalChanged === 0,
+    hasChanges: totalChanged > 0,
+    origLines,
+    imprvLines,
+    alignedRows,
+    hunks: correlatedHunks,
+    stats: {
+      totalChanged,
+      modified: modifiedCount,
+      added: addedCount,
+      removed: removedCount,
+      originalLines: n,
+      optimizedLines: m,
+      summaryText: totalChanged === 0
+        ? "No lines changed"
+        : `${totalChanged} line${totalChanged === 1 ? "" : "s"} changed (${summaryParts.join(", ")})`
+    }
+  };
 }
 
-function extractAndFormatCode(rawCode) {
-  let text = String(rawCode || "").trim();
-  
-  // 1. Remove markdown fences if present
-  const fenceRegex = /^```[a-z]*\n([\s\S]*?)```$/i;
-  const match = text.match(fenceRegex);
-  if (match) {
-    text = match[1].trim();
-  } else {
-    // Fallback block fence stripping
-    if (text.startsWith("\`\`\`")) {
-      const lines = text.split("\\n");
-      if (lines.length > 1) {
-        lines.shift();
-        if (lines[lines.length - 1].startsWith("\`\`\`")) {
-          lines.pop();
-        }
-        text = lines.join("\\n").trim();
-      }
+function safeSyntaxHighlight(text, language = "javascript", inline = null, mode = "normal") {
+  if (inline) {
+    const prefixHtml = safeSyntaxHighlight(inline.prefix, language);
+    const suffixHtml = safeSyntaxHighlight(inline.suffix, language);
+
+    if (mode === "del" && inline.del) {
+      return `${prefixHtml}<span class="diff-inline-del">${escapeHtml(inline.del)}</span>${suffixHtml}`;
+    }
+    if (mode === "ins" && inline.ins) {
+      return `${prefixHtml}<span class="diff-inline-ins">${escapeHtml(inline.ins)}</span>${suffixHtml}`;
     }
   }
 
-  // 2. Handle literal "\\n" if Gemini stringified it poorly
-  text = text.replace(/\\\\n/g, '\\n');
+  const keywords = {
+    javascript: /\b(const|let|var|function|return|if|else|for|while|switch|case|break|continue|class|new|import|from|export|try|catch|throw|async|await|Map|Set|Array|Object|null|true|false|undefined)\b/g,
+    python: /\b(def|return|if|elif|else|for|while|in|class|import|from|try|except|with|as|True|False|None|and|or|not|lambda|pass|set|dict|list)\b/g,
+    cpp: /\b(int|long|double|float|bool|char|void|return|if|else|for|while|class|struct|auto|const|std|vector|map|set|unordered_map|unordered_set|string|include|using|namespace|true|false|new|delete)\b/g,
+    java: /\b(public|private|protected|class|static|void|return|if|else|for|while|new|import|package|true|false|null|final|int|double|float|boolean|String|System|out|println|Map|HashMap|Set|HashSet|List|ArrayList)\b/g
+  };
 
-  // 3. Fallback auto-formatting if the text is entirely on one line
-  if (text.length > 30 && !text.includes('\\n')) {
-    let formatted = "";
-    let indentLevel = 0;
-    const indentChar = "    ";
-    let inString = false;
-    let stringChar = "";
-    
-    for (let i = 0; i < text.length; i++) {
-      const char = text[i];
-      if (inString) {
-        formatted += char;
-        if (char === stringChar && text[i-1] !== '\\\\') inString = false;
-        continue;
-      }
-      
-      if (char === '"' || char === "'" || char === "\`") {
-        inString = true;
-        stringChar = char;
-        formatted += char;
-        continue;
-      }
-      
-      if (char === '{') {
-        indentLevel++;
-        formatted += " {\\n" + indentChar.repeat(indentLevel);
-      } else if (char === '}') {
-        indentLevel = Math.max(0, indentLevel - 1);
-        formatted += "\\n" + indentChar.repeat(indentLevel) + "}\\n" + indentChar.repeat(indentLevel);
-      } else if (char === ';') {
-        const lookback = text.slice(Math.max(0, i - 20), i);
-        if (/for\\s*\\([^)]*$/.test(lookback)) {
-          formatted += "; ";
-        } else {
-          formatted += ";\\n" + indentChar.repeat(indentLevel);
-        }
-      } else {
-        formatted += char;
-      }
-    }
-    
-    text = formatted.replace(/\\n\\s*\\n/g, '\\n').trim();
-  }
-  
-  return text;
+  const kw = keywords[language] || keywords.javascript;
+  const num = /\b\d+(?:\.\d+)?\b/g;
+  const str = /("([^"\\]|\\.)*"|'([^'\\]|\\.)*'|`([^`\\]|\\.)*`)/g;
+  const cmt = /(\/\/.*$|#.*$)/g;
+
+  const tokens = [];
+  let masked = String(text || "");
+
+  masked = masked.replace(cmt, (m) => {
+    const id = `__CMT_${tokens.length}__`;
+    tokens.push(`<span class="token token-comment">${escapeHtml(m)}</span>`);
+    return id;
+  });
+
+  masked = masked.replace(str, (m) => {
+    const id = `__STR_${tokens.length}__`;
+    tokens.push(`<span class="token token-string">${escapeHtml(m)}</span>`);
+    return id;
+  });
+
+  let escaped = escapeHtml(masked);
+  escaped = escaped.replace(kw, (m) => `<span class="token token-keyword">${m}</span>`);
+  escaped = escaped.replace(num, (m) => `<span class="token token-number">${m}</span>`);
+
+  tokens.forEach((tok, idx) => {
+    escaped = escaped.replace(new RegExp(`__CMT_${idx}__|__STR_${idx}__`, "g"), tok);
+  });
+
+  return escaped;
+}
+
+function syntaxHighlight(line, language = "javascript") {
+  return safeSyntaxHighlight(line, language);
 }
 
 export function buildAnalysisViewModel({ analysis = {}, originalCode = "" }) {
   const code = String(originalCode || "");
   const language = detectLanguageLabel(code);
   const pattern = detectPattern(code);
-  const optimizedCode = extractAndFormatCode(analysis.improvedCode) || pattern.optimalTemplate;
+  const rawImproved = typeof analysis.improvedCode === "string" ? analysis.improvedCode.trim() : "";
+  const optimizedCode = rawImproved || code;
   const score = Number.isFinite(Number(analysis.score)) ? Math.max(0, Math.min(100, Math.round(Number(analysis.score)))) : 0;
   const timeComplexity = analysis.newTimeComplexity || analysis.oldTimeComplexity || "Unknown";
   const spaceComplexity = analysis.newSpaceComplexity || analysis.oldSpaceComplexity || "Unknown";
   const readabilityScore = estimateReadability(code, analysis);
   const maintainabilityScore = estimateMaintainability(code, analysis, pattern);
-  const diff = buildDiffMap(code, optimizedCode);
+  const diff = computeRealDiff(code, optimizedCode, analysis.issues || []);
   const complexityCards = [
     createComplexityValue("Time Complexity", "Unknown", analysis.oldTimeComplexity, analysis.newTimeComplexity),
     createComplexityValue("Space Complexity", "Unknown", analysis.oldSpaceComplexity, analysis.newSpaceComplexity)
@@ -594,6 +788,66 @@ export function buildAnalysisViewModel({ analysis = {}, originalCode = "" }) {
     pattern,
     language
   });
+  // Derive Key Findings (Part 3)
+  const rawIssues = Array.isArray(analysis?.issues) ? analysis.issues : [];
+  const findings = rawIssues.map((issue, idx) => {
+    const textToScan = `${issue.title || ""} ${issue.why || ""} ${issue.suggestion || ""}`.toLowerCase();
+    let severity = "MEDIUM";
+    if (
+      textToScan.includes("o(n^2)") ||
+      textToScan.includes("o(n²)") ||
+      textToScan.includes("o(2^n)") ||
+      textToScan.includes("quadratic") ||
+      textToScan.includes("infinite") ||
+      textToScan.includes("security") ||
+      textToScan.includes("leak") ||
+      textToScan.includes("crash") ||
+      textToScan.includes("vulnerability")
+    ) {
+      severity = "HIGH";
+    } else if (
+      textToScan.includes("naming") ||
+      textToScan.includes("style") ||
+      textToScan.includes("convention") ||
+      textToScan.includes("readability")
+    ) {
+      severity = "LOW";
+    }
+
+    const matchedHunk = diff.hunks.find((h) => h.issue === issue || (issue.lineRange && String(issue.lineRange).includes(String(h.origStartLine))));
+    const hunkId = matchedHunk ? matchedHunk.hunkId : (diff.hunks[idx] ? diff.hunks[idx].hunkId : (diff.hunks[0]?.hunkId || null));
+
+    let complexityDelta = null;
+    if (analysis?.oldTimeComplexity && analysis?.newTimeComplexity && analysis.oldTimeComplexity !== analysis.newTimeComplexity) {
+      complexityDelta = `${analysis.oldTimeComplexity} → ${analysis.newTimeComplexity}`;
+    }
+
+    return {
+      id: `finding-${idx + 1}`,
+      severity,
+      title: issue.title || "Logic Observation",
+      lineRange: issue.lineRange ? (String(issue.lineRange).toLowerCase().startsWith("line") ? issue.lineRange : `Lines ${issue.lineRange}`) : "",
+      why: issue.why || "Improves execution efficiency and robustness.",
+      suggestion: issue.suggestion || "",
+      complexityDelta: idx === 0 ? complexityDelta : null,
+      hunkId
+    };
+  });
+
+  const timeComplexityDelta =
+    analysis?.oldTimeComplexity && analysis?.newTimeComplexity && analysis.oldTimeComplexity !== analysis.newTimeComplexity
+      ? `${analysis.oldTimeComplexity} → ${analysis.newTimeComplexity}`
+      : null;
+
+  const spaceComplexityDelta =
+    analysis?.oldSpaceComplexity && analysis?.newSpaceComplexity && analysis.oldSpaceComplexity !== analysis.newSpaceComplexity
+      ? `${analysis.oldSpaceComplexity} → ${analysis.newSpaceComplexity}`
+      : null;
+
+  const mainWeakness =
+    findings.length > 0
+      ? (findings[0].severity === "HIGH" ? `${findings[0].title} is the primary weakness.` : findings[0].why || findings[0].title)
+      : (diff.hasChanges ? "Optimization opportunities detected." : "Code is efficient with no major flaws.");
 
   return {
     originalCode: code,
@@ -601,6 +855,10 @@ export function buildAnalysisViewModel({ analysis = {}, originalCode = "" }) {
     score,
     timeComplexity,
     spaceComplexity,
+    timeComplexityDelta,
+    spaceComplexityDelta,
+    mainWeakness,
+    findings,
     readabilityScore,
     maintainabilityScore,
     pattern,
@@ -639,13 +897,15 @@ export function buildAnalysisViewModel({ analysis = {}, originalCode = "" }) {
     learning: createLearningData(pattern),
     suggestions: createSuggestions({ language, pattern, originalCode: code }),
     summaryText:
-      score > 0
+      analysis.summary ||
+      (score > 0
         ? `AI review complete with a ${score}/100 score. The code most closely matches a ${pattern.title.toLowerCase()} pattern.`
-        : `AI review complete. The code most closely matches a ${pattern.title.toLowerCase()} pattern.`,
+        : `AI review complete. The code most closely matches a ${pattern.title.toLowerCase()} pattern.`),
     diffStats: {
-      originalLines: diff.originalLines.length,
-      optimizedLines: diff.improvedLines.length,
-      changedLines: diff.changedCount
+      originalLines: diff.stats.originalLines,
+      optimizedLines: diff.stats.optimizedLines,
+      changedLines: diff.stats.totalChanged,
+      breakdown: diff.stats.summaryText
     },
     analysis
   };
@@ -707,27 +967,70 @@ function HighlightedCode({ code = "", language = "javascript", status = "neutral
   );
 }
 
-function DiffPane({ title, code, language, statuses, tone, subtitle, onCopy, isCopied }) {
-  const lines = React.useMemo(() => String(code || "").split("\n"), [code]);
-
+function SideBySideDiffView({ alignedRows, language, onCopyOriginal, onCopyOptimized, copyState }) {
   return (
-    <div className={`diff-pane diff-pane-${tone}`}>
-      <div className="diff-pane-header">
-        <div>
-          <span className="diff-pane-kicker">{subtitle}</span>
-          <strong>{title}</strong>
+    <div className="diff-full-container">
+      <div className="diff-full-header">
+        <div className="diff-full-col-title left">
+          <span>ORIGINAL CODE</span>
+          <button type="button" className={`ghost-button ${copyState === "Original copied" ? "copied" : ""}`} onClick={onCopyOriginal}>
+            {copyState === "Original copied" ? "Copied!" : "Copy"}
+          </button>
         </div>
-        <button type="button" className={`ghost-button ${isCopied ? "copied" : ""}`} onClick={onCopy}>
-          {isCopied ? "Copied!" : "Copy"}
-        </button>
+        <div className="diff-full-col-title right">
+          <span>OPTIMIZED CODE</span>
+          <button type="button" className={`ghost-button ${copyState === "Optimized copied" ? "copied" : ""}`} onClick={onCopyOptimized}>
+            {copyState === "Optimized copied" ? "Copied!" : "Copy"}
+          </button>
+        </div>
       </div>
-      <div className="code-shell">
-        {lines.map((line, index) => {
-          const lineState = statuses[index] || "neutral";
+      <div className="diff-scroll-shell">
+        {alignedRows.map((row, idx) => {
+          const isMod = row.type === "modified";
+          const isDel = row.type === "removed";
+          const isAdd = row.type === "added";
+          const isIndent = row.isIndentOnly;
+
+          const leftClass = isDel
+            ? "cell-removed"
+            : isMod
+              ? (isIndent ? "cell-indent" : "cell-modified")
+              : "";
+          const rightClass = isAdd
+            ? "cell-added"
+            : isMod
+              ? (isIndent ? "cell-indent" : "cell-modified")
+              : "";
+
           return (
-            <div key={`${tone}-${index}-${line}`} className={`code-row code-row-${lineState}`}>
-              <span className="code-line-number">{index + 1}</span>
-              <span className="code-line-content" dangerouslySetInnerHTML={{ __html: syntaxHighlight(line, language) }} />
+            <div key={`sbs-${idx}`} className="diff-side-row">
+              {row.origLineNum ? (
+                <div className={`diff-side-cell left ${leftClass}`}>
+                  <span className="diff-cell-num">{row.origLineNum}</span>
+                  <span
+                    className="diff-cell-code"
+                    dangerouslySetInnerHTML={{
+                      __html: safeSyntaxHighlight(row.origText, language, isMod ? row.inline : null, "del")
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="diff-side-cell left diff-empty-cell" />
+              )}
+
+              {row.imprvLineNum ? (
+                <div className={`diff-side-cell right ${rightClass}`}>
+                  <span className="diff-cell-num">{row.imprvLineNum}</span>
+                  <span
+                    className="diff-cell-code"
+                    dangerouslySetInnerHTML={{
+                      __html: safeSyntaxHighlight(row.imprvText, language, isMod ? row.inline : null, "ins")
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="diff-side-cell right diff-empty-cell" />
+              )}
             </div>
           );
         })}
@@ -736,40 +1039,476 @@ function DiffPane({ title, code, language, statuses, tone, subtitle, onCopy, isC
   );
 }
 
+function UnifiedDiffView({ alignedRows, language }) {
+  return (
+    <div className="diff-unified-container">
+      <div className="diff-scroll-shell">
+        {alignedRows.map((row, idx) => {
+          if (row.type === "unchanged") {
+            return (
+              <div key={`uni-${idx}`} className="diff-unified-row row-unchanged">
+                <span className="unified-num-orig">{row.origLineNum}</span>
+                <span className="unified-num-imprv">{row.imprvLineNum}</span>
+                <span className="unified-marker">&nbsp;</span>
+                <span
+                  className="unified-code"
+                  dangerouslySetInnerHTML={{ __html: safeSyntaxHighlight(row.origText, language) }}
+                />
+              </div>
+            );
+          }
+
+          if (row.type === "modified") {
+            return (
+              <React.Fragment key={`uni-mod-${idx}`}>
+                <div className="diff-unified-row row-removed">
+                  <span className="unified-num-orig">{row.origLineNum}</span>
+                  <span className="unified-num-imprv"></span>
+                  <span className="unified-marker">-</span>
+                  <span
+                    className="unified-code"
+                    dangerouslySetInnerHTML={{
+                      __html: safeSyntaxHighlight(row.origText, language, row.inline, "del")
+                    }}
+                  />
+                </div>
+                <div className="diff-unified-row row-added">
+                  <span className="unified-num-orig"></span>
+                  <span className="unified-num-imprv">{row.imprvLineNum}</span>
+                  <span className="unified-marker">+</span>
+                  <span
+                    className="unified-code"
+                    dangerouslySetInnerHTML={{
+                      __html: safeSyntaxHighlight(row.imprvText, language, row.inline, "ins")
+                    }}
+                  />
+                </div>
+              </React.Fragment>
+            );
+          }
+
+          if (row.type === "removed") {
+            return (
+              <div key={`uni-rem-${idx}`} className="diff-unified-row row-removed">
+                <span className="unified-num-orig">{row.origLineNum}</span>
+                <span className="unified-num-imprv"></span>
+                <span className="unified-marker">-</span>
+                <span
+                  className="unified-code"
+                  dangerouslySetInnerHTML={{ __html: safeSyntaxHighlight(row.origText, language) }}
+                />
+              </div>
+            );
+          }
+
+          if (row.type === "added") {
+            return (
+              <div key={`uni-add-${idx}`} className="diff-unified-row row-added">
+                <span className="unified-num-orig"></span>
+                <span className="unified-num-imprv">{row.imprvLineNum}</span>
+                <span className="unified-marker">+</span>
+                <span
+                  className="unified-code"
+                  dangerouslySetInnerHTML={{ __html: safeSyntaxHighlight(row.imprvText, language) }}
+                />
+              </div>
+            );
+          }
+
+          return null;
+        })}
+      </div>
+    </div>
+  );
+}
+
+function KeyFindingsSection({ findings = [], onJumpToHunk }) {
+  if (!findings || findings.length === 0) return null;
+
+  return (
+    <section className="key-findings-section" id="key-findings">
+      <div className="findings-header">
+        <div className="findings-title-group">
+          <span className="findings-eyebrow">KEY FINDINGS</span>
+          <h2>Critical Observations & Bottlenecks</h2>
+        </div>
+        <span className="findings-count-badge">
+          {findings.length} {findings.length === 1 ? "Finding" : "Findings"}
+        </span>
+      </div>
+
+      <div className="findings-grid">
+        {findings.map((item) => {
+          const sev = (item.severity || "HIGH").toUpperCase();
+          const sevClass = sev === "HIGH" ? "sev-high" : sev === "MEDIUM" ? "sev-med" : "sev-low";
+
+          return (
+            <article key={item.id} className={`finding-card ${sevClass}`}>
+              <div className="finding-card-header">
+                <div className="finding-badge-group">
+                  <span className={`finding-sev-tag ${sevClass}`}>[{sev}]</span>
+                  {item.lineRange && <span className="finding-lines">{item.lineRange}</span>}
+                  {item.complexityDelta && (
+                    <span className="finding-complexity-badge">{item.complexityDelta}</span>
+                  )}
+                </div>
+                {item.hunkId && (
+                  <button
+                    type="button"
+                    className="finding-jump-btn"
+                    onClick={() => onJumpToHunk?.(item.hunkId)}
+                  >
+                    View change →
+                  </button>
+                )}
+              </div>
+
+              <h3 className="finding-title">{item.title}</h3>
+              <p className="finding-explanation">{item.why || item.suggestion}</p>
+
+              {item.suggestion && item.why && (
+                <div className="finding-improvement">
+                  <span className="improvement-dot">●</span>
+                  <span>{item.suggestion}</span>
+                </div>
+              )}
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function FullCodeView({ originalCode, optimizedCode, language, onCopyOriginal, onCopyOptimized, copyState }) {
+  const origLines = String(originalCode || "").split("\n");
+  const optLines = String(optimizedCode || "").split("\n");
+
+  return (
+    <div className="full-code-container">
+      <div className="full-code-grid">
+        <div className="full-code-pane">
+          <div className="full-code-header">
+            <span>ORIGINAL CODE ({origLines.length} lines)</span>
+            <button
+              type="button"
+              className={`ghost-button ${copyState === "Original copied" ? "copied" : ""}`}
+              onClick={onCopyOriginal}
+            >
+              {copyState === "Original copied" ? "✓ Copied" : "Copy Original"}
+            </button>
+          </div>
+          <div className="full-code-body">
+            {origLines.map((line, i) => (
+              <div key={`fc-orig-${i}`} className="code-row">
+                <span className="code-line-number">{i + 1}</span>
+                <span
+                  className="code-line-content"
+                  dangerouslySetInnerHTML={{ __html: safeSyntaxHighlight(line, language) }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="full-code-pane">
+          <div className="full-code-header">
+            <span>IMPROVED CODE ({optLines.length} lines)</span>
+            <button
+              type="button"
+              className={`ghost-button ${copyState === "Optimized copied" ? "copied" : ""}`}
+              onClick={onCopyOptimized}
+            >
+              {copyState === "Optimized copied" ? "✓ Copied" : "Copy Improved"}
+            </button>
+          </div>
+          <div className="full-code-body">
+            {optLines.map((line, i) => (
+              <div key={`fc-opt-${i}`} className="code-row code-row-optimized">
+                <span className="code-line-number">{i + 1}</span>
+                <span
+                  className="code-line-content"
+                  dangerouslySetInnerHTML={{ __html: safeSyntaxHighlight(line, language) }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CodeDiffViewer({ model, onCopyOriginal, onCopyOptimized, copyState }) {
+  const [viewMode, setViewMode] = React.useState("focused");
+  const [copiedHunk, setCopiedHunk] = React.useState(null);
+  const copyTimerRef = React.useRef(null);
+
+  const diff = model.diff || {};
+  const hunks = diff.hunks || [];
+  const alignedRows = diff.alignedRows || [];
+  const isNoChanges = diff.identical || !diff.hasChanges || model.analysis?.hasImprovements === false;
+
+  const copyText = async (text, id) => {
+    if (!text) return;
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        textArea.remove();
+      }
+      setCopiedHunk(id);
+      window.clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = window.setTimeout(() => setCopiedHunk(null), 2000);
+    } catch (e) {
+      console.error("Copy failed:", e);
+    }
+  };
+
   return (
     <SectionShell
-      eyebrow="CODE COMPARISON"
-      title="BEFORE VS AFTER"
-      description="See exactly what CodeSage recommends changing."
+      eyebrow="CODE CHANGES"
+      title={isNoChanges ? "CODE COMPARISON" : `${hunks.length} ${hunks.length === 1 ? "CHANGE RECOMMENDED" : "CHANGES RECOMMENDED"}`}
+      description="Review exact before/after lines with token-level inline diffs."
       className="diff-section"
     >
-      <div className="diff-grid">
-        <DiffPane
-          title="Original Code"
-          subtitle="Legacy source"
-          code={model.originalCode || ""}
-          language={model.language}
-          statuses={model.diff.originalStatus}
-          tone="original"
-          onCopy={onCopyOriginal}
-          isCopied={copyState === "Original copied"}
-        />
-        <DiffPane
-          title="Optimized Code"
-          subtitle="Refined output"
-          code={model.optimizedCode || ""}
-          language={model.language}
-          statuses={model.diff.improvedStatus}
-          tone="optimized"
-          onCopy={onCopyOptimized}
-          isCopied={copyState === "Optimized copied"}
-        />
-      </div>
-      <div className="diff-stats">
-        <MetricCard label="Original lines" value={model.diffStats.originalLines} hint="Source footprint" accent="neutral" size="sm" />
-        <MetricCard label="Optimized lines" value={model.diffStats.optimizedLines} hint="Refined footprint" accent="primary" size="sm" />
-        <MetricCard label="Changed lines" value={model.diffStats.changedLines} hint="Diff signal" accent="accent" size="sm" />
+      {/* If code is already optimal or no changes required (Task 15 & Task 16) */}
+      {isNoChanges ? (
+        <div className="diff-no-changes-card">
+          <span className="no-changes-badge">✓ CODE LOOKS GOOD</span>
+          <h3>No meaningful code changes recommended.</h3>
+          <p>
+            {model.analysis?.summary || "Your current approach is already efficient for this problem. It is correct and follows solid engineering practices."}
+          </p>
+          <div className="no-changes-metrics">
+            <span>Time Complexity: <strong>{model.timeComplexity}</strong></span>
+            <span>Space Complexity: <strong>{model.spaceComplexity}</strong></span>
+          </div>
+          <div className="no-changes-actions">
+            <button
+              type="button"
+              className={`ghost-button ${viewMode === "fullcode" ? "active" : ""}`}
+              onClick={() => setViewMode(viewMode === "fullcode" ? "focused" : "fullcode")}
+            >
+              {viewMode === "fullcode" ? "Hide Code Inspection" : "Inspect Full Code"}
+            </button>
+          </div>
+
+          {viewMode === "fullcode" && (
+            <div style={{ marginTop: "24px", textAlign: "left" }}>
+              <FullCodeView
+                originalCode={model.originalCode}
+                optimizedCode={model.optimizedCode}
+                language={model.language}
+                onCopyOriginal={onCopyOriginal}
+                onCopyOptimized={onCopyOptimized}
+                copyState={copyState}
+              />
+            </div>
+          )}
+        </div>
+      ) : (
+        <>
+          {/* Toolbar with View Mode Switcher and Global Copy Actions */}
+          <div className="diff-toolbar">
+            <div className="diff-mode-switcher">
+              <button
+                type="button"
+                className={`diff-mode-btn ${viewMode === "focused" ? "active" : ""}`}
+                onClick={() => setViewMode("focused")}
+              >
+                ⚡ Focused Changes ({hunks.length})
+              </button>
+              <button
+                type="button"
+                className={`diff-mode-btn ${viewMode === "sideBySide" ? "active" : ""}`}
+                onClick={() => setViewMode("sideBySide")}
+              >
+                ◫ Side-by-Side
+              </button>
+              <button
+                type="button"
+                className={`diff-mode-btn ${viewMode === "unified" ? "active" : ""}`}
+                onClick={() => setViewMode("unified")}
+              >
+                ☰ Unified Diff
+              </button>
+              <button
+                type="button"
+                className={`diff-mode-btn ${viewMode === "fullcode" ? "active" : ""}`}
+                onClick={() => setViewMode("fullcode")}
+              >
+                📄 Full Code
+              </button>
+            </div>
+
+            <div className="diff-global-actions">
+              <button
+                type="button"
+                className={`ghost-button ${copyState === "Optimized copied" ? "copied" : ""}`}
+                onClick={onCopyOptimized}
+              >
+                {copyState === "Optimized copied" ? "✓ Copied" : "Copy Improved"}
+              </button>
+              <button
+                type="button"
+                className={`ghost-button ${copyState === "Original copied" ? "copied" : ""}`}
+                onClick={onCopyOriginal}
+              >
+                {copyState === "Original copied" ? "✓ Copied" : "Copy Original"}
+              </button>
+            </div>
+          </div>
+
+          {/* VIEW MODE 1: Focused Changes (Task 10) */}
+          {viewMode === "focused" && (
+            <div className="diff-focused-list">
+              {hunks.map((hunk) => (
+                <div key={hunk.hunkId} id={hunk.hunkId} className="diff-change-card">
+                  <div className="diff-change-header">
+                    <div className="diff-change-badge-group">
+                      <span className="diff-change-num">CHANGE #{hunk.changeNumber}</span>
+                      <span className="diff-change-title">{hunk.title}</span>
+                      <span className="diff-change-lines">{hunk.lineLabel}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className={`ghost-button ${copiedHunk === hunk.hunkId ? "copied" : ""}`}
+                      onClick={() => copyText(hunk.afterSnippet, hunk.hunkId)}
+                    >
+                      {copiedHunk === hunk.hunkId ? "Copied!" : "Copy Change"}
+                    </button>
+                  </div>
+
+                  <div className="diff-change-why-box">
+                    <span className="why-label">WHY CHANGE THIS?</span>
+                    <p>{hunk.whyChange}</p>
+                  </div>
+
+                  <div className="diff-change-panes-grid">
+                    {/* BEFORE */}
+                    <div className="diff-snippet-pane before-pane">
+                      <div className="diff-snippet-header">
+                        <span>BEFORE</span>
+                        <span className="snippet-sub">Original source</span>
+                      </div>
+                      <div className="code-shell">
+                        {hunk.rows.map((row, rIdx) => {
+                          if (row.type === "added") return null;
+                          const isMod = row.type === "modified";
+                          const isDel = row.type === "removed";
+                          const lineClass = isMod ? "code-row-modified" : isDel ? "code-row-removed" : "code-row-match";
+                          return (
+                            <div key={`bf-${rIdx}-${row.origLineNum}`} className={`code-row ${lineClass}`}>
+                              <span className="code-line-number">{row.origLineNum || ""}</span>
+                              <span
+                                className="code-line-content"
+                                dangerouslySetInnerHTML={{
+                                  __html: safeSyntaxHighlight(row.origText, model.language, isMod ? row.inline : null, "del")
+                                }}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* AFTER */}
+                    <div className="diff-snippet-pane after-pane">
+                      <div className="diff-snippet-header">
+                        <span>AFTER</span>
+                        <span className="snippet-sub">Optimized replacement</span>
+                      </div>
+                      <div className="code-shell">
+                        {hunk.rows.map((row, rIdx) => {
+                          if (row.type === "removed") return null;
+                          const isMod = row.type === "modified";
+                          const isAdd = row.type === "added";
+                          const lineClass = isMod ? "code-row-modified" : isAdd ? "code-row-added" : "code-row-match";
+                          return (
+                            <div key={`af-${rIdx}-${row.imprvLineNum}`} className={`code-row ${lineClass}`}>
+                              <span className="code-line-number">{row.imprvLineNum || ""}</span>
+                              <span
+                                className="code-line-content"
+                                dangerouslySetInnerHTML={{
+                                  __html: safeSyntaxHighlight(row.imprvText, model.language, isMod ? row.inline : null, "ins")
+                                }}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="diff-change-better-box">
+                    <div className="better-header">
+                      <span className="why-label">WHY IS THIS BETTER?</span>
+                      <div className="complexity-chip-pill">
+                        {model.timeComplexity}
+                      </div>
+                    </div>
+                    <p>{hunk.whyBetter}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* VIEW MODE 2: Side-by-Side (Task 11) */}
+          {viewMode === "sideBySide" && (
+            <SideBySideDiffView
+              alignedRows={alignedRows}
+              language={model.language}
+              onCopyOriginal={onCopyOriginal}
+              onCopyOptimized={onCopyOptimized}
+              copyState={copyState}
+            />
+          )}
+
+          {/* VIEW MODE 3: Unified Diff */}
+          {viewMode === "unified" && (
+            <UnifiedDiffView
+              alignedRows={alignedRows}
+              language={model.language}
+            />
+          )}
+
+          {/* VIEW MODE 4: Full Code */}
+          {viewMode === "fullcode" && (
+            <FullCodeView
+              originalCode={model.originalCode}
+              optimizedCode={model.optimizedCode}
+              language={model.language}
+              onCopyOriginal={onCopyOriginal}
+              onCopyOptimized={onCopyOptimized}
+              copyState={copyState}
+            />
+          )}
+        </>
+      )}
+
+      {/* Stats Bar */}
+      <div className="diff-metrics-footer">
+        <div className="diff-metric-pill">
+          Original Lines: <strong>{model.diffStats.originalLines}</strong>
+        </div>
+        <div className="diff-metric-pill">
+          Optimized Lines: <strong>{model.diffStats.optimizedLines}</strong>
+        </div>
+        <div className="diff-metric-pill changed">
+          Changed Lines: <strong>{model.diffStats.changedLines}</strong>
+        </div>
+        <div className="diff-metric-pill" style={{ color: "var(--color-text-secondary)" }}>
+          {model.diffStats.breakdown}
+        </div>
       </div>
     </SectionShell>
   );
@@ -833,9 +1572,18 @@ function ApproachTabs({ model, onCopy, copyState }) {
   );
 }
 
-function ExplanationTabs({ model }) {
+function ExplanationTabs({ model, tabs }) {
+  const tabList = Array.isArray(tabs)
+    ? tabs
+    : Array.isArray(model?.explanationTabs)
+      ? model.explanationTabs
+      : [];
+
   const [active, setActive] = React.useState("why");
-  const current = model.explanationTabs.find((item) => item.id === active) || model.explanationTabs[0];
+  if (tabList.length === 0) return null;
+
+  const current = tabList.find((item) => item.id === active) || tabList[0] || {};
+  const currentCopy = current.copy || "No detailed notes provided.";
 
   return (
     <SectionShell
@@ -845,20 +1593,29 @@ function ExplanationTabs({ model }) {
       className="explanation-section"
     >
       <div className="tab-strip">
-        {model.explanationTabs.map((tab) => (
+        {tabList.map((tab) => (
           <TabButton key={tab.id} active={active === tab.id} onClick={() => setActive(tab.id)}>
             {tab.label}
           </TabButton>
         ))}
       </div>
       <div className="explanation-card">
-        <p>{current.copy}</p>
+        <p>{currentCopy}</p>
       </div>
     </SectionShell>
   );
 }
 
-function FeedbackPanel({ feedback }) {
+function FeedbackPanel({ feedback = {} }) {
+  const mistakes = Array.isArray(feedback?.codingMistakes) ? feedback.codingMistakes : [];
+  const naming = Array.isArray(feedback?.namingIssues) ? feedback.namingIssues : [];
+  const edgeCases = Array.isArray(feedback?.missedEdgeCases) ? feedback.missedEdgeCases : [];
+  const scalability = Array.isArray(feedback?.scalabilityProblems) ? feedback.scalabilityProblems : [];
+  const bestPractices = Array.isArray(feedback?.bestPractices) ? feedback.bestPractices : [];
+
+  const hasAnyFeedback = mistakes.length > 0 || naming.length > 0 || edgeCases.length > 0 || scalability.length > 0 || bestPractices.length > 0;
+  if (!hasAnyFeedback) return null;
+
   return (
     <SectionShell
       eyebrow="Interview Feedback"
@@ -867,36 +1624,46 @@ function FeedbackPanel({ feedback }) {
       className="feedback-section"
     >
       <div className="feedback-grid">
-        <div className="feedback-card">
-          <span>Coding mistakes</span>
-          <ul>
-            {feedback.codingMistakes.map((item) => <li key={item}>{item}</li>)}
-          </ul>
-        </div>
-        <div className="feedback-card">
-          <span>Naming issues</span>
-          <ul>
-            {feedback.namingIssues.map((item) => <li key={item}>{item}</li>)}
-          </ul>
-        </div>
-        <div className="feedback-card">
-          <span>Missed edge cases</span>
-          <ul>
-            {feedback.missedEdgeCases.map((item) => <li key={item}>{item}</li>)}
-          </ul>
-        </div>
-        <div className="feedback-card">
-          <span>Scalability problems</span>
-          <ul>
-            {feedback.scalabilityProblems.map((item) => <li key={item}>{item}</li>)}
-          </ul>
-        </div>
+        {mistakes.length > 0 && (
+          <div className="feedback-card">
+            <span>Coding mistakes</span>
+            <ul>
+              {mistakes.map((item, idx) => <li key={`cm-${idx}`}>{item}</li>)}
+            </ul>
+          </div>
+        )}
+        {naming.length > 0 && (
+          <div className="feedback-card">
+            <span>Naming issues</span>
+            <ul>
+              {naming.map((item, idx) => <li key={`nm-${idx}`}>{item}</li>)}
+            </ul>
+          </div>
+        )}
+        {edgeCases.length > 0 && (
+          <div className="feedback-card">
+            <span>Missed edge cases</span>
+            <ul>
+              {edgeCases.map((item, idx) => <li key={`ec-${idx}`}>{item}</li>)}
+            </ul>
+          </div>
+        )}
+        {scalability.length > 0 && (
+          <div className="feedback-card">
+            <span>Scalability problems</span>
+            <ul>
+              {scalability.map((item, idx) => <li key={`sc-${idx}`}>{item}</li>)}
+            </ul>
+          </div>
+        )}
       </div>
-      <div className="best-practices-strip">
-        {feedback.bestPractices.map((item) => (
-          <span key={item} className="best-practice-pill">{item}</span>
-        ))}
-      </div>
+      {bestPractices.length > 0 && (
+        <div className="best-practices-strip">
+          {bestPractices.map((item, idx) => (
+            <span key={`bp-${idx}`} className="best-practice-pill">{item}</span>
+          ))}
+        </div>
+      )}
     </SectionShell>
   );
 }
@@ -1040,17 +1807,113 @@ function ReanalyzePanel({ editableCode, setEditableCode, onAnalyze, loading }) {
   );
 }
 
+function AdditionalInsightsSection({ model }) {
+  const [activeTab, setActiveTab] = React.useState("strengths");
+  const edgeCases = Array.isArray(model.analysis?.missedEdgeCases) ? model.analysis.missedEdgeCases : [];
+  const strengths = Array.isArray(model.analysis?.strengths) ? model.analysis.strengths : [];
+  const whyBetter = model.analysis?.whyBetter || model.analysis?.whyItWorks || "";
+  const pattern = model.pattern?.title || "Standard Flow";
+
+  const hasAny = strengths.length > 0 || edgeCases.length > 0 || whyBetter || model.feedback;
+  if (!hasAny) return null;
+
+  return (
+    <SectionShell
+      eyebrow="DEEP ANALYSIS"
+      title="Additional Insights & Learning"
+      description="Supporting context on edge cases, algorithmic patterns, and code maintainability."
+      className="insights-section"
+      defaultOpen={false}
+    >
+      <div className="insights-tabs">
+        <button
+          type="button"
+          className={`insights-tab-btn ${activeTab === "strengths" ? "active" : ""}`}
+          onClick={() => setActiveTab("strengths")}
+        >
+          Strengths & Pattern
+        </button>
+        {edgeCases.length > 0 && (
+          <button
+            type="button"
+            className={`insights-tab-btn ${activeTab === "edgeCases" ? "active" : ""}`}
+            onClick={() => setActiveTab("edgeCases")}
+          >
+            Edge Cases ({edgeCases.length})
+          </button>
+        )}
+        {model.feedback && (
+          <button
+            type="button"
+            className={`insights-tab-btn ${activeTab === "health" ? "active" : ""}`}
+            onClick={() => setActiveTab("health")}
+          >
+            Code Health Observations
+          </button>
+        )}
+      </div>
+
+      <div className="insights-content">
+        {activeTab === "strengths" && (
+          <div className="insights-panel">
+            {strengths.length > 0 && (
+              <div className="insights-block">
+                <span className="insights-subheading">Code Strengths</span>
+                <ul className="insights-list">
+                  {strengths.map((st, i) => (
+                    <li key={`st-${i}`}>✓ {st}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {whyBetter && (
+              <div className="insights-block">
+                <span className="insights-subheading">Why This Approach Works</span>
+                <p className="insights-copy">{whyBetter}</p>
+              </div>
+            )}
+            <div className="insights-block">
+              <span className="insights-subheading">Algorithmic Pattern</span>
+              <p className="insights-copy">{model.pattern?.explanation || pattern}</p>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "edgeCases" && (
+          <div className="insights-panel">
+            <span className="insights-subheading">Edge Cases & Boundary Conditions</span>
+            <ul className="insights-list edge-case-list">
+              {edgeCases.map((ec, i) => (
+                <li key={`ec-${i}`}>⚠ {ec}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {activeTab === "health" && model.feedback && (
+          <div className="insights-panel">
+            <FeedbackPanel feedback={model.feedback} />
+          </div>
+        )}
+      </div>
+    </SectionShell>
+  );
+}
+
 export {
   SectionShell,
   MetricCard,
   HighlightedCode,
+  KeyFindingsSection,
   CodeDiffViewer,
+  FullCodeView,
   ApproachTabs,
   ExplanationTabs,
   FeedbackPanel,
   LearningPanel,
   SuggestionsPanel,
   SummaryStrip,
+  AdditionalInsightsSection,
   ReanalyzePanel,
   detectLanguage,
   detectPattern,
